@@ -1,0 +1,31 @@
+Source: sync-monitor
+Section: gnome
+Priority: extra
+Maintainer: Ubuntu Developers <ubuntu-devel-discuss@lists.ubuntu.com>
+Build-Depends: debhelper (>= 9),
+               libaccounts-qt5-dev,
+               qtbase5-dev,
+               pkg-config,
+Standards-Version: 3.9.3
+Homepage: https://launchpad.net/sync-monitor
+
+Package: sync-monitor
+Architecture: any
+Depends: ${misc:Depends},
+         ${shlibs:Depends},
+         account-plugin-google,
+         address-book-service,
+         syncevolution-dbus,
+Description: Ubuntu online account sync monitor plugin
+ Keep track of Ubuntu online accounts and sync with with the cloud
+
+Package: sync-monitor-dbg
+Architecture: any
+Section: debug
+Priority: extra
+Depends: sync-monitor (= ${binary:Version}),
+         ${misc:Depends},
+Description: debugging symbols for sync-monitor
+ Keep track of Ubuntu online accounts and sync it with the cloud
+ .
+ This package contains the debugging symbols for sync-monitor-app

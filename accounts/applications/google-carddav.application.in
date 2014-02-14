@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<application id="google-carddav-application">
+  <_description>Contacts</_description>
+  <desktop-entry>sync-monitor-contacts.desktop</desktop-entry>
+  <translations>google-carddav-application</translations>
+  <services>
+    <service id="google-carddav">
+      <_description>Syncronize your contacts</_description>
+    </service>
+  </services>
+</application>

@@ -1,0 +1,11 @@
+Format: http://www.debian.org/doc/packaging-manuals/copyright-format/1.0/
+Source: https://launchpad.net/unity-scope-gdrive
+Upstream-Name: unity-scope-gdrive
+Upstream-Contact: Alberto Mardegan <alberto.mardegan@canonical.com>
+
+Files: *
+Copyright: 2011 Neil Jagdish Patel
+           2012 Canonical Ltd.
+License: GPL-3
+ On Debian systems, the complete text of the GNU General
+ Public License version 3 can be found in "/usr/share/common-licenses/GPL-3".

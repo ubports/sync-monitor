@@ -1,0 +1,9 @@
+[Desktop Entry]
+Categories=Office;
+Exec=
+GenericName=sync-monitor
+Name=Contacts
+NoDisplay=true
+Terminal=false
+Type=Application
+Icon=contacts-app

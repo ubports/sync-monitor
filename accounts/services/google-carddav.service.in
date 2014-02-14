@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<service id="google-carddav">
+  <type>google-carddav</type>
+  <name>Google Contacts</name>
+  <provider>google</provider>
+
+  <!-- default settings (account settings have precedence over these) -->
+  <template>
+    <group name="auth">
+      <setting name="method">oauth2</setting>
+      <setting name="mechanism">web_server</setting>
+      <group name="oauth2">
+        <group name="web_server">
+          <setting type="as" name="Scope">['email','https://www.googleapis.com/auth/carddav']</setting>
+          <!-- workaround for (g)signond token cache issue: use different client IDs for each service and the provider -->
+          <setting name="ClientId">759250720802-4sii0me9963n9fdqdmi7cepn6ub8luoh.apps.googleusercontent.com</setting>
+          <setting name="ClientSecret">juFngKUcuhB7IRQqHtSLavqJ</setting>
+        </group>
+      </group>
+    </group>
+  </template>
+</service>
