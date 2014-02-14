@@ -26,6 +26,15 @@ Priority: extra
 Depends: sync-monitor (= ${binary:Version}),
          ${misc:Depends},
 Description: debugging symbols for sync-monitor
- Keep track of Ubuntu online accounts and sync it with the cloud
+ Keep track of Ubuntu online accounts and sync it with the cloud.
  .
  This package contains the debugging symbols for sync-monitor-app
+
+Package: sync-monitor-uoa
+Architecture: all
+Depends: ${misc:Depends},
+         sync-monitor (= ${binary:Version}),
+Description: Ubuntu online account sync monitor plugin
+ Keep track of Ubuntu online accounts and sync with with the cloud.
+ .
+ This package contains the ubuntu online accounts service files.

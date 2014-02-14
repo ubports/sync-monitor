@@ -1,0 +1,2 @@
+usr/libexec/sync-monitor
+usr/com/upstart/sessions/sync-monitor.conf

@@ -1,0 +1,9 @@
+description "sync-monitor"
+author "Renato Oliveira Filho <renato.filho@canonical.com>"
+
+start on started sync-monitor
+stop on session-end
+
+respawn
+
+exec @CMAKE_INSTALL_FULL_LIBEXECDIR@/sync-monitor
