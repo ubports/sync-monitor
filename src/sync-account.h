@@ -33,8 +33,10 @@ public:
     void wait();
     void status() const;
     AccountState state() const;
-    QDateTime lastSync() const;
-
+    QDateTime lastSyncDate() const;
+    bool enabled() const;
+    QString displayName() const;
+    int id() const;
 
 Q_SIGNALS:
     void stateChanged(AccountState newState);
@@ -42,12 +44,13 @@ Q_SIGNALS:
     void syncFinished();
     void syncError(int);
     void enableChanged(bool enable);
+    void configured();
 
 private Q_SLOTS:
     void onAccountEnabledChanged(const QString &serviceName, bool enabled);
     void onSessionStatusChanged(const QString &newStatus);
     void onSessionProgressChanged(int progress);
-    void onSessionError(int error);
+    void onSessionError(uint error);
 
 private:
     Accounts::Account *m_account;
@@ -56,7 +59,6 @@ private:
     QString m_sessionName;
     QStringMap m_syncOperation;
     AccountState m_state;
-    bool m_isNew;
     QList<QMetaObject::Connection> m_sessionConnections;
 
     void configure();
@@ -67,6 +69,8 @@ private:
     void continueSync();
     void attachSession(SyncEvolutionSessionProxy *session);
     void releaseSession();
+    QStringMap lastReport() const;
+    QString lastSyncStatus() const;
 };
 
 #endif

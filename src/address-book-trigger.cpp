@@ -34,6 +34,18 @@ AddressBookTrigger::~AddressBookTrigger()
 {
 }
 
+void AddressBookTrigger::createSource(const QString &sourceName)
+{
+    QDBusInterface iface(ADDRESS_BOOK_SERVICE_NAME,
+                         ADDRESS_BOOK_OBJECT_PATH,
+                         ADDRESS_BOOK_IFACE_NAME);
+    if (iface.lastError().isValid()) {
+        qWarning() << "Fail to create addressbook session:" << iface.lastError().message();
+    } else {
+        iface.call("createSource", sourceName);
+    }
+}
+
 void AddressBookTrigger::changed(QStringList ids)
 {
     qDebug() << "AB CHANGED";

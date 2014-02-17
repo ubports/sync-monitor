@@ -9,6 +9,7 @@ int main(int argc, char** argv)
     syncevolution_qt_dbus_register_types();
 
     QCoreApplication app(argc, argv);
+    app.setApplicationName("Synq");
     SyncDaemon *daemon = new SyncDaemon();
     daemon->connect(&app, SIGNAL(aboutToQuit()), SLOT(quit()));
     daemon->run();

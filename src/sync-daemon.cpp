@@ -1,6 +1,8 @@
+#include "config.h"
 #include "sync-daemon.h"
 #include "sync-account.h"
 #include "address-book-trigger.h"
+#include "notify-message.h"
 
 #include <QtCore/QDebug>
 #include <QtCore/QTimer>
@@ -8,11 +10,12 @@
 using namespace Accounts;
 
 #define GOOGLE_PROVIDER_NAME    "google"
-#define DAEMON_SYNC_TIMEOUT     10000
+#define DAEMON_SYNC_TIMEOUT     1000
 
 SyncDaemon::SyncDaemon()
     : QObject(0),
       m_manager(0),
+      m_addressbook(0),
       m_syncing(false),
       m_aboutToQuit(false)
 {
@@ -20,6 +23,11 @@ SyncDaemon::SyncDaemon()
     m_timeout->setInterval(DAEMON_SYNC_TIMEOUT);
     m_timeout->setSingleShot(true);
     connect(m_timeout, SIGNAL(timeout()), SLOT(continueSync()));
+}
+
+SyncDaemon::~SyncDaemon()
+{
+    quit();
 }
 
 void SyncDaemon::setupAccounts()
@@ -41,18 +49,12 @@ void SyncDaemon::setupAccounts()
 
 void SyncDaemon::setupTriggers()
 {
-    AddressBookTrigger *trigger = new AddressBookTrigger(this);
-    connect(trigger, SIGNAL(contactsUpdated()), SLOT(syncAll()));
-}
-
-SyncDaemon::~SyncDaemon()
-{
-    quit();
+    m_addressbook = new AddressBookTrigger(this);
+    connect(m_addressbook, SIGNAL(contactsUpdated()), SLOT(syncAll()));
 }
 
 void SyncDaemon::syncAll()
 {
-    qDebug() << "sync all" << m_syncing;
     Q_FOREACH(SyncAccount *acc, m_accounts.values()) {
         sync(acc);
     }
@@ -66,14 +68,15 @@ void SyncDaemon::sync()
 
 void SyncDaemon::continueSync()
 {
-    qDebug() << "continue to sync" << m_syncing;
     // sync one account by time
     if (!m_aboutToQuit && m_syncQueue.size()) {
         m_syncing = true;
-        SyncAccount *syncAcc = m_syncQueue.takeFirst();
-        syncAcc->sync();
+        m_currenctAccount = m_syncQueue.takeFirst();
+        m_currenctAccount->sync();
     } else {
-        qDebug() << "no account to sync";
+        NotifyMessage::instance()->show("Syncronization",
+                                        QString("All accounts synced"));
+        m_currenctAccount = 0;
         m_syncing = false;
     }
 }
@@ -82,7 +85,7 @@ void SyncDaemon::run()
 {
     setupAccounts();
     setupTriggers();
-    sync();
+    syncAll();
 }
 
 void SyncDaemon::addAccount(const AccountId &accountId, bool startSync)
@@ -98,6 +101,7 @@ void SyncDaemon::addAccount(const AccountId &accountId, bool startSync)
         connect(syncAcc, SIGNAL(syncFinished()), SLOT(onAccountSyncFinished()));
         connect(syncAcc, SIGNAL(syncError(int)), SLOT(onAccountSyncError(int)));
         connect(syncAcc, SIGNAL(enableChanged(bool)), SLOT(onAccountEnableChanged(bool)));
+        connect(syncAcc, SIGNAL(configured()), SLOT(onAccountConfigured()), Qt::DirectConnection);
         if (startSync) {
             sync(syncAcc);
         }
@@ -106,7 +110,6 @@ void SyncDaemon::addAccount(const AccountId &accountId, bool startSync)
 
 void SyncDaemon::sync(SyncAccount *syncAcc)
 {
-    qDebug() << "sync account" << syncAcc << m_syncing;
     if (!m_syncQueue.contains(syncAcc)) {
         m_syncQueue.push_back(syncAcc);
         if (!m_syncing) {
@@ -117,7 +120,8 @@ void SyncDaemon::sync(SyncAccount *syncAcc)
 
 void SyncDaemon::cancel(SyncAccount *syncAcc)
 {
-    qDebug() << "cancel sync for account" << syncAcc;
+    NotifyMessage::instance()->show("Syncronization",
+                                    QString("Sync canceled: %1").arg(syncAcc->displayName()));
     m_syncQueue.removeOne(syncAcc);
     syncAcc->cancel();
 }
@@ -133,18 +137,25 @@ void SyncDaemon::removeAccount(const AccountId &accountId)
 
 void SyncDaemon::onAccountSyncStarted()
 {
-    //TODO
+    NotifyMessage::instance()->show("Syncronization",
+                                    QString("Start sync account: %1").arg(m_currenctAccount->displayName()));
 }
 
 void SyncDaemon::onAccountSyncFinished()
 {
     // sync next account
+    NotifyMessage::instance()->show("Syncronization",
+                                    QString("Sync done: %1").arg(m_currenctAccount->displayName()));
+
     continueSync();
 }
 
 void SyncDaemon::onAccountSyncError(int errorCode)
 {
-    qWarning() << "Fail to sync account" << errorCode;
+    NotifyMessage::instance()->show("Syncronization",
+                                    QString("Sync error account: %1, %2")
+                                    .arg(m_currenctAccount->displayName())
+                                    .arg(errorCode));
     // sync next account
     continueSync();
 }
@@ -152,7 +163,6 @@ void SyncDaemon::onAccountSyncError(int errorCode)
 void SyncDaemon::onAccountEnableChanged(bool enabled)
 {
     SyncAccount *acc = qobject_cast<SyncAccount*>(QObject::sender());
-    qDebug() << "account enabled changed" << enabled;
     if (enabled) {
         sync(acc);
     } else {
@@ -160,9 +170,20 @@ void SyncDaemon::onAccountEnableChanged(bool enabled)
     }
 }
 
+void SyncDaemon::onAccountConfigured()
+{
+    SyncAccount *acc = qobject_cast<SyncAccount*>(QObject::sender());
+    m_addressbook->createSource(QString(ACCOUNT_DATABASE_NAME).arg(acc->id()));
+}
+
 void SyncDaemon::quit()
 {
     m_aboutToQuit = true;
+
+    if (m_addressbook) {
+        delete m_addressbook;
+        m_addressbook = 0;
+    }
 
     // cancel all sync operation
     while(m_syncQueue.size()) {

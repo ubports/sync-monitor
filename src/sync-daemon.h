@@ -9,6 +9,7 @@
 #include <Accounts/Manager>
 
 class SyncAccount;
+class AddressBookTrigger;
 
 class SyncDaemon : public QObject
 {
@@ -31,12 +32,15 @@ private Q_SLOTS:
     void onAccountSyncFinished();
     void onAccountSyncError(int errorCode);
     void onAccountEnableChanged(bool enabled);
+    void onAccountConfigured();
 
 private:
     Accounts::Manager *m_manager;
     QTimer *m_timeout;
     QHash<Accounts::AccountId, SyncAccount*> m_accounts;
     QQueue<SyncAccount*> m_syncQueue;
+    SyncAccount *m_currenctAccount;
+    AddressBookTrigger *m_addressbook;
     bool m_syncing;
     bool m_aboutToQuit;
 

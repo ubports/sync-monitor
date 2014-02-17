@@ -12,6 +12,7 @@ class AddressBookTrigger : public QObject
 public:
     AddressBookTrigger(QObject *parent = 0);
     ~AddressBookTrigger();
+    void createSource(const QString &sourceName);
 
 Q_SIGNALS:
     void contactsUpdated();

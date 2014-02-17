@@ -1,8 +1,13 @@
+#include "config.h"
 #include "sync-account.h"
 #include "syncevolution-server-proxy.h"
 #include "syncevolution-session-proxy.h"
 
 using namespace Accounts;
+
+#define SESSION_NAME                "ubuntu-google-contacts-%1"
+#define TARGET_CONFIG_NAME          "target-config@google-%1"
+#define ACCOUNT_CONFIG_NAME         "google-%1"
 
 const QString SyncAccount::GoogleCalendarService = QStringLiteral("google-carddav");
 const QString SyncAccount::GoogleContactService = QStringLiteral("google-carddav");
@@ -11,10 +16,9 @@ SyncAccount::SyncAccount(Account *account, QObject *parent)
     : QObject(parent),
       m_currentSession(0),
       m_account(account),
-      m_isNew(false),
       m_state(SyncAccount::Empty)
 {
-    m_sessionName = QString("ubuntu-google-contacts-%1").arg(account->id());
+    m_sessionName = QString(SESSION_NAME).arg(account->id());
     m_syncOperation.insert(GoogleCalendarService, QStringLiteral("disabled"));
     m_syncOperation.insert(GoogleContactService, QStringLiteral("disabled"));
     setup();
@@ -29,7 +33,6 @@ void SyncAccount::setup()
 {
     // enable sync for enabled service on account
     Q_FOREACH(Service service, m_account->enabledServices()) {
-        qDebug() << "Service enabled" << service.name();
         if (m_syncOperation.contains(service.name())) {
             m_syncOperation[service.name()] = QStringLiteral("two-way");
         }
@@ -66,13 +69,14 @@ void SyncAccount::continueSync()
 {
     setState(SyncAccount::Syncing);
     SyncEvolutionServerProxy *proxy = SyncEvolutionServerProxy::instance();
-    SyncEvolutionSessionProxy *session = proxy->openSession(QString("google-contacts-%1").arg(m_account->id()),
+    SyncEvolutionSessionProxy *session = proxy->openSession(QString(ACCOUNT_CONFIG_NAME).arg(m_account->id()),
                                                             QStringList());
     if (session) {
         attachSession(session);
 
         QStringMap syncFlags;
-        syncFlags.insert("addressbook", m_isNew ? "slow" : m_syncOperation[GoogleContactService]);
+        bool forceSlowSync = lastSyncStatus() != "0";
+        syncFlags.insert("addressbook", (forceSlowSync ? "slow" : m_syncOperation[GoogleContactService]));
         session->sync(syncFlags);
     } else {
         setState(SyncAccount::Invalid);
@@ -89,9 +93,27 @@ SyncAccount::AccountState SyncAccount::state() const
     return m_state;
 }
 
-QDateTime SyncAccount::lastSync() const
+QDateTime SyncAccount::lastSyncDate() const
 {
-    uint pageSize = 100;
+    QStringMap lastReport = this->lastReport();
+    if (lastReport.contains("start")) {
+        QString lastSync = lastReport.value("start", "0");
+        return QDateTime::fromTime_t(lastSync.toInt());
+    } else {
+        return QDateTime();
+    }
+}
+
+QString SyncAccount::lastSyncStatus() const
+{
+    QStringMap lastReport = this->lastReport();
+    qDebug() << "last report" << lastReport;
+    return lastReport.value("source-addressbook-status", "-1");
+}
+
+QStringMap SyncAccount::lastReport() const
+{
+    const uint pageSize = 100;
     uint index = 0;
     QStringMap lastReport;
 
@@ -107,12 +129,22 @@ QDateTime SyncAccount::lastSync() const
         lastReport = reports.last();
     }
 
-    if (lastReport.contains("start")) {
-        QString lastSync = lastReport.value("start", "0");
-        return QDateTime::fromTime_t(lastSync.toInt());
-    } else {
-        return QDateTime();
-    }
+    return lastReport;
+}
+
+bool SyncAccount::enabled() const
+{
+    return m_account->enabled();
+}
+
+QString SyncAccount::displayName() const
+{
+    return m_account->displayName();
+}
+
+int SyncAccount::id() const
+{
+    return m_account->id();
 }
 
 void SyncAccount::onAccountEnabledChanged(const QString &serviceName, bool enabled)
@@ -133,10 +165,15 @@ bool SyncAccount::configServerSide()
     config[""]["username"] = QString("uoa:%1,google-carddav").arg(accountId);
     config[""]["consumerReady"] = "0";
     config["source/addressbook"]["backend"] = "CardDAV";
+    config.remove("source/calendar");
     config.remove("source/todo");
     config.remove("source/memo");
-    config.remove("source/calendar");
-    return m_currentSession->saveConfig(QString("target-config@google-%1").arg(accountId), config);
+    bool result = m_currentSession->saveConfig(QString(TARGET_CONFIG_NAME).arg(accountId), config);
+    if (!result) {
+        qWarning() << "Fail to save account client config";
+        return false;
+    }
+    return true;
 }
 
 bool SyncAccount::configClientSide()
@@ -149,18 +186,28 @@ bool SyncAccount::configClientSide()
     config[""]["syncURL"] = QString("local://@google-%1").arg(accountId);
     config[""]["username"] = QString();
     config[""]["password"] = QString();
-    return m_currentSession->saveConfig(QString("google-contacts-%1").arg(accountId), config);
+    config["source/addressbook"]["database"] = QString(ACCOUNT_DATABASE_NAME).arg(accountId);
+    config.remove("source/calendar");
+    config.remove("source/todo");
+    config.remove("source/memo");
+    bool result = m_currentSession->saveConfig(QString(ACCOUNT_CONFIG_NAME).arg(accountId), config);
+    if (!result) {
+        qWarning() << "Fail to save account client config";
+        return false;
+    }
+    return true;
 }
 
 void SyncAccount::continueConfigure()
 {
     Q_ASSERT(m_currentSession);
     AccountId accountId = m_account->id();
-    bool isConfigured = m_currentSession->hasConfig(QString("target-config@google-%1").arg(accountId));
+    bool isConfigured = m_currentSession->hasConfig(QString(TARGET_CONFIG_NAME).arg(accountId));
     if (isConfigured) {
         qDebug() << "Account already configured";
     } else if (configServerSide() && configClientSide()) {
         qDebug() << "Account configured";
+        Q_EMIT configured();
     } else {
         qWarning() << "Fail to configure account" << accountId;
         setState(SyncAccount::Invalid);
@@ -204,7 +251,7 @@ void SyncAccount::onSessionProgressChanged(int progress)
     qDebug() << "Progress" << progress;
 }
 
-void SyncAccount::onSessionError(int error)
+void SyncAccount::onSessionError(uint error)
 {
     qWarning() << "Session error" << error;
     setState(SyncAccount::Invalid);
@@ -215,7 +262,6 @@ void SyncAccount::configure()
     qDebug() << "Configure account";
     if (m_state == SyncAccount::Empty) {
         setState(SyncAccount::Configuring);
-        m_isNew = false;
         SyncEvolutionServerProxy *proxy = SyncEvolutionServerProxy::instance();
         SyncEvolutionSessionProxy *session = proxy->openSession(m_sessionName, QStringList() << "all-configs");
         if (session) {
@@ -251,17 +297,22 @@ void SyncAccount::attachSession(SyncEvolutionSessionProxy *session)
     m_sessionConnections << connect(m_currentSession,
                                     SIGNAL(progressChanged(int)),
                                     SLOT(onSessionProgressChanged(int)));
+    m_sessionConnections << connect(m_currentSession,
+                                    SIGNAL(error(uint)),
+                                    SLOT(onSessionError(uint)));
+
 }
 
 void SyncAccount::releaseSession()
 {
-    Q_ASSERT(m_currentSession != 0);
-    Q_FOREACH(QMetaObject::Connection conn, m_sessionConnections) {
-        disconnect(conn);
+    if (m_currentSession) {
+        Q_FOREACH(QMetaObject::Connection conn, m_sessionConnections) {
+            disconnect(conn);
+        }
+        m_sessionConnections.clear();
+        m_currentSession->destroy();
+        m_currentSession->deleteLater();
+        m_currentSession = 0;
     }
-    m_sessionConnections.clear();
-    m_currentSession->destroy();
-    m_currentSession->deleteLater();
-    m_currentSession = 0;
 }
 

@@ -10,6 +10,7 @@ find_package(Qt5DBus REQUIRED)
 add_definitions(-DQT_NO_KEYWORDS)
 
 pkg_check_modules(ACCOUNTS REQUIRED accounts-qt5>=1.10)
+pkg_check_modules(LIBNOTIFY libnotify)
 
 find_program(INTLTOOL_MERGE_EXECUTABLE intltool-merge)
 
