@@ -110,7 +110,8 @@ void SyncDaemon::addAccount(const AccountId &accountId, bool startSync)
 
 void SyncDaemon::sync(SyncAccount *syncAcc)
 {
-    if (!m_syncQueue.contains(syncAcc)) {
+    if (!m_syncQueue.contains(syncAcc) &&
+        m_currenctAccount != syncAcc) {
         m_syncQueue.push_back(syncAcc);
         if (!m_syncing) {
             sync();
