@@ -1,7 +1,7 @@
 description "sync-monitor"
 author "Renato Oliveira Filho <renato.filho@canonical.com>"
 
-start on started sync-monitor
+start on started address-book-service
 stop on session-end
 
 respawn
