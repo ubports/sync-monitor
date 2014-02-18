@@ -2,10 +2,13 @@ Source: sync-monitor
 Section: gnome
 Priority: extra
 Maintainer: Ubuntu Developers <ubuntu-devel-discuss@lists.ubuntu.com>
-Build-Depends: debhelper (>= 9),
+Build-Depends: cmake,
+               debhelper (>= 9),
+               dh-translations,
                libaccounts-qt5-dev,
-               qtbase5-dev,
                pkg-config,
+               qt5-default,
+               qtbase5-dev,
 Standards-Version: 3.9.3
 Homepage: https://launchpad.net/sync-monitor
 
