@@ -85,7 +85,6 @@ void SyncAccount::sync()
 
 void SyncAccount::continueSync()
 {
-    setState(SyncAccount::Syncing);
     SyncEvolutionServerProxy *proxy = SyncEvolutionServerProxy::instance();
     SyncEvolutionSessionProxy *session = proxy->openSession(QString(ACCOUNT_CONFIG_NAME).arg(m_account->id()),
                                                             QStringList());
@@ -213,7 +212,7 @@ bool SyncAccount::configClientSide()
         qWarning() << "Fail to save account client config";
         return false;
     }
-    return true;
+    return result;
 }
 
 void SyncAccount::continueConfigure()
