@@ -19,6 +19,4 @@
 #ifndef __CONFIG_H__
 #define __CONFIG_H__
 
-#define ACCOUNT_DATABASE_NAME       "google-account-%1"
-
 #endif

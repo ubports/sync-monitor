@@ -192,7 +192,7 @@ void SyncDaemon::onAccountEnableChanged(bool enabled)
 void SyncDaemon::onAccountConfigured()
 {
     SyncAccount *acc = qobject_cast<SyncAccount*>(QObject::sender());
-    m_addressbook->createSource(QString(ACCOUNT_DATABASE_NAME).arg(acc->id()));
+    m_addressbook->createSource(acc->displayName());
 }
 
 void SyncDaemon::quit()

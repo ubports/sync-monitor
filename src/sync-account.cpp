@@ -203,7 +203,7 @@ bool SyncAccount::configClientSide()
     config[""]["syncURL"] = QString("local://@google-%1").arg(accountId);
     config[""]["username"] = QString();
     config[""]["password"] = QString();
-    config["source/addressbook"]["database"] = QString(ACCOUNT_DATABASE_NAME).arg(accountId);
+    config["source/addressbook"]["database"] = m_account->displayName();
     config.remove("source/calendar");
     config.remove("source/todo");
     config.remove("source/memo");
