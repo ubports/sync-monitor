@@ -181,6 +181,8 @@ bool SyncAccount::configServerSide()
     config[""]["syncURL"] = QStringLiteral("https://www.googleapis.com/.well-known/carddav");
     config[""]["username"] = QString("uoa:%1,google-carddav").arg(accountId);
     config[""]["consumerReady"] = "0";
+    config[""]["dumpData"] = "0";
+    config[""]["printChanges"] = "0";
     config["source/addressbook"]["backend"] = "CardDAV";
     config.remove("source/calendar");
     config.remove("source/todo");
