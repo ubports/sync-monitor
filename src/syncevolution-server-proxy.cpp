@@ -64,7 +64,8 @@ void SyncEvolutionServerProxy::destroy()
     }
 }
 
-SyncEvolutionSessionProxy* SyncEvolutionServerProxy::openSession(const QString &sessionName, QStringList flags)
+SyncEvolutionSessionProxy* SyncEvolutionServerProxy::openSession(const QString &sessionName,
+                                                                 QStringList flags)
 {
     QDBusReply<QDBusObjectPath> reply;
     if (flags.isEmpty()) {
@@ -72,10 +73,17 @@ SyncEvolutionSessionProxy* SyncEvolutionServerProxy::openSession(const QString &
     } else {
         reply = m_iface->call("StartSessionWithFlags", sessionName, flags);
     }
+
     if (m_iface->lastError().isValid()) {
         qWarning() << "Fail to start session" << m_iface->lastError().message();
         return 0;
     }
 
     return new SyncEvolutionSessionProxy(reply.value(), this);
+}
+
+QStringList SyncEvolutionServerProxy::configs() const
+{
+    QDBusReply<QStringList> reply = m_iface->call("GetConfigs", false);
+    return reply.value();
 }

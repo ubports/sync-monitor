@@ -184,6 +184,7 @@ bool SyncAccount::configServerSide()
     config[""]["dumpData"] = "0";
     config[""]["printChanges"] = "0";
     config["source/addressbook"]["backend"] = "CardDAV";
+    config["source/addressbook"]["database"] = m_account->displayName();
     config.remove("source/calendar");
     config.remove("source/todo");
     config.remove("source/memo");
@@ -205,7 +206,8 @@ bool SyncAccount::configClientSide()
     config[""]["syncURL"] = QString("local://@google-%1").arg(accountId);
     config[""]["username"] = QString();
     config[""]["password"] = QString();
-    config["source/addressbook"]["database"] = m_account->displayName();
+    config[""]["dumpData"] = "0";
+    config[""]["printChanges"] = "0";
     config.remove("source/calendar");
     config.remove("source/todo");
     config.remove("source/memo");
@@ -221,7 +223,10 @@ void SyncAccount::continueConfigure()
 {
     Q_ASSERT(m_currentSession);
     AccountId accountId = m_account->id();
-    bool isConfigured = m_currentSession->hasConfig(QString(TARGET_CONFIG_NAME).arg(accountId));
+
+    SyncEvolutionServerProxy *proxy = SyncEvolutionServerProxy::instance();
+    QStringList configs = proxy->configs();
+    bool isConfigured = configs.contains(QString(TARGET_CONFIG_NAME).arg(accountId));
     if (isConfigured) {
         qDebug() << "Account already configured";
     } else if (configServerSide() && configClientSide()) {
