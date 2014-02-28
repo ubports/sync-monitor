@@ -112,11 +112,19 @@ bool SyncEvolutionSessionProxy::saveConfig(const QString &configName,
                                            QStringMultiMap config)
 {
     Q_ASSERT(isValid());
-    QDBusReply<void> reply = m_iface->call("SetNamedConfig",
-                                           configName,
-                                           false,
-                                           false,
-                                           QVariant::fromValue(config));
+    QDBusReply<void> reply;
+    if (configName.isEmpty()) {
+        reply = m_iface->call("SetConfig",
+                              false,
+                              false,
+                              QVariant::fromValue(config));
+    } else {
+        reply = m_iface->call("SetNamedConfig",
+                              configName,
+                              false,
+                              false,
+                              QVariant::fromValue(config));
+    }
     if (reply.error().isValid()) {
         qWarning() << "Fail to save named config" << reply.error().message();
         return false;
@@ -129,7 +137,7 @@ bool SyncEvolutionSessionProxy::isValid() const
     return (m_iface != 0);
 }
 
-void SyncEvolutionSessionProxy::sync(QStringMap services)
+void SyncEvolutionSessionProxy::sync(QString mode, QStringMap services)
 {
     Q_ASSERT(isValid());
     qDebug() << "sync flags" << services;

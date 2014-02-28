@@ -75,6 +75,7 @@ private:
     SyncEvolutionSessionProxy *m_currentSession;
 
     QString m_sessionName;
+    QStringMap m_syncSources;
     QStringMap m_syncOperation;
     AccountState m_state;
     QList<QMetaObject::Connection> m_sessionConnections;

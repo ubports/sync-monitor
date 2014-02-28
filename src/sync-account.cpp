@@ -37,6 +37,8 @@ SyncAccount::SyncAccount(Account *account, QObject *parent)
       m_state(SyncAccount::Empty)
 {
     m_sessionName = QString(SESSION_NAME).arg(account->id());
+    m_syncSources.insert(GoogleCalendarService, QString("calendar-uoa-%1").arg(account->id()));
+    m_syncSources.insert(GoogleContactService, QString("addressbook-uoa-%1").arg(account->id()));
     m_syncOperation.insert(GoogleCalendarService, QStringLiteral("disabled"));
     m_syncOperation.insert(GoogleContactService, QStringLiteral("disabled"));
     setup();
@@ -93,8 +95,9 @@ void SyncAccount::continueSync()
 
         QStringMap syncFlags;
         bool forceSlowSync = lastSyncStatus() != "0";
-        syncFlags.insert("addressbook", (forceSlowSync ? "slow" : m_syncOperation[GoogleContactService]));
-        session->sync(syncFlags);
+        QString syncMode = (forceSlowSync ? "slow" : "two-way");
+        syncFlags.insert(m_syncSources[GoogleContactService], syncMode);
+        session->sync(syncMode, syncFlags);
     } else {
         setState(SyncAccount::Invalid);
     }
@@ -198,7 +201,7 @@ bool SyncAccount::configSync()
 {
     Q_ASSERT(m_currentSession);
     AccountId accountId = m_account->id();
-    // config server side
+
     QStringMultiMap config = m_currentSession->getConfig("SyncEvolution_Client", true);
     Q_ASSERT(!config.isEmpty());
     config[""]["syncURL"] = QString("local://@"SYNC_CONFIG_NAME).arg(accountId);
@@ -206,9 +209,21 @@ bool SyncAccount::configSync()
     config[""]["password"] = QString();
     config[""]["dumpData"] = "0";
     config[""]["printChanges"] = "0";
+
+    // remove default sources
+    config.remove("source/addressbook");
     config.remove("source/calendar");
     config.remove("source/todo");
     config.remove("source/memo");
+
+    // contacts
+    QString sourceName = QString("source/%1").arg(m_syncSources[GoogleContactService]);
+    config[sourceName]["backend"] = "evolution-contacts";
+    config[sourceName]["database"] = m_account->displayName();
+    config[sourceName]["uri"] = "addressbook";
+    config[sourceName]["sync"] = "two-way";
+
+
     bool result = m_currentSession->saveConfig(QString(SYNC_CONFIG_NAME).arg(accountId), config);
     if (!result) {
         qWarning() << "Fail to save account client config";

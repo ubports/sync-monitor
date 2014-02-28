@@ -66,6 +66,5 @@ void AddressBookTrigger::createSource(const QString &sourceName)
 
 void AddressBookTrigger::changed(QStringList ids)
 {
-    qDebug() << "AB CHANGED";
     Q_EMIT contactsUpdated();
 }
