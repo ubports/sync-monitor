@@ -23,9 +23,9 @@
 
 using namespace Accounts;
 
-#define SESSION_NAME                "ubuntu-google-contacts-%1"
-#define TARGET_CONFIG_NAME          "target-config@google-%1"
-#define ACCOUNT_CONFIG_NAME         "google-%1"
+#define SESSION_NAME                "ubuntu-contacts-%1"
+#define TARGET_CONFIG_NAME          "target-config@ubuntu-%1"
+#define SYNC_CONFIG_NAME            "ubuntu-%1"
 
 const QString SyncAccount::GoogleCalendarService = QStringLiteral("google-carddav");
 const QString SyncAccount::GoogleContactService = QStringLiteral("google-carddav");
@@ -86,7 +86,7 @@ void SyncAccount::sync()
 void SyncAccount::continueSync()
 {
     SyncEvolutionServerProxy *proxy = SyncEvolutionServerProxy::instance();
-    SyncEvolutionSessionProxy *session = proxy->openSession(QString(ACCOUNT_CONFIG_NAME).arg(m_account->id()),
+    SyncEvolutionSessionProxy *session = proxy->openSession(QString(SYNC_CONFIG_NAME).arg(m_account->id()),
                                                             QStringList());
     if (session) {
         attachSession(session);
@@ -172,23 +172,21 @@ void SyncAccount::onAccountEnabledChanged(const QString &serviceName, bool enabl
     }
 }
 
-bool SyncAccount::configServerSide()
+bool SyncAccount::configTarget()
 {
     AccountId accountId = m_account->id();
     // config server side
-    QStringMultiMap config = m_currentSession->getConfig("SyncEvolution", true);
-    Q_ASSERT(!config.isEmpty());
+    QStringMultiMap config = m_currentSession->getConfig("WebDAV", true);
     config[""]["syncURL"] = QStringLiteral("https://www.googleapis.com/.well-known/carddav");
     config[""]["username"] = QString("uoa:%1,google-carddav").arg(accountId);
     config[""]["consumerReady"] = "0";
     config[""]["dumpData"] = "0";
     config[""]["printChanges"] = "0";
-    config["source/addressbook"]["backend"] = "CardDAV";
-    config["source/addressbook"]["database"] = m_account->displayName();
+    config[""]["PeerName"] = QString(TARGET_CONFIG_NAME).arg(accountId);
     config.remove("source/calendar");
     config.remove("source/todo");
     config.remove("source/memo");
-    bool result = m_currentSession->saveConfig(QString(TARGET_CONFIG_NAME).arg(accountId), config);
+    bool result = m_currentSession->saveConfig(config[""]["PeerName"], config);
     if (!result) {
         qWarning() << "Fail to save account client config";
         return false;
@@ -196,14 +194,14 @@ bool SyncAccount::configServerSide()
     return true;
 }
 
-bool SyncAccount::configClientSide()
+bool SyncAccount::configSync()
 {
     Q_ASSERT(m_currentSession);
     AccountId accountId = m_account->id();
     // config server side
     QStringMultiMap config = m_currentSession->getConfig("SyncEvolution_Client", true);
     Q_ASSERT(!config.isEmpty());
-    config[""]["syncURL"] = QString("local://@google-%1").arg(accountId);
+    config[""]["syncURL"] = QString("local://@"SYNC_CONFIG_NAME).arg(accountId);
     config[""]["username"] = QString();
     config[""]["password"] = QString();
     config[""]["dumpData"] = "0";
@@ -211,7 +209,7 @@ bool SyncAccount::configClientSide()
     config.remove("source/calendar");
     config.remove("source/todo");
     config.remove("source/memo");
-    bool result = m_currentSession->saveConfig(QString(ACCOUNT_CONFIG_NAME).arg(accountId), config);
+    bool result = m_currentSession->saveConfig(QString(SYNC_CONFIG_NAME).arg(accountId), config);
     if (!result) {
         qWarning() << "Fail to save account client config";
         return false;
@@ -229,7 +227,7 @@ void SyncAccount::continueConfigure()
     bool isConfigured = configs.contains(QString(TARGET_CONFIG_NAME).arg(accountId));
     if (isConfigured) {
         qDebug() << "Account already configured";
-    } else if (configServerSide() && configClientSide()) {
+    } else if (configTarget() && configSync()) {
         qDebug() << "Account configured";
         Q_EMIT configured();
     } else {

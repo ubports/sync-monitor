@@ -37,7 +37,7 @@ public:
     static void destroy();
 
     SyncEvolutionSessionProxy *openSession(const QString &sessionName, QStringList flags);
-    QStringList configs() const;
+    QStringList configs(bool templates=false) const;
 
 private:
     static SyncEvolutionServerProxy *m_instance;

@@ -81,8 +81,8 @@ private:
 
     void configure();
     void continueConfigure();
-    bool configClientSide();
-    bool configServerSide();
+    bool configSync();
+    bool configTarget();
     void setState(AccountState state);
     void continueSync();
     void attachSession(SyncEvolutionSessionProxy *session);

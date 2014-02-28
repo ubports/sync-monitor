@@ -82,8 +82,8 @@ SyncEvolutionSessionProxy* SyncEvolutionServerProxy::openSession(const QString &
     return new SyncEvolutionSessionProxy(reply.value(), this);
 }
 
-QStringList SyncEvolutionServerProxy::configs() const
+QStringList SyncEvolutionServerProxy::configs(bool templates) const
 {
-    QDBusReply<QStringList> reply = m_iface->call("GetConfigs", false);
+    QDBusReply<QStringList> reply = m_iface->call("GetConfigs", templates);
     return reply.value();
 }
