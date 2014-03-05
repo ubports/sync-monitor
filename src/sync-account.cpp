@@ -37,8 +37,8 @@ SyncAccount::SyncAccount(Account *account, QObject *parent)
       m_state(SyncAccount::Empty)
 {
     m_sessionName = QString(SESSION_NAME).arg(account->id());
-    m_syncSources.insert(GoogleCalendarService, QString("calendar-uoa-%1").arg(account->id()));
-    m_syncSources.insert(GoogleContactService, QString("addressbook-uoa-%1").arg(account->id()));
+    m_syncSources.insert(GoogleCalendarService, QString("calendar_uoa_%1").arg(account->id()));
+    m_syncSources.insert(GoogleContactService, QString("addressbook_uoa_%1").arg(account->id()));
     m_syncOperation.insert(GoogleCalendarService, QStringLiteral("disabled"));
     m_syncOperation.insert(GoogleContactService, QStringLiteral("disabled"));
     setup();
@@ -94,8 +94,9 @@ void SyncAccount::continueSync()
         attachSession(session);
 
         QStringMap syncFlags;
-        bool forceSlowSync = lastSyncStatus() != "0";
-        m_syncMode = (forceSlowSync ? "slow" : "two-way");
+        QString lastSync = lastSyncStatus();
+        bool forceSlowSync = (lastSync != "0");
+        m_syncMode = (forceSlowSync ? "slow" : m_syncOperation[GoogleContactService]);
         syncFlags.insert(m_syncSources[GoogleContactService], m_syncMode);
         session->sync(m_syncMode, syncFlags);
     } else {
@@ -127,7 +128,15 @@ QDateTime SyncAccount::lastSyncDate() const
 QString SyncAccount::lastSyncStatus() const
 {
     QStringMap lastReport = this->lastReport();
-    return lastReport.value("source-addressbook-status", "-1");
+    QString lastStatus = lastReport.value("status", "-1");
+    if ((lastStatus == "0") ||          // STATUS_OK
+        (lastStatus == "200") ||        // STATUS_HTTP_OK
+        (lastStatus == "204") ||        // STATUS_NO_CONTENT
+        (lastStatus == "207")) {        // STATUS_DATA_MERGED
+        return "0";
+    } else {
+        return "-1";
+    }
 }
 
 QStringMap SyncAccount::lastReport() const
@@ -168,7 +177,7 @@ int SyncAccount::id() const
 
 void SyncAccount::onAccountEnabledChanged(const QString &serviceName, bool enabled)
 {
-    if (m_syncOperation.contains(serviceName)) {
+    if (serviceName.isEmpty() || m_syncOperation.contains(serviceName)) {
         m_syncOperation[serviceName] = (enabled ? QStringLiteral("two-way") : QStringLiteral("disabled"));
         Q_EMIT enableChanged(enabled);
     }

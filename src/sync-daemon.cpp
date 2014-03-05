@@ -113,8 +113,8 @@ void SyncDaemon::addAccount(const AccountId &accountId, bool startSync)
     } else if (acc->providerName() == GOOGLE_PROVIDER_NAME) {
         SyncAccount *syncAcc = new SyncAccount(acc, this);
         m_accounts.insert(accountId, syncAcc);
-        connect(syncAcc, SIGNAL(syncStarted()), SLOT(onAccountSyncStarted()));
-        connect(syncAcc, SIGNAL(syncFinished()), SLOT(onAccountSyncFinished()));
+        connect(syncAcc, SIGNAL(syncStarted(QString)), SLOT(onAccountSyncStarted(QString)));
+        connect(syncAcc, SIGNAL(syncFinished(QString)), SLOT(onAccountSyncFinished(QString)));
         connect(syncAcc, SIGNAL(syncError(int)), SLOT(onAccountSyncError(int)));
         connect(syncAcc, SIGNAL(enableChanged(bool)), SLOT(onAccountEnableChanged(bool)));
         connect(syncAcc, SIGNAL(configured()), SLOT(onAccountConfigured()), Qt::DirectConnection);
