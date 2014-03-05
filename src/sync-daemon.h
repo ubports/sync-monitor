@@ -46,8 +46,8 @@ private Q_SLOTS:
     void addAccount(const Accounts::AccountId &accountId, bool startSync=true);
     void removeAccount(const Accounts::AccountId &accountId);
 
-    void onAccountSyncStarted();
-    void onAccountSyncFinished();
+    void onAccountSyncStarted(const QString &mode);
+    void onAccountSyncFinished(const QString &mode);
     void onAccountSyncError(int errorCode);
     void onAccountEnableChanged(bool enabled);
     void onAccountConfigured();

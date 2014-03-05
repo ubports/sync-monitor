@@ -92,8 +92,6 @@ void SyncDaemon::continueSync()
         m_currenctAccount = m_syncQueue.takeFirst();
         m_currenctAccount->sync();
     } else {
-        NotifyMessage::instance()->show("Syncronization",
-                                        QString("All accounts synced"));
         m_currenctAccount = 0;
         m_syncing = false;
     }
@@ -154,18 +152,26 @@ void SyncDaemon::removeAccount(const AccountId &accountId)
     }
 }
 
-void SyncDaemon::onAccountSyncStarted()
+void SyncDaemon::onAccountSyncStarted(const QString &mode)
 {
-    NotifyMessage::instance()->show("Syncronization",
-                                    QString("Start sync account: %1").arg(m_currenctAccount->displayName()));
+    if (mode == "slow") {
+        NotifyMessage::instance()->show("Syncronization",
+                                        QString("Start sync account: %1").arg(m_currenctAccount->displayName()));
+    } else {
+        qDebug() << "Syncronization" << QString("Start sync account: %1").arg(m_currenctAccount->displayName());
+    }
 }
 
-void SyncDaemon::onAccountSyncFinished()
+void SyncDaemon::onAccountSyncFinished(const QString &mode)
 {
-    // sync next account
-    NotifyMessage::instance()->show("Syncronization",
-                                    QString("Sync done: %1").arg(m_currenctAccount->displayName()));
+    if (mode == "slow") {
+        NotifyMessage::instance()->show("Syncronization",
+                                        QString("Sync done: %1").arg(m_currenctAccount->displayName()));
+    } else {
+        qDebug() << "Syncronization" << QString("Sync done: %1").arg(m_currenctAccount->displayName());
+    }
 
+    // sync next account
     continueSync();
 }
 

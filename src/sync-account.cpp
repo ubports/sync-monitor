@@ -95,9 +95,9 @@ void SyncAccount::continueSync()
 
         QStringMap syncFlags;
         bool forceSlowSync = lastSyncStatus() != "0";
-        QString syncMode = (forceSlowSync ? "slow" : "two-way");
-        syncFlags.insert(m_syncSources[GoogleContactService], syncMode);
-        session->sync(syncMode, syncFlags);
+        m_syncMode = (forceSlowSync ? "slow" : "two-way");
+        syncFlags.insert(m_syncSources[GoogleContactService], m_syncMode);
+        session->sync(m_syncMode, syncFlags);
     } else {
         setState(SyncAccount::Invalid);
     }
@@ -127,7 +127,6 @@ QDateTime SyncAccount::lastSyncDate() const
 QString SyncAccount::lastSyncStatus() const
 {
     QStringMap lastReport = this->lastReport();
-    qDebug() << "last report" << lastReport;
     return lastReport.value("source-addressbook-status", "-1");
 }
 
@@ -263,7 +262,7 @@ void SyncAccount::onSessionStatusChanged(const QString &newStatus)
     case SyncAccount::Idle:
         if (newStatus == "running") {
             setState(SyncAccount::Syncing);
-            Q_EMIT syncStarted();
+            Q_EMIT syncStarted(m_syncMode);
         }
         break;
     case SyncAccount::Configuring:
@@ -275,7 +274,7 @@ void SyncAccount::onSessionStatusChanged(const QString &newStatus)
         if (newStatus == "done") {
             releaseSession();
             setState(SyncAccount::Idle);
-            Q_EMIT syncFinished();
+            Q_EMIT syncFinished(m_syncMode);
         }
         break;
     default:

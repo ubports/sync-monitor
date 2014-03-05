@@ -58,8 +58,8 @@ public:
 
 Q_SIGNALS:
     void stateChanged(AccountState newState);
-    void syncStarted();
-    void syncFinished();
+    void syncStarted(const QString &mode);
+    void syncFinished(const QString &mode);
     void syncError(int);
     void enableChanged(bool enable);
     void configured();
@@ -79,6 +79,7 @@ private:
     QStringMap m_syncOperation;
     AccountState m_state;
     QList<QMetaObject::Connection> m_sessionConnections;
+    QString m_syncMode;
 
     void configure();
     void continueConfigure();
