@@ -3,9 +3,9 @@
   <_description>Contacts</_description>
   <desktop-entry>sync-monitor-contacts.desktop</desktop-entry>
   <translations>google-carddav-application</translations>
-  <services>
-    <service id="google-carddav">
+  <service-types>
+    <service-type id="contacts">
       <_description>Syncronize your contacts</_description>
-    </service>
-  </services>
+    </service-type>
+  </service-types>
 </application>

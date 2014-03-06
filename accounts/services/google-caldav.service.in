@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <service id="google-caldav">
-  <type>google-caldav</type>
+  <type>calendar</type>
   <name>Google Calendar</name>
   <provider>google</provider>
 

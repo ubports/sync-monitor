@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <service id="google-carddav">
-  <type>google-carddav</type>
+  <type>contacts</type>
   <name>Google Contacts</name>
   <provider>google</provider>
 
