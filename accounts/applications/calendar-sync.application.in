@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<application id="google-caldav-application">
+<application id="calendar-sync">
   <_description>Calendar</_description>
   <desktop-entry>sync-monitor-calendar.desktop</desktop-entry>
-  <translations>google-caldav-application</translations>
+  <translations>calendar-sync</translations>
 
   <service-types>
     <service-type id="calendar">

@@ -19,7 +19,8 @@ Depends: ${misc:Depends},
          ${shlibs:Depends},
          account-plugin-google,
          address-book-service,
-         syncevolution-dbus,
+         syncevolution-dbus (>= 1.4),
+         syncevolution-provider-uoa (>= 1.4),
 Description: Ubuntu online account sync monitor plugin
  Keep track of Ubuntu online accounts and sync with with the cloud
 

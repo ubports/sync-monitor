@@ -16,31 +16,24 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "config.h"
 #include "sync-account.h"
+#include "sync-configure.h"
 #include "syncevolution-server-proxy.h"
 #include "syncevolution-session-proxy.h"
 
+#include "config.h"
+
 using namespace Accounts;
 
-#define SESSION_NAME                "ubuntu-contacts-%1"
-#define TARGET_CONFIG_NAME          "target-config@ubuntu-%1"
-#define SYNC_CONFIG_NAME            "ubuntu-%1"
-
-const QString SyncAccount::GoogleCalendarService = QStringLiteral("google-carddav");
-const QString SyncAccount::GoogleContactService = QStringLiteral("google-carddav");
-
-SyncAccount::SyncAccount(Account *account, QObject *parent)
+SyncAccount::SyncAccount(Account *account,
+                         QSettings *settings,
+                         QObject *parent)
     : QObject(parent),
       m_currentSession(0),
       m_account(account),
-      m_state(SyncAccount::Empty)
+      m_state(SyncAccount::Empty),
+      m_settings(settings)
 {
-    m_sessionName = QString(SESSION_NAME).arg(account->id());
-    m_syncSources.insert(GoogleCalendarService, QString("calendar_uoa_%1").arg(account->id()));
-    m_syncSources.insert(GoogleContactService, QString("addressbook_uoa_%1").arg(account->id()));
-    m_syncOperation.insert(GoogleCalendarService, QStringLiteral("disabled"));
-    m_syncOperation.insert(GoogleContactService, QStringLiteral("disabled"));
     setup();
 }
 
@@ -49,46 +42,73 @@ SyncAccount::~SyncAccount()
     cancel();
 }
 
-void SyncAccount::setup()
+// Load all available services for the online-account
+// fill the m_availabeServices with the service name
+// and a flag to say it is enabled or not
+void SyncAccount::setupServices()
 {
-    // enable sync for enabled service on account
-    Q_FOREACH(Service service, m_account->enabledServices()) {
-        if (m_syncOperation.contains(service.name())) {
-            m_syncOperation[service.name()] = QStringLiteral("two-way");
+    m_availabeServices.clear();
+    QStringList supportedSevices = m_settings->childGroups();
+    ServiceList enabledServices = m_account->enabledServices();
+    Q_FOREACH(Service service, m_account->services()) {
+        if (supportedSevices.contains(service.serviceType())) {
+            bool enabled = m_account->enabled() && enabledServices.contains(service);
+            m_availabeServices.insert(service.serviceType(), enabled);
         }
     }
+}
 
+void SyncAccount::setup()
+{
+    setupServices();
     connect(m_account,
             SIGNAL(enabledChanged(QString,bool)),
             SLOT(onAccountEnabledChanged(QString,bool)));
 }
 
-void SyncAccount::cancel()
+void SyncAccount::cancel(const QString &serviceName)
 {
+    //TODO: cancel the only the seviceName sync
     if (m_currentSession) {
         m_currentSession->destroy();
         m_currentSession = 0;
     }
 }
 
-void SyncAccount::sync()
+void SyncAccount::sync(const QString &serviceName)
 {
     switch(m_state) {
     case SyncAccount::Empty:
-        configure();
+        configure(serviceName);
         break;
     case SyncAccount::Idle:
-        continueSync();
+        continueSync(serviceName);
         break;
     default:
         break;
     }
 }
 
-void SyncAccount::continueSync()
+bool SyncAccount::syncService(const QString &serviceName)
 {
+    bool enabledService = m_availabeServices.value(serviceName, false);
+    if (!enabledService) {
+        Q_EMIT syncFinished(serviceName, "");
+        return true;
+    }
+
+    m_syncServiceName = serviceName;
+    QString sessionName = QString("%1-%2-%3")
+            .arg(m_account->providerName())
+            .arg(serviceName)
+            .arg(m_account->id());
+
+    QString sourceName = QString("%1_uoa_%2")
+            .arg(serviceName)
+            .arg(m_account->id());
+
     SyncEvolutionServerProxy *proxy = SyncEvolutionServerProxy::instance();
-    SyncEvolutionSessionProxy *session = proxy->openSession(QString(SYNC_CONFIG_NAME).arg(m_account->id()),
+    SyncEvolutionSessionProxy *session = proxy->openSession(sessionName,
                                                             QStringList());
     if (session) {
         attachSession(session);
@@ -96,11 +116,27 @@ void SyncAccount::continueSync()
         QStringMap syncFlags;
         QString lastSync = lastSyncStatus();
         bool forceSlowSync = (lastSync != "0");
-        m_syncMode = (forceSlowSync ? "slow" : m_syncOperation[GoogleContactService]);
-        syncFlags.insert(m_syncSources[GoogleContactService], m_syncMode);
+        m_syncMode = (forceSlowSync ? "slow" : "two-way");
+        syncFlags.insert(sourceName, m_syncMode);
         session->sync(m_syncMode, syncFlags);
+        return true;
     } else {
         setState(SyncAccount::Invalid);
+        return false;
+    }
+}
+
+void SyncAccount::continueSync(const QString &serviceName)
+{
+    QStringList services;
+    if (serviceName.isEmpty()) {
+        services  = m_settings->childGroups();
+    } else {
+        services << serviceName;
+    }
+
+    Q_FOREACH(const QString &service, services) {
+        syncService(service);
     }
 }
 
@@ -175,115 +211,39 @@ int SyncAccount::id() const
     return m_account->id();
 }
 
+QStringList SyncAccount::availableServices() const
+{
+    return m_availabeServices.keys();
+}
+
 void SyncAccount::onAccountEnabledChanged(const QString &serviceName, bool enabled)
 {
-    if (serviceName.isEmpty() || m_syncOperation.contains(serviceName)) {
-        m_syncOperation[serviceName] = (enabled ? QStringLiteral("two-way") : QStringLiteral("disabled"));
-        Q_EMIT enableChanged(enabled);
-    }
-}
-
-bool SyncAccount::configTarget()
-{
-    AccountId accountId = m_account->id();
-    // config server side
-    QStringMultiMap config = m_currentSession->getConfig("WebDAV", true);
-    config[""]["syncURL"] = QStringLiteral("https://www.googleapis.com/.well-known/carddav");
-    config[""]["username"] = QString("uoa:%1,google-carddav").arg(accountId);
-    config[""]["consumerReady"] = "0";
-    config[""]["dumpData"] = "0";
-    config[""]["printChanges"] = "0";
-    config[""]["PeerName"] = QString(TARGET_CONFIG_NAME).arg(accountId);
-    config.remove("source/calendar");
-    config.remove("source/todo");
-    config.remove("source/memo");
-    bool result = m_currentSession->saveConfig(config[""]["PeerName"], config);
-    if (!result) {
-        qWarning() << "Fail to save account client config";
-        return false;
-    }
-    return true;
-}
-
-bool SyncAccount::configSync()
-{
-    Q_ASSERT(m_currentSession);
-    AccountId accountId = m_account->id();
-
-    QStringMultiMap config = m_currentSession->getConfig("SyncEvolution_Client", true);
-    Q_ASSERT(!config.isEmpty());
-    config[""]["syncURL"] = QString("local://@"SYNC_CONFIG_NAME).arg(accountId);
-    config[""]["username"] = QString();
-    config[""]["password"] = QString();
-    config[""]["dumpData"] = "0";
-    config[""]["printChanges"] = "0";
-
-    // remove default sources
-    config.remove("source/addressbook");
-    config.remove("source/calendar");
-    config.remove("source/todo");
-    config.remove("source/memo");
-
-    // contacts
-    QString sourceName = QString("source/%1").arg(m_syncSources[GoogleContactService]);
-    config[sourceName]["backend"] = "evolution-contacts";
-    config[sourceName]["database"] = m_account->displayName();
-    config[sourceName]["uri"] = "addressbook";
-    config[sourceName]["sync"] = "two-way";
-
-
-    bool result = m_currentSession->saveConfig(QString(SYNC_CONFIG_NAME).arg(accountId), config);
-    if (!result) {
-        qWarning() << "Fail to save account client config";
-        return false;
-    }
-    return result;
-}
-
-void SyncAccount::continueConfigure()
-{
-    Q_ASSERT(m_currentSession);
-    AccountId accountId = m_account->id();
-
-    SyncEvolutionServerProxy *proxy = SyncEvolutionServerProxy::instance();
-    QStringList configs = proxy->configs();
-    bool isConfigured = configs.contains(QString(TARGET_CONFIG_NAME).arg(accountId));
-    if (isConfigured) {
-        qDebug() << "Account already configured";
-    } else if (configTarget() && configSync()) {
-        qDebug() << "Account configured";
-        Q_EMIT configured();
-    } else {
-        qWarning() << "Fail to configure account" << accountId;
-        setState(SyncAccount::Invalid);
-    }
-    releaseSession();
-    if (state() != SyncAccount::Invalid) {
-        setState(SyncAccount::Idle);
-        continueSync();
+    // empty service name means that the hole account has been enabled/disabled
+    if (serviceName.isEmpty()) {
+        setupServices();
+        Q_EMIT enableChanged(QString(), enabled);
+    } else if (m_availabeServices.contains(serviceName)) {
+        m_availabeServices[serviceName] = enabled;
+        Q_EMIT enableChanged(serviceName, enabled);
     }
 }
 
 void SyncAccount::onSessionStatusChanged(const QString &newStatus)
 {
-    qDebug() << "Session status changed" << newStatus;
     switch (m_state) {
     case SyncAccount::Idle:
         if (newStatus == "running") {
             setState(SyncAccount::Syncing);
-            Q_EMIT syncStarted(m_syncMode);
-        }
-        break;
-    case SyncAccount::Configuring:
-        if (newStatus != "queueing") {
-            continueConfigure();
+            Q_EMIT syncStarted(m_syncServiceName, m_syncMode);
         }
         break;
     case SyncAccount::Syncing:
         if (newStatus == "done") {
             releaseSession();
             setState(SyncAccount::Idle);
-            Q_EMIT syncFinished(m_syncMode);
+            Q_EMIT syncFinished(m_syncServiceName, m_syncMode);
+            m_syncMode.clear();
+            m_syncServiceName.clear();
         }
         break;
     default:
@@ -302,26 +262,43 @@ void SyncAccount::onSessionError(uint error)
     setState(SyncAccount::Invalid);
 }
 
-void SyncAccount::configure()
+// configure syncevolution with the necessary information for sync
+void SyncAccount::configure(const QString &serviceName)
 {
-    qDebug() << "Configure account";
-    if (m_state == SyncAccount::Empty) {
-        setState(SyncAccount::Configuring);
-        SyncEvolutionServerProxy *proxy = SyncEvolutionServerProxy::instance();
-        SyncEvolutionSessionProxy *session = proxy->openSession(m_sessionName, QStringList() << "all-configs");
-        if (session) {
-            attachSession(session);
-            qDebug() << "Configure account status" << session->status();
-            if (session->status() != "queueing") {
-                continueConfigure();
-            }
-        } else {
-            setState(SyncAccount::Invalid);
-            qWarning() << "Fail to configure account" << m_account->id() << m_account->displayName();
-        }
-    } else {
-        qWarning() << "Called configure for a account with invalid state" << m_state;
-    }
+    qDebug() << "Configure account for service:"
+             << m_account->displayName() << serviceName;
+
+    setState(SyncAccount::Configuring);
+    SyncConfigure *configure = new SyncConfigure(m_account, m_settings, this);
+    m_pendingConfigs << configure;
+
+    connect(configure, &SyncConfigure::done,
+            this, &SyncAccount::onAccountConfigured);
+    connect(configure, &SyncConfigure::error,
+            this, &SyncAccount::onAccountConfigureError);
+
+    configure->configure(serviceName);
+}
+
+void SyncAccount::onAccountConfigured()
+{
+    SyncConfigure *configure = qobject_cast<SyncConfigure*>(QObject::sender());
+    m_pendingConfigs.removeOne(configure);
+    QString serviceName = configure->serviceName();
+    configure->deleteLater();
+
+    setState(SyncAccount::Idle);
+    continueSync(serviceName);
+}
+
+void SyncAccount::onAccountConfigureError()
+{
+    SyncConfigure *configure = qobject_cast<SyncConfigure*>(QObject::sender());
+    m_pendingConfigs.removeOne(configure);
+    configure->deleteLater();
+    // TODO: notify error
+    setState(SyncAccount::Invalid);
+    qWarning() << "Fail to configure account" << m_account->id() << m_account->displayName();
 }
 
 void SyncAccount::setState(SyncAccount::AccountState state)
@@ -345,7 +322,6 @@ void SyncAccount::attachSession(SyncEvolutionSessionProxy *session)
     m_sessionConnections << connect(m_currentSession,
                                     SIGNAL(error(uint)),
                                     SLOT(onSessionError(uint)));
-
 }
 
 void SyncAccount::releaseSession()
@@ -360,4 +336,3 @@ void SyncAccount::releaseSession()
         m_currentSession = 0;
     }
 }
-

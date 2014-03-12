@@ -21,13 +21,14 @@
 
 #include <QtCore/QObject>
 #include <QtCore/QHash>
-#include <QtCore/QQueue>
 #include <QtCore/QTimer>
 
 #include <Accounts/Manager>
 
 class SyncAccount;
 class AddressBookTrigger;
+class ProviderTemplate;
+class SyncQueue;
 
 class SyncDaemon : public QObject
 {
@@ -46,26 +47,28 @@ private Q_SLOTS:
     void addAccount(const Accounts::AccountId &accountId, bool startSync=true);
     void removeAccount(const Accounts::AccountId &accountId);
 
-    void onAccountSyncStarted(const QString &mode);
-    void onAccountSyncFinished(const QString &mode);
-    void onAccountSyncError(int errorCode);
-    void onAccountEnableChanged(bool enabled);
-    void onAccountConfigured();
+    void onAccountSyncStarted(const QString &serviceName, const QString &mode);
+    void onAccountSyncFinished(const QString &serviceName, const QString &mode);
+    void onAccountSyncError(const QString &serviceName, int errorCode);
+    void onAccountEnableChanged(const QString &serviceName, bool enabled);
+    void onAccountConfigured(const QString &serviceName);
 
 private:
     Accounts::Manager *m_manager;
     QTimer *m_timeout;
     QHash<Accounts::AccountId, SyncAccount*> m_accounts;
-    QQueue<SyncAccount*> m_syncQueue;
-    SyncAccount *m_currenctAccount;
+    SyncQueue *m_syncQueue;
+    SyncAccount *m_currentAccount;
+    QString m_currentServiceName;
     AddressBookTrigger *m_addressbook;
+    ProviderTemplate *m_provider;
     bool m_syncing;
     bool m_aboutToQuit;
 
     void setupAccounts();
     void setupTriggers();
-    void sync(SyncAccount *syncAcc);
-    void cancel(SyncAccount *syncAcc);
+    void sync(SyncAccount *syncAcc, const QString &serviceName = QString());
+    void cancel(SyncAccount *syncAcc, const QString &serviceName = QString());
     void setup();
     void sync();
 };

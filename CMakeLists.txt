@@ -27,5 +27,6 @@ add_subdirectory(3rd_party)
 add_subdirectory(src)
 add_subdirectory(upstart)
 add_subdirectory(accounts)
+add_subdirectory(templates)
 
 configure_file(config.h.in ${CMAKE_CURRENT_BINARY_DIR}/config.h)

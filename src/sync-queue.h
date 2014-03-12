@@ -16,9 +16,33 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef __CONFIG_H__
-#define __CONFIG_H__
+#ifndef __SYNC_QUEUE_H__
+#define __SYNC_QUEUE_H__
 
-#define PROVIDER_TEMPLATE_PATH       "@CMAKE_INSTALL_FULL_DATADIR@/sync-monitor/templates"
+#include <QtCore/QString>
+#include <QtCore/QSet>
+#include <QtCore/QMap>
+
+class SyncAccount;
+
+class SyncQueue
+{
+public:
+    SyncQueue();
+    ~SyncQueue();
+
+    void push(SyncAccount *account, const QString &serviceName = QString());
+    QString popNext(SyncAccount **account);
+    SyncAccount *popNext();
+    void remove(SyncAccount *account, const QString &serviceName = QString());
+
+    bool contains(SyncAccount *account, const QString &serviceName) const;
+    int count() const;
+    bool isEmpty() const;
+
+private:
+    QMap<SyncAccount*, QSet<QString> > m_queue;
+};
 
 #endif
+

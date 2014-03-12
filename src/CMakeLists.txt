@@ -14,10 +14,16 @@ set(SYNQ_BIN_SRC
     address-book-trigger.cpp
     notify-message.h
     notify-message.cpp
+    provider-template.h
+    provider-template.cpp
     sync-account.h
     sync-account.cpp
+    sync-configure.h
+    sync-configure.cpp
     sync-daemon.h
     sync-daemon.cpp
+    sync-queue.h
+    sync-queue.cpp
     syncevolution-server-proxy.h
     syncevolution-server-proxy.cpp
     syncevolution-session-proxy.h

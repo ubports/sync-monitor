@@ -16,9 +16,27 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef __CONFIG_H__
-#define __CONFIG_H__
+#ifndef __PROVIDER_TEMPLATE_H__
+#define __PROVIDER_TEMPLATE_H__
 
-#define PROVIDER_TEMPLATE_PATH       "@CMAKE_INSTALL_FULL_DATADIR@/sync-monitor/templates"
+#include <QtCore/QObject>
+#include <QtCore/QSettings>
+
+class ProviderTemplate
+{
+public:
+    ProviderTemplate();
+    ~ProviderTemplate();
+
+    void load();
+
+    bool contains(const QString &provider) const;
+    QStringList supportedServices(const QString &provider) const;
+    QSettings *settings(const QString &provider) const;
+
+private:
+    QMap<QString, QSettings*> m_providers;
+    QString m_baseDir;
+};
 
 #endif

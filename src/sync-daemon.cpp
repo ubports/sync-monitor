@@ -19,16 +19,17 @@
 #include "config.h"
 #include "sync-daemon.h"
 #include "sync-account.h"
+#include "sync-queue.h"
 #include "address-book-trigger.h"
 #include "notify-message.h"
+#include "provider-template.h"
 
 #include <QtCore/QDebug>
 #include <QtCore/QTimer>
 
 using namespace Accounts;
 
-#define GOOGLE_PROVIDER_NAME    "google"
-#define DAEMON_SYNC_TIMEOUT     1000 * 60 // one minute
+#define DAEMON_SYNC_TIMEOUT     1000 * 6 // one minute
 
 SyncDaemon::SyncDaemon()
     : QObject(0),
@@ -37,6 +38,11 @@ SyncDaemon::SyncDaemon()
       m_syncing(false),
       m_aboutToQuit(false)
 {
+    m_provider = new ProviderTemplate();
+    m_provider->load();
+
+    m_syncQueue = new SyncQueue();
+
     m_timeout = new QTimer(this);
     m_timeout->setInterval(DAEMON_SYNC_TIMEOUT);
     m_timeout->setSingleShot(true);
@@ -53,6 +59,8 @@ void SyncDaemon::setupAccounts()
     if (m_manager) {
         return;
     }
+    qDebug() << "Loading accounts...";
+
     m_manager = new Manager(this);
     Q_FOREACH(const AccountId &accountId, m_manager->accountList()) {
         addAccount(accountId, false);
@@ -86,14 +94,16 @@ void SyncDaemon::sync()
 
 void SyncDaemon::continueSync()
 {
-    // sync one account by time
-    if (!m_aboutToQuit && m_syncQueue.size()) {
+    // sync the next service on the queue
+    if (!m_aboutToQuit && !m_syncQueue->isEmpty()) {
         m_syncing = true;
-        m_currenctAccount = m_syncQueue.takeFirst();
-        m_currenctAccount->sync();
+        m_currentServiceName = m_syncQueue->popNext(&m_currentAccount);
+        m_currentAccount->sync(m_currentServiceName);
     } else {
-        m_currenctAccount = 0;
+        m_currentAccount = 0;
+        m_currentServiceName.clear();
         m_syncing = false;
+        qDebug() << "All accounts synced";
     }
 }
 
@@ -106,41 +116,52 @@ void SyncDaemon::run()
 
 void SyncDaemon::addAccount(const AccountId &accountId, bool startSync)
 {
-    Q_ASSERT(!m_accounts.contains(accountId));
     Account *acc = m_manager->account(accountId);
+    qDebug() << "Found account:" << acc->displayName();
     if (!acc) {
         qWarning() << "Fail to retrieve accounts:" << m_manager->lastError().message();
-    } else if (acc->providerName() == GOOGLE_PROVIDER_NAME) {
-        SyncAccount *syncAcc = new SyncAccount(acc, this);
+    } else if (m_provider->contains(acc->providerName())) {
+        SyncAccount *syncAcc = new SyncAccount(acc,
+                                               m_provider->settings(acc->providerName()),
+                                               this);
         m_accounts.insert(accountId, syncAcc);
-        connect(syncAcc, SIGNAL(syncStarted(QString)), SLOT(onAccountSyncStarted(QString)));
-        connect(syncAcc, SIGNAL(syncFinished(QString)), SLOT(onAccountSyncFinished(QString)));
-        connect(syncAcc, SIGNAL(syncError(int)), SLOT(onAccountSyncError(int)));
-        connect(syncAcc, SIGNAL(enableChanged(bool)), SLOT(onAccountEnableChanged(bool)));
-        connect(syncAcc, SIGNAL(configured()), SLOT(onAccountConfigured()), Qt::DirectConnection);
+        connect(syncAcc, SIGNAL(syncStarted(QString, QString)),
+                         SLOT(onAccountSyncStarted(QString, QString)));
+        connect(syncAcc, SIGNAL(syncFinished(QString, QString)),
+                         SLOT(onAccountSyncFinished(QString, QString)));
+        connect(syncAcc, SIGNAL(syncError(QString, int)),
+                         SLOT(onAccountSyncError(QString, int)));
+        connect(syncAcc, SIGNAL(enableChanged(QString, bool)),
+                         SLOT(onAccountEnableChanged(QString, bool)));
+        connect(syncAcc, SIGNAL(configured(QString)),
+                         SLOT(onAccountConfigured(QString)), Qt::DirectConnection);
         if (startSync) {
             sync(syncAcc);
         }
     }
 }
 
-void SyncDaemon::sync(SyncAccount *syncAcc)
+void SyncDaemon::sync(SyncAccount *syncAcc, const QString &serviceName)
 {
-    if (!m_syncQueue.contains(syncAcc) &&
-        m_currenctAccount != syncAcc) {
-        m_syncQueue.push_back(syncAcc);
+    // check if the service is already in the sync queue or is the current operation
+    if (!m_syncQueue->contains(syncAcc, serviceName) &&
+        ((m_currentAccount != syncAcc) || (m_currentServiceName != serviceName)))    {
+        m_syncQueue->push(syncAcc, serviceName);
+        // if not syncing start a full sync
         if (!m_syncing) {
             sync();
         }
+    } else {
+        qDebug() << "Account aready in the queue";
     }
 }
 
-void SyncDaemon::cancel(SyncAccount *syncAcc)
+void SyncDaemon::cancel(SyncAccount *syncAcc, const QString &serviceName)
 {
     NotifyMessage::instance()->show("Syncronization",
                                     QString("Sync canceled: %1").arg(syncAcc->displayName()));
-    m_syncQueue.removeOne(syncAcc);
-    syncAcc->cancel();
+    m_syncQueue->remove(syncAcc, serviceName);
+    syncAcc->cancel(serviceName);
 }
 
 void SyncDaemon::removeAccount(const AccountId &accountId)
@@ -152,53 +173,68 @@ void SyncDaemon::removeAccount(const AccountId &accountId)
     }
 }
 
-void SyncDaemon::onAccountSyncStarted(const QString &mode)
+void SyncDaemon::onAccountSyncStarted(const QString &serviceName, const QString &mode)
 {
     if (mode == "slow") {
         NotifyMessage::instance()->show("Syncronization",
-                                        QString("Start sync account: %1").arg(m_currenctAccount->displayName()));
+                                        QString("Start sync:  %1 (%2)")
+                                        .arg(m_currentAccount->displayName())
+                                        .arg(serviceName));
     } else {
-        qDebug() << "Syncronization" << QString("Start sync account: %1").arg(m_currenctAccount->displayName());
+        qDebug() << "Syncronization"
+                 << QString("Start sync:  %1 (%2)")
+                    .arg(m_currentAccount->displayName())
+                    .arg(serviceName);
     }
 }
 
-void SyncDaemon::onAccountSyncFinished(const QString &mode)
+void SyncDaemon::onAccountSyncFinished(const QString &serviceName, const QString &mode)
 {
+    qDebug() << "Account sync done" << serviceName << mode;
     if (mode == "slow") {
         NotifyMessage::instance()->show("Syncronization",
-                                        QString("Sync done: %1").arg(m_currenctAccount->displayName()));
+                                        QString("Sync done: %1 (%2)")
+                                        .arg(m_currentAccount->displayName())
+                                        .arg(serviceName));
     } else {
-        qDebug() << "Syncronization" << QString("Sync done: %1").arg(m_currenctAccount->displayName());
+        qDebug() << "Syncronization"
+                 << QString("Sync done: %1 (%2)")
+                    .arg(m_currentAccount->displayName())
+                    .arg(serviceName);
     }
 
     // sync next account
     continueSync();
 }
 
-void SyncDaemon::onAccountSyncError(int errorCode)
+void SyncDaemon::onAccountSyncError(const QString &serviceName, int errorCode)
 {
     NotifyMessage::instance()->show("Syncronization",
-                                    QString("Sync error account: %1, %2")
-                                    .arg(m_currenctAccount->displayName())
+                                    QString("Sync error account: %1, %2, %3")
+                                    .arg(m_currentAccount->displayName())
+                                    .arg(serviceName)
                                     .arg(errorCode));
     // sync next account
     continueSync();
 }
 
-void SyncDaemon::onAccountEnableChanged(bool enabled)
+void SyncDaemon::onAccountEnableChanged(const QString &serviceName, bool enabled)
 {
     SyncAccount *acc = qobject_cast<SyncAccount*>(QObject::sender());
     if (enabled) {
-        sync(acc);
+        sync(acc, serviceName);
     } else {
-        cancel(acc);
+        cancel(acc, serviceName);
     }
 }
 
-void SyncDaemon::onAccountConfigured()
+void SyncDaemon::onAccountConfigured(const QString &serviceName)
 {
     SyncAccount *acc = qobject_cast<SyncAccount*>(QObject::sender());
-    m_addressbook->createSource(acc->displayName());
+    if (serviceName == "contacts") {
+        m_addressbook->createSource(acc->displayName());
+    }
+    // TODO implement support for other services
 }
 
 void SyncDaemon::quit()
@@ -211,8 +247,8 @@ void SyncDaemon::quit()
     }
 
     // cancel all sync operation
-    while(m_syncQueue.size()) {
-        SyncAccount *acc = m_syncQueue.takeFirst();
+    while(m_syncQueue->count()) {
+        SyncAccount *acc = m_syncQueue->popNext();
         acc->cancel();
         acc->wait();
         delete acc;

@@ -1,11 +1,11 @@
 set(APPLICATION_FILES
-    google-caldav.application
-    google-carddav.application
+    contacts-sync.application
+    calendar-sync.application
 )
 
 set(APPLICATION_OUTPUT_FILES
-    ${CMAKE_CURRENT_BINARY_DIR}/google-caldav.application
-    ${CMAKE_CURRENT_BINARY_DIR}/google-carddav.application
+    ${CMAKE_CURRENT_BINARY_DIR}/contacts-sync.application
+    ${CMAKE_CURRENT_BINARY_DIR}/calendar-sync.application
 )
 
 
