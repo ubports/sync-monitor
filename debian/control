@@ -10,6 +10,7 @@ Build-Depends: cmake,
                pkg-config,
                qt5-default,
                qtbase5-dev,
+               qtpim5-dev,
 Standards-Version: 3.9.3
 Homepage: https://launchpad.net/sync-monitor
 
@@ -21,6 +22,8 @@ Depends: ${misc:Depends},
          address-book-service,
          syncevolution-dbus (>= 1.4),
          syncevolution-provider-uoa (>= 1.4),
+         qtcontact5-galera,
+         qtorganizer5-eds,
 Description: Ubuntu online account sync monitor plugin
  Keep track of Ubuntu online accounts and sync with with the cloud
 
