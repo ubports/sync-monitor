@@ -20,6 +20,8 @@
 #include "syncevolution-server-proxy.h"
 #include "syncevolution-session-proxy.h"
 
+#include "config.h"
+
 using namespace Accounts;
 
 SyncConfigure::SyncConfigure(Accounts::Account *account,
@@ -81,7 +83,7 @@ void SyncConfigure::configureServices()
         connect(session, &SyncEvolutionSessionProxy::error,
             this, &SyncConfigure::onSessionError);
 
-        qDebug() << "config session created" << sessionName << session->status();
+        qDebug() << "\tconfig session created" << sessionName << session->status();
         if (session->status() != "queueing") {
             configureService(serviceName);
         }
@@ -103,18 +105,12 @@ void SyncConfigure::configureService(const QString &serviceName)
 
     bool isConfigured = true;
     if (!configs.contains(targetConfigName)) {
+        qDebug() << "\tCreate target:" << targetConfigName;
         isConfigured = configTarget(targetConfigName, serviceName);
-        if (isConfigured) {
-            isConfigured = configSync(targetSuffix, serviceName);
-        }
-        if (isConfigured) {
-            Q_EMIT configured(serviceName);
-        } else {
-            isConfigured = false;
-        }
-        qDebug() << "account configured" << accountId;
-    } else {
-        qDebug() << "account " << accountId << "already configured";
+    }
+    if (isConfigured && !configs.contains(targetSuffix)) {
+        qDebug() << "\tCreate sync config:" << targetSuffix;
+        isConfigured = configSync(targetSuffix, serviceName);
     }
 
     if (!isConfigured) {
@@ -133,7 +129,7 @@ void SyncConfigure::removeService(const QString &serviceName)
     delete session;
 
     if (m_services.isEmpty()) {
-        qDebug() << "account config done" << m_account->displayName() << serviceName;
+        qDebug() << "\taccount config done" << m_account->displayName() << serviceName;
         Q_EMIT done();
     }
 }
