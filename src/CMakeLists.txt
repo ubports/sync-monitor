@@ -10,8 +10,8 @@ endif()
 
 set(SYNQ_BIN_SRC
     main.cpp
-    address-book-trigger.h
-    address-book-trigger.cpp
+    eds-helper.h
+    eds-helper.cpp
     notify-message.h
     notify-message.cpp
     provider-template.h
@@ -41,7 +41,7 @@ target_link_libraries(${SYNQ_BIN}
     syncevolution-qt
 )
 
-qt5_use_modules(${SYNQ_BIN} Core DBus)
+qt5_use_modules(${SYNQ_BIN} Core DBus Organizer Contacts)
 
 include_directories(
     ${CMAKE_SOURCE_DIR}

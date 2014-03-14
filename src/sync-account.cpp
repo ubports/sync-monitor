@@ -31,7 +31,7 @@ SyncAccount::SyncAccount(Account *account,
     : QObject(parent),
       m_currentSession(0),
       m_account(account),
-      m_state(SyncAccount::Empty),
+      m_state(SyncAccount::Idle),
       m_settings(settings)
 {
     setup();
@@ -56,6 +56,8 @@ void SyncAccount::setupServices()
             m_availabeServices.insert(service.serviceType(), enabled);
         }
     }
+    qDebug() << "Supported sevices for protocol:" << m_account->providerName() << supportedSevices;
+    qDebug() << "Services available for:" << m_account->displayName() << m_availabeServices;
 }
 
 void SyncAccount::setup()
@@ -78,11 +80,9 @@ void SyncAccount::cancel(const QString &serviceName)
 void SyncAccount::sync(const QString &serviceName)
 {
     switch(m_state) {
-    case SyncAccount::Empty:
-        configure(serviceName);
-        break;
     case SyncAccount::Idle:
-        continueSync(serviceName);
+        qDebug() << "Sync requested service:" << m_account->displayName() << serviceName;
+        configure(serviceName);
         break;
     default:
         break;
@@ -286,6 +286,8 @@ void SyncAccount::onAccountConfigured()
     m_pendingConfigs.removeOne(configure);
     QString serviceName = configure->serviceName();
     configure->deleteLater();
+
+    Q_EMIT configured(serviceName);
 
     setState(SyncAccount::Idle);
     continueSync(serviceName);

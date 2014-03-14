@@ -20,7 +20,7 @@
 #include "sync-daemon.h"
 #include "sync-account.h"
 #include "sync-queue.h"
-#include "address-book-trigger.h"
+#include "eds-helper.h"
 #include "notify-message.h"
 #include "provider-template.h"
 
@@ -34,7 +34,7 @@ using namespace Accounts;
 SyncDaemon::SyncDaemon()
     : QObject(0),
       m_manager(0),
-      m_addressbook(0),
+      m_eds(0),
       m_syncing(false),
       m_aboutToQuit(false)
 {
@@ -75,14 +75,25 @@ void SyncDaemon::setupAccounts()
 
 void SyncDaemon::setupTriggers()
 {
-    m_addressbook = new AddressBookTrigger(this);
-    connect(m_addressbook, SIGNAL(contactsUpdated()), SLOT(syncAll()));
+    m_eds = new EdsHelper(this);
+    connect(m_eds, &EdsHelper::dataChanged,
+            this, &SyncDaemon::onDataChanged);
 }
 
-void SyncDaemon::syncAll()
+void SyncDaemon::onDataChanged(const QString &serviceName, const QString &sourceName)
+{
+    // TODO: filter by sourceName
+    syncAll(serviceName);
+}
+
+void SyncDaemon::syncAll(const QString &serviceName)
 {
     Q_FOREACH(SyncAccount *acc, m_accounts.values()) {
-        sync(acc);
+        if (serviceName.isEmpty()) {
+            sync(acc);
+        } else if (acc->availableServices().contains(serviceName)) {
+            sync(acc, serviceName);
+        }
     }
 }
 
@@ -143,16 +154,19 @@ void SyncDaemon::addAccount(const AccountId &accountId, bool startSync)
 
 void SyncDaemon::sync(SyncAccount *syncAcc, const QString &serviceName)
 {
+    qDebug() << "syn requested for account:" << syncAcc->displayName() << serviceName;
+
     // check if the service is already in the sync queue or is the current operation
-    if (!m_syncQueue->contains(syncAcc, serviceName) &&
-        ((m_currentAccount != syncAcc) || (m_currentServiceName != serviceName)))    {
+    if (m_syncQueue->contains(syncAcc, serviceName) ||
+        (m_currentAccount == syncAcc) && (serviceName.isEmpty() || (serviceName == m_currentServiceName))) {
+        qDebug() << "Account aready in the queue";
+    } else {
+        qDebug() << "Pushed into queue";
         m_syncQueue->push(syncAcc, serviceName);
         // if not syncing start a full sync
         if (!m_syncing) {
             sync();
         }
-    } else {
-        qDebug() << "Account aready in the queue";
     }
 }
 
@@ -231,19 +245,16 @@ void SyncDaemon::onAccountEnableChanged(const QString &serviceName, bool enabled
 void SyncDaemon::onAccountConfigured(const QString &serviceName)
 {
     SyncAccount *acc = qobject_cast<SyncAccount*>(QObject::sender());
-    if (serviceName == "contacts") {
-        m_addressbook->createSource(acc->displayName());
-    }
-    // TODO implement support for other services
+    m_eds->createSource(serviceName, acc->displayName());
 }
 
 void SyncDaemon::quit()
 {
     m_aboutToQuit = true;
 
-    if (m_addressbook) {
-        delete m_addressbook;
-        m_addressbook = 0;
+    if (m_eds) {
+        delete m_eds;
+        m_eds = 0;
     }
 
     // cancel all sync operation

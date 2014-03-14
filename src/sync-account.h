@@ -38,7 +38,6 @@ public:
     static const QString GoogleContactService;
 
     enum AccountState {
-        Empty,
         Configuring,
         Syncing,
         Idle,

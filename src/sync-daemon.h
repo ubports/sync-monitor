@@ -26,7 +26,7 @@
 #include <Accounts/Manager>
 
 class SyncAccount;
-class AddressBookTrigger;
+class EdsHelper;
 class ProviderTemplate;
 class SyncQueue;
 
@@ -42,7 +42,7 @@ public Q_SLOTS:
     void quit();
 
 private Q_SLOTS:
-    void syncAll();
+    void syncAll(const QString &serviceName = QString());
     void continueSync();
     void addAccount(const Accounts::AccountId &accountId, bool startSync=true);
     void removeAccount(const Accounts::AccountId &accountId);
@@ -52,6 +52,7 @@ private Q_SLOTS:
     void onAccountSyncError(const QString &serviceName, int errorCode);
     void onAccountEnableChanged(const QString &serviceName, bool enabled);
     void onAccountConfigured(const QString &serviceName);
+    void onDataChanged(const QString &serviceName, const QString &sourceName);
 
 private:
     Accounts::Manager *m_manager;
@@ -60,7 +61,7 @@ private:
     SyncQueue *m_syncQueue;
     SyncAccount *m_currentAccount;
     QString m_currentServiceName;
-    AddressBookTrigger *m_addressbook;
+    EdsHelper *m_eds;
     ProviderTemplate *m_provider;
     bool m_syncing;
     bool m_aboutToQuit;
