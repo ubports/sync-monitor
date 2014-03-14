@@ -141,15 +141,17 @@ bool SyncConfigure::configTarget(const QString &targetName, const QString &servi
 
     // loas settings
     m_settings->beginGroup(serviceName);
-    QString templateName = m_settings->value("template", "").toString();
-    QString syncUrl = m_settings->value("syncURL", "").toString();
+    QString templateName = m_settings->value("template", "SyncEvolution").toString();
+    QString syncUrl = m_settings->value("syncURL", QString(QString::null)).toString();
     QString uoaServiceName = m_settings->value("uoa-service", "").toString();
     m_settings->endGroup();
 
     // config server side
     Q_ASSERT(!templateName.isEmpty());
     QStringMultiMap config = session->getConfig(templateName, true);
-    config[""]["syncURL"] = syncUrl;
+    if (!syncUrl.isNull()) {
+        config[""]["syncURL"] = syncUrl;
+    }
     config[""]["username"] = QString("uoa:%1,%2").arg(accountId).arg(uoaServiceName);
     config[""]["consumerReady"] = "0";
     config[""]["dumpData"] = "0";
@@ -172,7 +174,8 @@ bool SyncConfigure::configSync(const QString &targetName, const QString &service
     SyncEvolutionSessionProxy *session = m_sessions.value(serviceName, 0);
 
     m_settings->beginGroup(serviceName);
-    QString clientBackend = m_settings->value("sync-backend", "").toString();
+    QString clientBackend = m_settings->value("sync-backend", QString(QString::null)).toString();
+    QString clientUri = m_settings->value("sync-uri", QString(QString::null)).toString();
     m_settings->endGroup();
 
     QStringMultiMap config = session->getConfig("SyncEvolution_Client", true);
@@ -192,10 +195,15 @@ bool SyncConfigure::configSync(const QString &targetName, const QString &service
     // database
     QString sourceName = QString("%1_uoa_%2").arg(serviceName).arg(accountId);
     QString sourceFullName = QString("source/%1").arg(sourceName);
-    config[sourceFullName]["backend"] = clientBackend;
+
     config[sourceFullName]["database"] = m_account->displayName();
+    if (!clientBackend.isNull()) {
+        config[sourceFullName]["backend"] = clientBackend;
+    }
     //TODO: create one for each database
-    config[sourceFullName]["uri"] = "addressbook";
+    if (!clientUri.isNull()) {
+        config[sourceFullName]["uri"] = clientUri;
+    }
     config[sourceFullName]["sync"] = "two-way";
 
     bool result = session->saveConfig(targetName, config);
