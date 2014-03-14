@@ -140,7 +140,6 @@ bool SyncEvolutionSessionProxy::isValid() const
 void SyncEvolutionSessionProxy::sync(QString mode, QStringMap services)
 {
     Q_ASSERT(isValid());
-    qDebug() << "sync flags" << services;
     QDBusReply<void> reply = m_iface->call("Sync", QString(), QVariant::fromValue(services));
     if (reply.error().isValid()) {
         qWarning() << "Fail to sync account" << reply.error().message();

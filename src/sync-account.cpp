@@ -241,9 +241,12 @@ void SyncAccount::onSessionStatusChanged(const QString &newStatus)
         if (newStatus == "done") {
             releaseSession();
             setState(SyncAccount::Idle);
-            Q_EMIT syncFinished(m_syncServiceName, m_syncMode);
+            QString currentServiceName = m_syncServiceName;
+            QString currentSyncMode = m_syncMode;
+
             m_syncMode.clear();
             m_syncServiceName.clear();
+            Q_EMIT syncFinished(currentServiceName, currentSyncMode);
         }
         break;
     default:

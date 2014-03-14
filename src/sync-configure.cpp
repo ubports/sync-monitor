@@ -157,9 +157,23 @@ bool SyncConfigure::configTarget(const QString &targetName, const QString &servi
     config[""]["dumpData"] = "0";
     config[""]["printChanges"] = "0";
     config[""]["PeerName"] = targetName;
-    config.remove("source/calendar");
-    config.remove("source/todo");
-    config.remove("source/memo");
+
+
+    QString expectedSource;
+    if (serviceName == CONTACTS_SERVICE_NAME) {
+        expectedSource = QString("source/addressbook");
+    } else {
+        expectedSource = QString("source/%1").arg(serviceName);
+    }
+
+    QStringList keys = config.keys();
+    Q_FOREACH(QString key, keys) {
+        if (key.startsWith("source/") && (key != expectedSource)) {
+            qDebug() << "\tRemove source:" << key;
+            config.remove(key);
+        }
+    }
+
     bool result = session->saveConfig(targetName, config);
     if (!result) {
         qWarning() << "Fail to save account client config";
