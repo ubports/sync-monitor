@@ -22,6 +22,8 @@ set(SYNQ_BIN_SRC
     sync-configure.cpp
     sync-daemon.h
     sync-daemon.cpp
+    sync-dbus.h
+    sync-dbus.cpp
     sync-queue.h
     sync-queue.cpp
     syncevolution-server-proxy.h

@@ -29,6 +29,7 @@ class SyncAccount;
 class EdsHelper;
 class ProviderTemplate;
 class SyncQueue;
+class SyncDBus;
 
 class SyncDaemon : public QObject
 {
@@ -37,12 +38,22 @@ public:
     SyncDaemon();
     ~SyncDaemon();
     void run();
+    bool isSyncing() const;
+    QStringList availableServices() const;
+
+Q_SIGNALS:
+    void syncStarted(SyncAccount *syncAcc, const QString &serviceName);
+    void syncFinished(SyncAccount *syncAcc, const QString &serviceName);
+    void syncError(SyncAccount *syncAcc, const QString &serviceName, const QString &error);
+    void syncAboutToStart();
+    void done();
 
 public Q_SLOTS:
     void quit();
+    void syncAll(const QString &serviceName = QString());
+    void cancel(const QString &serviceName = QString());
 
 private Q_SLOTS:
-    void syncAll(const QString &serviceName = QString());
     void continueSync();
     void addAccount(const Accounts::AccountId &accountId, bool startSync=true);
     void removeAccount(const Accounts::AccountId &accountId);
@@ -63,6 +74,7 @@ private:
     QString m_currentServiceName;
     EdsHelper *m_eds;
     ProviderTemplate *m_provider;
+    SyncDBus *m_dbusAddaptor;
     bool m_syncing;
     bool m_aboutToQuit;
 
@@ -72,6 +84,7 @@ private:
     void cancel(SyncAccount *syncAcc, const QString &serviceName = QString());
     void setup();
     void sync();
+    bool registerService();
 };
 
 #endif

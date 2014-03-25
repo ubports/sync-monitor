@@ -20,6 +20,7 @@
 #include "sync-daemon.h"
 #include "sync-account.h"
 #include "sync-queue.h"
+#include "sync-dbus.h"
 #include "eds-helper.h"
 #include "notify-message.h"
 #include "provider-template.h"
@@ -35,6 +36,7 @@ SyncDaemon::SyncDaemon()
     : QObject(0),
       m_manager(0),
       m_eds(0),
+      m_dbusAddaptor(0),
       m_syncing(false),
       m_aboutToQuit(false)
 {
@@ -97,8 +99,20 @@ void SyncDaemon::syncAll(const QString &serviceName)
     }
 }
 
+void SyncDaemon::cancel(const QString &serviceName)
+{
+    Q_FOREACH(SyncAccount *acc, m_accounts.values()) {
+        if (serviceName.isEmpty()) {
+            cancel(acc);
+        } else if (acc->availableServices().contains(serviceName)) {
+            cancel(acc, serviceName);
+        }
+    }
+}
+
 void SyncDaemon::sync()
 {
+    m_syncing = true;
     // wait some time for new sync requests
     m_timeout->start();
 }
@@ -106,16 +120,39 @@ void SyncDaemon::sync()
 void SyncDaemon::continueSync()
 {
     // sync the next service on the queue
-    if (!m_aboutToQuit && !m_syncQueue->isEmpty()) {
-        m_syncing = true;
+    if (!m_aboutToQuit && !m_syncQueue->isEmpty()) {        
         m_currentServiceName = m_syncQueue->popNext(&m_currentAccount);
         m_currentAccount->sync(m_currentServiceName);
     } else {
         m_currentAccount = 0;
         m_currentServiceName.clear();
-        m_syncing = false;
-        qDebug() << "All accounts synced";
+        m_syncing = false;        
+        Q_EMIT done();
     }
+}
+
+bool SyncDaemon::registerService()
+{
+    if (!m_dbusAddaptor) {
+        QDBusConnection connection = QDBusConnection::sessionBus();
+        if (connection.interface()->isServiceRegistered(SYNCMONITOR_SERVICE_NAME)) {
+            qWarning() << "SyncMonitor service already registered";
+            return false;
+        } else if (!connection.registerService(SYNCMONITOR_SERVICE_NAME)) {
+            qWarning() << "Could not register service!" << SYNCMONITOR_SERVICE_NAME;
+            return false;
+        }
+
+        m_dbusAddaptor = new SyncDBus(connection, this);
+        if (!connection.registerObject(SYNCMONITOR_OBJECT_PATH, this))
+        {
+            qWarning() << "Could not register object!" << SYNCMONITOR_OBJECT_PATH;
+            delete m_dbusAddaptor;
+            m_dbusAddaptor = 0;
+            return false;
+        }
+    }
+    return true;
 }
 
 void SyncDaemon::run()
@@ -123,6 +160,20 @@ void SyncDaemon::run()
     setupAccounts();
     setupTriggers();
     syncAll();
+
+    // export dbus interface
+    registerService();
+}
+
+bool SyncDaemon::isSyncing() const
+{
+    return m_syncing;
+}
+
+QStringList SyncDaemon::availableServices() const
+{
+    // TODO: check for all providers
+    return m_provider->supportedServices("google");
 }
 
 void SyncDaemon::addAccount(const AccountId &accountId, bool startSync)
@@ -166,6 +217,7 @@ void SyncDaemon::sync(SyncAccount *syncAcc, const QString &serviceName)
         // if not syncing start a full sync
         if (!m_syncing) {
             sync();
+            Q_EMIT syncAboutToStart();
         }
     }
 }
@@ -176,6 +228,7 @@ void SyncDaemon::cancel(SyncAccount *syncAcc, const QString &serviceName)
                                     QString("Sync canceled: %1").arg(syncAcc->displayName()));
     m_syncQueue->remove(syncAcc, serviceName);
     syncAcc->cancel(serviceName);
+    Q_EMIT syncError(syncAcc, serviceName, "canceled");
 }
 
 void SyncDaemon::removeAccount(const AccountId &accountId)
@@ -200,11 +253,12 @@ void SyncDaemon::onAccountSyncStarted(const QString &serviceName, const QString 
                     .arg(m_currentAccount->displayName())
                     .arg(serviceName);
     }
+    Q_EMIT syncStarted(m_currentAccount, serviceName);
 }
 
 void SyncDaemon::onAccountSyncFinished(const QString &serviceName, const QString &mode)
 {
-    qDebug() << "Account sync done" << serviceName << mode;
+
     if (mode == "slow") {
         NotifyMessage::instance()->show("Syncronization",
                                         QString("Sync done: %1 (%2)")
@@ -217,6 +271,7 @@ void SyncDaemon::onAccountSyncFinished(const QString &serviceName, const QString
                     .arg(serviceName);
     }
 
+    Q_EMIT syncFinished(m_currentAccount, serviceName);
     // sync next account
     continueSync();
 }
@@ -228,6 +283,8 @@ void SyncDaemon::onAccountSyncError(const QString &serviceName, int errorCode)
                                     .arg(m_currentAccount->displayName())
                                     .arg(serviceName)
                                     .arg(errorCode));
+
+    Q_EMIT syncError(m_currentAccount, serviceName, QString(errorCode));
     // sync next account
     continueSync();
 }
@@ -251,6 +308,11 @@ void SyncDaemon::onAccountConfigured(const QString &serviceName)
 void SyncDaemon::quit()
 {
     m_aboutToQuit = true;
+
+    if (m_dbusAddaptor) {
+        delete m_dbusAddaptor;
+        m_dbusAddaptor = 0;
+    }
 
     if (m_eds) {
         delete m_eds;
