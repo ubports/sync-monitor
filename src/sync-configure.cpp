@@ -162,6 +162,8 @@ bool SyncConfigure::configTarget(const QString &targetName, const QString &servi
     QString expectedSource;
     if (serviceName == CONTACTS_SERVICE_NAME) {
         expectedSource = QString("source/addressbook");
+    } else if (serviceName == CALENDAR_SERVICE_NAME) {
+        expectedSource = QString("source/calendar");
     } else {
         expectedSource = QString("source/%1").arg(serviceName);
     }
@@ -171,6 +173,8 @@ bool SyncConfigure::configTarget(const QString &targetName, const QString &servi
         if (key.startsWith("source/") && (key != expectedSource)) {
             qDebug() << "\tRemove source:" << key;
             config.remove(key);
+        } else {
+            qDebug() << "\tkeep:" << key;
         }
     }
 
@@ -218,7 +222,8 @@ bool SyncConfigure::configSync(const QString &targetName, const QString &service
     if (!clientUri.isNull()) {
         config[sourceFullName]["uri"] = clientUri;
     }
-    config[sourceFullName]["sync"] = "two-way";
+    // disable default sync
+    config[sourceFullName]["sync"] = "disabled";
 
     bool result = session->saveConfig(targetName, config);
     if (!result) {
