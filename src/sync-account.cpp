@@ -234,9 +234,20 @@ void SyncAccount::onAccountEnabledChanged(const QString &serviceName, bool enabl
     if (serviceName.isEmpty()) {
         setupServices();
         Q_EMIT enableChanged(QString(), enabled);
-    } else if (m_availabeServices.contains(serviceName)) {
-        m_availabeServices[serviceName] = enabled;
-        Q_EMIT enableChanged(serviceName, enabled);
+    } else {
+        // get service type
+        QString serviceType = serviceName;
+        Q_FOREACH(Service service, m_account->services()) {
+            if (service.name() == serviceName) {
+                serviceType = service.serviceType();
+                break;
+            }
+        }
+
+        if (m_availabeServices.contains(serviceType)) {
+            m_availabeServices[serviceType] = enabled;
+            Q_EMIT enableChanged(serviceType, enabled);
+        }
     }
 }
 
