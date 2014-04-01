@@ -38,7 +38,7 @@ public:
     static const QString GoogleContactService;
 
     enum AccountState {
-        Configuring,
+        Configuring = 0,
         Syncing,
         Idle,
         Invalid
@@ -60,6 +60,7 @@ public:
     QString displayName() const;
     int id() const;
     QStringList availableServices() const;
+    uint lastError() const;
 
 Q_SIGNALS:
     void stateChanged(AccountState newState);
@@ -87,6 +88,7 @@ private:
     AccountState m_state;
     QList<QMetaObject::Connection> m_sessionConnections;
     QList<SyncConfigure*> m_pendingConfigs;
+    uint m_lastError;
 
     // current sync information
     QString m_syncMode;
@@ -99,6 +101,7 @@ private:
     void releaseSession();
     QStringMap lastReport() const;
     QString lastSyncStatus() const;
+    bool isFirstSync() const;
     bool syncService(const QString &serviceName);
     void setupServices();
 };

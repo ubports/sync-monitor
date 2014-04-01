@@ -156,8 +156,6 @@ bool SyncConfigure::configTarget(const QString &targetName, const QString &servi
     config[""]["consumerReady"] = "0";
     config[""]["dumpData"] = "0";
     config[""]["printChanges"] = "0";
-    config[""]["PeerName"] = targetName;
-
 
     QString expectedSource;
     if (serviceName == CONTACTS_SERVICE_NAME) {
@@ -166,16 +164,6 @@ bool SyncConfigure::configTarget(const QString &targetName, const QString &servi
         expectedSource = QString("source/calendar");
     } else {
         expectedSource = QString("source/%1").arg(serviceName);
-    }
-
-    QStringList keys = config.keys();
-    Q_FOREACH(QString key, keys) {
-        if (key.startsWith("source/") && (key != expectedSource)) {
-            qDebug() << "\tRemove source:" << key;
-            config.remove(key);
-        } else {
-            qDebug() << "\tkeep:" << key;
-        }
     }
 
     bool result = session->saveConfig(targetName, config);

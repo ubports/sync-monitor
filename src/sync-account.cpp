@@ -114,10 +114,9 @@ bool SyncAccount::syncService(const QString &serviceName)
         attachSession(session);
 
         QStringMap syncFlags;
-        QString lastSync = lastSyncStatus();
-        bool forceSlowSync = (lastSync != "0");
-        m_syncMode = (forceSlowSync ? "slow" : "two-way");
+        m_syncMode = (isFirstSync() ? "slow" : "two-way");
         syncFlags.insert(sourceName, m_syncMode);
+        qDebug() << "sync Mod" << syncFlags;
         session->sync(m_syncMode, syncFlags);
         return true;
     } else {
@@ -165,6 +164,8 @@ QString SyncAccount::lastSyncStatus() const
 {
     QStringMap lastReport = this->lastReport();
     QString lastStatus = lastReport.value("status", "-1");
+
+    qDebug() << "lastStatus" << lastStatus;
     if ((lastStatus == "0") ||          // STATUS_OK
         (lastStatus == "200") ||        // STATUS_HTTP_OK
         (lastStatus == "204") ||        // STATUS_NO_CONTENT
@@ -196,6 +197,12 @@ QStringMap SyncAccount::lastReport() const
     return lastReport;
 }
 
+bool SyncAccount::isFirstSync() const
+{
+    QArrayOfStringMap reports = m_currentSession->reports(0, 1);
+    return (reports.size() == 0);
+}
+
 bool SyncAccount::enabled() const
 {
     return m_account->enabled();
@@ -216,6 +223,11 @@ QStringList SyncAccount::availableServices() const
     return m_availabeServices.keys();
 }
 
+uint SyncAccount::lastError() const
+{
+    return m_lastError;
+}
+
 void SyncAccount::onAccountEnabledChanged(const QString &serviceName, bool enabled)
 {
     // empty service name means that the hole account has been enabled/disabled
@@ -230,27 +242,37 @@ void SyncAccount::onAccountEnabledChanged(const QString &serviceName, bool enabl
 
 void SyncAccount::onSessionStatusChanged(const QString &newStatus)
 {
-    switch (m_state) {
-    case SyncAccount::Idle:
-        if (newStatus == "running") {
+    if (newStatus == "running") {
+        switch (m_state) {
+        case SyncAccount::Idle:
             setState(SyncAccount::Syncing);
             Q_EMIT syncStarted(m_syncServiceName, m_syncMode);
+            break;
+        default:
+            qWarning() << "State changed to" << newStatus << "during" << state();
+            break;
         }
-        break;
-    case SyncAccount::Syncing:
-        if (newStatus == "done") {
-            releaseSession();
-            setState(SyncAccount::Idle);
+    } else if (newStatus == "done") {
+        releaseSession();
+        switch (m_state) {
+        case SyncAccount::Syncing:
+        {
             QString currentServiceName = m_syncServiceName;
             QString currentSyncMode = m_syncMode;
 
             m_syncMode.clear();
             m_syncServiceName.clear();
+            setState(SyncAccount::Idle);
             Q_EMIT syncFinished(currentServiceName, currentSyncMode);
+            break;
         }
-        break;
-    default:
-        break;
+        default:
+            qWarning() << "State changed to" << newStatus << "during" << state();
+            break;
+        }
+
+    } else {
+        qWarning() << "Status changed invalid;" << newStatus;
     }
 }
 

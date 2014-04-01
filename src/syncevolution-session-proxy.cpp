@@ -158,12 +158,12 @@ QArrayOfStringMap SyncEvolutionSessionProxy::reports(uint start, uint maxCount)
     }
 }
 
-void SyncEvolutionSessionProxy::onSessionStatusChanged(const QString &status, uint error, QSyncStatusMap source)
+void SyncEvolutionSessionProxy::onSessionStatusChanged(const QString &status, uint errorNuber, QSyncStatusMap source)
 {
     Q_UNUSED(source);
     Q_EMIT statusChanged(status);
-    if (error != 0) {
-        Q_EMIT this->error(error);
+    if (errorNuber != 0) {
+        Q_EMIT error(errorNuber);
     }
 }
 
