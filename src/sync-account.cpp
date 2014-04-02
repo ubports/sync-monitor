@@ -93,7 +93,7 @@ bool SyncAccount::syncService(const QString &serviceName)
 {
     bool enabledService = m_availabeServices.value(serviceName, false);
     if (!enabledService) {
-        Q_EMIT syncFinished(serviceName, "");
+        Q_EMIT syncFinished(serviceName, false, "");
         return true;
     }
 
@@ -114,7 +114,7 @@ bool SyncAccount::syncService(const QString &serviceName)
         attachSession(session);
 
         QStringMap syncFlags;
-        m_syncMode = (isFirstSync() ? "slow" : "two-way");
+        m_syncMode = syncMode(serviceName, &m_firstSync);
         syncFlags.insert(sourceName, m_syncMode);
         qDebug() << "sync Mod" << syncFlags;
         session->sync(m_syncMode, syncFlags);
@@ -149,58 +149,84 @@ SyncAccount::AccountState SyncAccount::state() const
     return m_state;
 }
 
-QDateTime SyncAccount::lastSyncDate() const
-{
-    QStringMap lastReport = this->lastReport();
-    if (lastReport.contains("start")) {
-        QString lastSync = lastReport.value("start", "0");
-        return QDateTime::fromTime_t(lastSync.toInt());
-    } else {
-        return QDateTime();
-    }
-}
-
-QString SyncAccount::lastSyncStatus() const
-{
-    QStringMap lastReport = this->lastReport();
-    QString lastStatus = lastReport.value("status", "-1");
-
-    qDebug() << "lastStatus" << lastStatus;
-    if ((lastStatus == "0") ||          // STATUS_OK
-        (lastStatus == "200") ||        // STATUS_HTTP_OK
-        (lastStatus == "204") ||        // STATUS_NO_CONTENT
-        (lastStatus == "207")) {        // STATUS_DATA_MERGED
-        return "0";
-    } else {
-        return "-1";
-    }
-}
-
-QStringMap SyncAccount::lastReport() const
+QStringMap SyncAccount::lastReport(const QString &serviceName) const
 {
     const uint pageSize = 100;
     uint index = 0;
-    QStringMap lastReport;
+    QArrayOfStringMap allReports;
+    QArrayOfStringMap result;
 
     // load all reports
     QArrayOfStringMap reports = m_currentSession->reports(index, pageSize);
-    while (reports.size() == pageSize) {
-        lastReport = reports.last();
-        index += pageSize;
+    if (reports.isEmpty()) {
+        return QStringMap();
+    } else if (serviceName.isEmpty()) {
+        return reports.value(0);
+    }
+
+    QString sessionName = QString("%1-%2-%3")
+            .arg(m_account->providerName())
+            .arg(serviceName)
+            .arg(m_account->id());
+
+    index += pageSize;
+    while (reports.size() != pageSize) {
+        Q_FOREACH(const QStringMap &report, reports) {
+            if (report.value("peer") == sessionName) {
+                return report;
+            }
+        }
+
         reports = m_currentSession->reports(index, pageSize);
+        index += pageSize;
     }
 
-    if (reports.size()) {
-        lastReport = reports.last();
+    Q_FOREACH(const QStringMap &report, reports) {
+        if (report.value("peer") == sessionName) {
+            return report;
+        }
     }
 
-    return lastReport;
+    return QStringMap();
 }
 
-bool SyncAccount::isFirstSync() const
+QString SyncAccount::syncMode(const QString &serviceName, bool *firstSync) const
 {
-    QArrayOfStringMap reports = m_currentSession->reports(0, 1);
-    return (reports.size() == 0);
+    QString lastStatus = lastSyncStatus(serviceName);
+    qDebug() << "last status" << lastStatus;
+    *firstSync = lastStatus.isEmpty();
+    if (lastStatus.isEmpty()) {
+        return "slow";
+    }
+    switch(lastStatus.toInt())
+    {
+    case 0:                         // STATUS_OK
+    case 200:                       // STATUS_HTTP_OK
+    case 204:                       // STATUS_NO_CONTENT
+    case 207:                       // STATUS_DATA_MERGED
+        return "two-way";
+    case 22001:                     // fail to sync some items
+    case 22002:                     // last process unexpected die
+        return "two-way";
+    case 22000:                     // fail to run "two-way" sync
+        return "slow";
+    case 403:                       // forbidden / access denied
+    case 404:                       // bject not found / unassigned field
+    case 405:                       // command not allowed
+    case 406:
+    case 407:
+    case 420:                       // disk full
+        return "two-way";
+    default:
+        qWarning() << "last status unkown using slow sync:" << lastStatus;
+        return "slow";
+    }
+}
+
+QString SyncAccount::lastSyncStatus(const QString &serviceName) const
+{
+    QStringMap lastReport = this->lastReport(serviceName);
+    return lastReport.value("status", "");
 }
 
 bool SyncAccount::enabled() const
@@ -257,24 +283,27 @@ void SyncAccount::onSessionStatusChanged(const QString &newStatus)
         switch (m_state) {
         case SyncAccount::Idle:
             setState(SyncAccount::Syncing);
-            Q_EMIT syncStarted(m_syncServiceName, m_syncMode);
+            Q_EMIT syncStarted(m_syncServiceName, m_firstSync);
             break;
         default:
             qWarning() << "State changed to" << newStatus << "during" << state();
             break;
         }
     } else if (newStatus == "done") {
+        QString lastStatus = lastSyncStatus(m_syncServiceName);
         releaseSession();
         switch (m_state) {
         case SyncAccount::Syncing:
         {
             QString currentServiceName = m_syncServiceName;
-            QString currentSyncMode = m_syncMode;
+            bool firstSync = m_firstSync;
 
             m_syncMode.clear();
             m_syncServiceName.clear();
+            m_firstSync = false;
             setState(SyncAccount::Idle);
-            Q_EMIT syncFinished(currentServiceName, currentSyncMode);
+
+            Q_EMIT syncFinished(currentServiceName, firstSync, lastStatus);
             break;
         }
         default:

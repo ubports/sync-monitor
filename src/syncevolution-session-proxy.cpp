@@ -161,6 +161,10 @@ QArrayOfStringMap SyncEvolutionSessionProxy::reports(uint start, uint maxCount)
 void SyncEvolutionSessionProxy::onSessionStatusChanged(const QString &status, uint errorNuber, QSyncStatusMap source)
 {
     Q_UNUSED(source);
+    Q_FOREACH(QString s, source.keys()) {
+        qDebug() << "sync done with" << s << source[s].status;
+    }
+
     Q_EMIT statusChanged(status);
     if (errorNuber != 0) {
         Q_EMIT error(errorNuber);

@@ -55,7 +55,6 @@ public:
     void wait();
     void status() const;
     AccountState state() const;
-    QDateTime lastSyncDate() const;
     bool enabled() const;
     QString displayName() const;
     int id() const;
@@ -64,8 +63,8 @@ public:
 
 Q_SIGNALS:
     void stateChanged(AccountState newState);
-    void syncStarted(const QString &serviceName, const QString &mode);
-    void syncFinished(const QString &serviceName, const QString &mode);
+    void syncStarted(const QString &serviceName, bool firstSync);
+    void syncFinished(const QString &serviceName, bool firstSync, const QString &status);
     void syncError(const QString &serviceName, int errorCode);
     void enableChanged(const QString &serviceName, bool enable);
     void configured(const QString &serviceName);
@@ -93,15 +92,16 @@ private:
     // current sync information
     QString m_syncMode;
     QString m_syncServiceName;
+    bool m_firstSync;
 
     void configure(const QString &serviceName);
     void setState(AccountState state);
     void continueSync(const QString &serviceName);
     void attachSession(SyncEvolutionSessionProxy *session);
     void releaseSession();
-    QStringMap lastReport() const;
-    QString lastSyncStatus() const;
-    bool isFirstSync() const;
+    QStringMap lastReport(const QString &serviceName) const;
+    QString syncMode(const QString &serviceName, bool *firstSync) const;
+    QString lastSyncStatus(const QString &serviceName) const;
     bool syncService(const QString &serviceName);
     void setupServices();
 };

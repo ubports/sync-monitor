@@ -40,7 +40,6 @@ public:
     QString serviceName() const;
 
 Q_SIGNALS:
-    void configured(const QString &serviceName);
     void done();
     void error();
 

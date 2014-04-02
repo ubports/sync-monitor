@@ -58,8 +58,8 @@ private Q_SLOTS:
     void addAccount(const Accounts::AccountId &accountId, bool startSync=true);
     void removeAccount(const Accounts::AccountId &accountId);
 
-    void onAccountSyncStarted(const QString &serviceName, const QString &mode);
-    void onAccountSyncFinished(const QString &serviceName, const QString &mode);
+    void onAccountSyncStarted(const QString &serviceName, bool firstSync);
+    void onAccountSyncFinished(const QString &serviceName, bool firstSync, const QString &status);
     void onAccountSyncError(const QString &serviceName, int errorCode);
     void onAccountEnableChanged(const QString &serviceName, bool enabled);
     void onAccountConfigured(const QString &serviceName);
@@ -85,6 +85,7 @@ private:
     void setup();
     void sync();
     bool registerService();
+    QString getErrorMessageFromStatus(const QString &status) const;
 };
 
 #endif

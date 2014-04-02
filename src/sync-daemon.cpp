@@ -120,13 +120,13 @@ void SyncDaemon::sync()
 void SyncDaemon::continueSync()
 {
     // sync the next service on the queue
-    if (!m_aboutToQuit && !m_syncQueue->isEmpty()) {        
+    if (!m_aboutToQuit && !m_syncQueue->isEmpty()) {
         m_currentServiceName = m_syncQueue->popNext(&m_currentAccount);
         m_currentAccount->sync(m_currentServiceName);
     } else {
         m_currentAccount = 0;
         m_currentServiceName.clear();
-        m_syncing = false;        
+        m_syncing = false;
         Q_EMIT done();
     }
 }
@@ -153,6 +153,38 @@ bool SyncDaemon::registerService()
         }
     }
     return true;
+}
+
+QString SyncDaemon::getErrorMessageFromStatus(const QString &status) const
+{
+    if (status.isEmpty()) {
+        return QString();
+    }
+
+    switch(status.toInt())
+    {
+    case 0:                         // STATUS_OK
+    case 200:                       // STATUS_HTTP_OK
+    case 204:                       // STATUS_NO_CONTENT
+    case 207:                       // STATUS_DATA_MERGED
+        return "";
+    case 22001:                     // fail to sync some items
+    case 22002:                     // last process unexpected die
+        return "Fail to sync try again";
+    case 22000:                     // fail to run "two-way" sync
+        return "Fast sync fail, will retry with slow sync";
+    case 403:                       // forbidden / access denied
+    case 404:                       // bject not found / unassigned field
+    case 405:                       // command not allowed
+    case 406:
+    case 407:
+        return "Access denied";
+    case 420:                       // disk full
+        return "Disk is full";
+    default:
+        qWarning() << "invalid last status:" << status;
+        return "";
+    }
 }
 
 void SyncDaemon::run()
@@ -187,10 +219,10 @@ void SyncDaemon::addAccount(const AccountId &accountId, bool startSync)
                                                m_provider->settings(acc->providerName()),
                                                this);
         m_accounts.insert(accountId, syncAcc);
-        connect(syncAcc, SIGNAL(syncStarted(QString, QString)),
-                         SLOT(onAccountSyncStarted(QString, QString)));
-        connect(syncAcc, SIGNAL(syncFinished(QString, QString)),
-                         SLOT(onAccountSyncFinished(QString, QString)));
+        connect(syncAcc, SIGNAL(syncStarted(QString, bool)),
+                         SLOT(onAccountSyncStarted(QString, bool)));
+        connect(syncAcc, SIGNAL(syncFinished(QString, bool, QString)),
+                         SLOT(onAccountSyncFinished(QString, bool, QString)));
         connect(syncAcc, SIGNAL(syncError(QString, int)),
                          SLOT(onAccountSyncError(QString, int)));
         connect(syncAcc, SIGNAL(enableChanged(QString, bool)),
@@ -240,9 +272,9 @@ void SyncDaemon::removeAccount(const AccountId &accountId)
     }
 }
 
-void SyncDaemon::onAccountSyncStarted(const QString &serviceName, const QString &mode)
+void SyncDaemon::onAccountSyncStarted(const QString &serviceName, bool firstSync)
 {
-    if (mode == "slow") {
+    if (firstSync) {
         NotifyMessage::instance()->show("Syncronization",
                                         QString("Start sync:  %1 (%2)")
                                         .arg(m_currentAccount->displayName())
@@ -256,20 +288,29 @@ void SyncDaemon::onAccountSyncStarted(const QString &serviceName, const QString 
     Q_EMIT syncStarted(m_currentAccount, serviceName);
 }
 
-void SyncDaemon::onAccountSyncFinished(const QString &serviceName, const QString &mode)
+void SyncDaemon::onAccountSyncFinished(const QString &serviceName, const bool firstSync, const QString &status)
 {
-
-    if (mode == "slow") {
+    QString errorMessage = getErrorMessageFromStatus(status);
+    if (firstSync && errorMessage.isEmpty()) {
         NotifyMessage::instance()->show("Syncronization",
                                         QString("Sync done: %1 (%2)")
                                         .arg(m_currentAccount->displayName())
                                         .arg(serviceName));
+    } else if (!errorMessage.isEmpty()) {
+        NotifyMessage::instance()->show("Syncronization",
+                                        QString("Fail to sync %1 (%2).\n%3")
+                                        .arg(m_currentAccount->displayName())
+                                        .arg(serviceName)
+                                        .arg(errorMessage));
     } else {
         qDebug() << "Syncronization"
-                 << QString("Sync done: %1 (%2)")
+                 << QString("Sync done: %1 (%2) Status: %3 ")
                     .arg(m_currentAccount->displayName())
-                    .arg(serviceName);
+                    .arg(serviceName)
+                    .arg(status);
     }
+
+
 
     Q_EMIT syncFinished(m_currentAccount, serviceName);
     // sync next account
