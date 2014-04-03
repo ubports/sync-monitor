@@ -68,13 +68,11 @@ QStringList SyncDBus::servicesAvailable()
 void SyncDBus::onSyncStarted(SyncAccount *syncAcc, const QString &serviceName)
 {
     updateState();
-    qDebug() << "Sync started" << syncAcc->displayName() << serviceName;
     Q_EMIT syncStarted(syncAcc->displayName(), serviceName);
 }
 
 void SyncDBus::onSyncFinished(SyncAccount *syncAcc, const QString &serviceName)
 {
-    qDebug() << "Sync done" << syncAcc->displayName() << serviceName;
     Q_EMIT syncFinished(syncAcc->displayName(), serviceName);
 }
 

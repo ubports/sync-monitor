@@ -190,10 +190,47 @@ QStringMap SyncAccount::lastReport(const QString &serviceName) const
     return QStringMap();
 }
 
+QString SyncAccount::statusDescription(const QString &status) const
+{
+    if (status.isEmpty()) {
+        return "";
+    }
+
+    switch(status.toInt())
+    {
+    case 0:
+        return "STATUS_OK";
+    case 200:
+        return "STATUS_HTTP_OK";
+    case 204:
+        return "STATUS_NO_CONTENT";
+    case 207:
+        return "STATUS_DATA_MERGED";
+    case 22001:
+        return "Fail to sync some items";
+    case 22002:
+        return "Last process unexpected die.";
+    case 22000:
+        return "Fail to run \"two-way\" sync";
+    case 403:
+        return "Forbidden / access denied";
+    case 404:
+        return "Object not found / unassigned field";
+    case 405:
+        return "Command not allowed";
+    case 406:
+    case 407:
+    case 420:
+        return "Disk full";
+    default:
+        return "Unkown status";
+    }
+}
+
 QString SyncAccount::syncMode(const QString &serviceName, bool *firstSync) const
 {
     QString lastStatus = lastSyncStatus(serviceName);
-    qDebug() << "last status" << lastStatus;
+    qDebug() << "Last sync status:" << lastStatus << statusDescription(lastStatus);
     *firstSync = lastStatus.isEmpty();
     if (lastStatus.isEmpty()) {
         return "slow";
@@ -285,6 +322,8 @@ void SyncAccount::onSessionStatusChanged(const QString &newStatus)
             setState(SyncAccount::Syncing);
             Q_EMIT syncStarted(m_syncServiceName, m_firstSync);
             break;
+        case SyncAccount::Syncing:
+            break;
         default:
             qWarning() << "State changed to" << newStatus << "during" << state();
             break;
@@ -311,6 +350,8 @@ void SyncAccount::onSessionStatusChanged(const QString &newStatus)
             break;
         }
 
+    } else if (newStatus == "running;waiting") {
+        // ignore
     } else {
         qWarning() << "Status changed invalid;" << newStatus;
     }

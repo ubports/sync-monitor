@@ -183,7 +183,7 @@ QString SyncDaemon::getErrorMessageFromStatus(const QString &status) const
         return "Disk is full";
     default:
         qWarning() << "invalid last status:" << status;
-        return "";
+        return "Unknow error: " + status;
     }
 }
 
@@ -279,12 +279,12 @@ void SyncDaemon::onAccountSyncStarted(const QString &serviceName, bool firstSync
                                         QString("Start sync:  %1 (%2)")
                                         .arg(m_currentAccount->displayName())
                                         .arg(serviceName));
-    } else {
-        qDebug() << "Syncronization"
-                 << QString("Start sync:  %1 (%2)")
-                    .arg(m_currentAccount->displayName())
-                    .arg(serviceName);
     }
+    m_syncElapsedTime.restart();
+    qDebug() << QString("[%3] Start sync:  %1 (%2)")
+                .arg(m_currentAccount->displayName())
+                .arg(serviceName)
+                .arg(QDateTime::currentDateTime().toString(Qt::SystemLocaleShortDate));
     Q_EMIT syncStarted(m_currentAccount, serviceName);
 }
 
@@ -302,15 +302,15 @@ void SyncDaemon::onAccountSyncFinished(const QString &serviceName, const bool fi
                                         .arg(m_currentAccount->displayName())
                                         .arg(serviceName)
                                         .arg(errorMessage));
-    } else {
-        qDebug() << "Syncronization"
-                 << QString("Sync done: %1 (%2) Status: %3 ")
-                    .arg(m_currentAccount->displayName())
-                    .arg(serviceName)
-                    .arg(status);
     }
 
-
+    qDebug() << QString("[%6] Sync done: %1 (%2) Status: %3 Error: %4 Duration: %5s")
+                .arg(m_currentAccount->displayName())
+                .arg(serviceName)
+                .arg(status)
+                .arg(errorMessage.isEmpty() ? "None" : errorMessage)
+                .arg((m_syncElapsedTime.elapsed() > 60 ? 1  : m_syncElapsedTime.elapsed() / 60))
+                .arg(QDateTime::currentDateTime().toString(Qt::SystemLocaleShortDate));
 
     Q_EMIT syncFinished(m_currentAccount, serviceName);
     // sync next account

@@ -22,6 +22,7 @@
 #include <QtCore/QObject>
 #include <QtCore/QHash>
 #include <QtCore/QTimer>
+#include <QtCore/QElapsedTimer>
 
 #include <Accounts/Manager>
 
@@ -77,6 +78,7 @@ private:
     SyncDBus *m_dbusAddaptor;
     bool m_syncing;
     bool m_aboutToQuit;
+    QElapsedTimer m_syncElapsedTime;
 
     void setupAccounts();
     void setupTriggers();

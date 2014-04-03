@@ -104,6 +104,7 @@ private:
     QString lastSyncStatus(const QString &serviceName) const;
     bool syncService(const QString &serviceName);
     void setupServices();
+    QString statusDescription(const QString &status) const;
 };
 
 #endif
