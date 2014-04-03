@@ -309,7 +309,7 @@ void SyncDaemon::onAccountSyncFinished(const QString &serviceName, const bool fi
                 .arg(serviceName)
                 .arg(status)
                 .arg(errorMessage.isEmpty() ? "None" : errorMessage)
-                .arg((m_syncElapsedTime.elapsed() > 60 ? 1  : m_syncElapsedTime.elapsed() / 60))
+                .arg((m_syncElapsedTime.elapsed() < 1000 ? 1  : m_syncElapsedTime.elapsed() / 1000))
                 .arg(QDateTime::currentDateTime().toString(Qt::SystemLocaleShortDate));
 
     Q_EMIT syncFinished(m_currentAccount, serviceName);
