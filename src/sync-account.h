@@ -106,6 +106,8 @@ private:
     QString lastSyncStatus(const QString &serviceName) const;
     bool syncService(const QString &serviceName);
     void setupServices();
+    QString sessionName(const QString &serviceName) const;
+    void dumpReport(const QStringMap &report) const;
 };
 
 #endif

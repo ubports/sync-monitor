@@ -68,7 +68,7 @@ void EdsHelper::contactDataChanged()
     // The dataChanged signal is fired during the server startup.
     // Some contact data is loaded async like Avatar, a signal with contactChanged will be fired
     // late during the server startup. Because of that We will wait for some time before start to
-    // accept contact changes signals, to avoid cause unnecessary syncs.
+    // accept contact changes signals, to avoid unnecessary syncs.
     m_timeoutTimer.start(CHANGE_TIMEOUT);
 }
 

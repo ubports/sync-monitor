@@ -60,6 +60,21 @@ void SyncAccount::setupServices()
     qDebug() << "Services available for:" << m_account->displayName() << m_availabeServices;
 }
 
+QString SyncAccount::sessionName(const QString &serviceName) const
+{
+    return QString("%1-%2-%3")
+            .arg(m_account->providerName())
+            .arg(serviceName)
+            .arg(m_account->id());
+}
+
+void SyncAccount::dumpReport(const QStringMap &report) const
+{
+    Q_FOREACH(const QString &key, report.keys()) {
+        qDebug() << "\t" << key << ":" << report[key];
+    }
+}
+
 void SyncAccount::setup()
 {
     setupServices();
@@ -98,11 +113,7 @@ bool SyncAccount::syncService(const QString &serviceName)
     }
 
     m_syncServiceName = serviceName;
-    QString sessionName = QString("%1-%2-%3")
-            .arg(m_account->providerName())
-            .arg(serviceName)
-            .arg(m_account->id());
-
+    QString sessionName = this->sessionName(serviceName);
     QString sourceName = QString("%1_uoa_%2")
             .arg(serviceName)
             .arg(m_account->id());
@@ -153,10 +164,7 @@ QStringMap SyncAccount::lastReport(const QString &serviceName) const
 {
     const uint pageSize = 100;
     uint index = 0;
-    QArrayOfStringMap allReports;
-    QArrayOfStringMap result;
 
-    // load all reports
     QArrayOfStringMap reports = m_currentSession->reports(index, pageSize);
     if (reports.isEmpty()) {
         return QStringMap();
@@ -164,11 +172,7 @@ QStringMap SyncAccount::lastReport(const QString &serviceName) const
         return reports.value(0);
     }
 
-    QString sessionName = QString("%1-%2-%3")
-            .arg(m_account->providerName())
-            .arg(serviceName)
-            .arg(m_account->id());
-
+    QString sessionName = this->sessionName(serviceName);
     index += pageSize;
     while (reports.size() != pageSize) {
         Q_FOREACH(const QStringMap &report, reports) {
@@ -193,8 +197,6 @@ QStringMap SyncAccount::lastReport(const QString &serviceName) const
 QString SyncAccount::syncMode(const QString &serviceName, bool *firstSync) const
 {
     QString lastStatus = lastSyncStatus(serviceName);
-    QString statusMessage = statusDescription(lastStatus);
-    qDebug() << "Last sync status:" << lastStatus << (statusMessage.isEmpty() ? "OK" : statusMessage);
     *firstSync = lastStatus.isEmpty();
     if (lastStatus.isEmpty()) {
         return "slow";
@@ -251,7 +253,15 @@ QString SyncAccount::syncMode(const QString &serviceName, bool *firstSync) const
 QString SyncAccount::lastSyncStatus(const QString &serviceName) const
 {
     QStringMap lastReport = this->lastReport(serviceName);
-    return lastReport.value("status", "");
+    QString lastStatus = lastReport.value("status", "");
+    QString statusMessage = statusDescription(lastStatus);
+
+    qDebug() << QString("Last report start date: %1, Status: %2 Message: %3")
+                .arg(QDateTime::fromTime_t(lastReport.value("start", "0").toUInt()).toString(Qt::SystemLocaleShortDate))
+                .arg(lastStatus)
+                .arg(statusMessage.isEmpty() ? "OK" : statusMessage);
+
+    return lastStatus;
 }
 
 bool SyncAccount::enabled() const
