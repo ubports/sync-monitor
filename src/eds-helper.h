@@ -21,6 +21,7 @@
 
 #include <QtCore/QObject>
 #include <QtCore/QStringList>
+#include <QtCore/QTimer>
 
 #include <QtOrganizer/QOrganizerManager>
 #include <QtContacts/QContactManager>
@@ -40,11 +41,13 @@ Q_SIGNALS:
 
 private Q_SLOTS:
     void contactChanged();
+    void contactDataChanged();
     void calendarChanged();
 
 private:
     QtOrganizer::QOrganizerManager *m_organizerEngine;
     QtContacts::QContactManager *m_contactEngine;
+    QTimer m_timeoutTimer;
 
     void createOrganizerSource(const QString &sourceName);
     void createContactsSource(const QString &sourceName);

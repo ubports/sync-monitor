@@ -159,7 +159,6 @@ void SyncDaemon::run()
 {
     setupAccounts();
     setupTriggers();
-    syncAll();
 
     // export dbus interface
     registerService();

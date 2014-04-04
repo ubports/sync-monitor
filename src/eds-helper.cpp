@@ -11,12 +11,15 @@
 
 #include "config.h"
 
+#define CHANGE_TIMEOUT      1000
+
 using namespace QtOrganizer;
 using namespace QtContacts;
 
 EdsHelper::EdsHelper(QObject *parent)
     : QObject(parent)
 {
+    m_timeoutTimer.setSingleShot(true);
     m_contactEngine = new QContactManager("galera", QMap<QString, QString>());
     connect(m_contactEngine, &QContactManager::contactsAdded,
             this, &EdsHelper::contactChanged);
@@ -24,6 +27,8 @@ EdsHelper::EdsHelper(QObject *parent)
             this, &EdsHelper::contactChanged);
     connect(m_contactEngine, &QContactManager::contactsChanged,
             this, &EdsHelper::contactChanged);
+    connect(m_contactEngine, &QContactManager::dataChanged,
+            this, &EdsHelper::contactDataChanged);
 
     m_organizerEngine = new QOrganizerManager("eds", QMap<QString, QString>());
     connect(m_organizerEngine, &QOrganizerManager::itemsAdded,
@@ -53,7 +58,17 @@ void EdsHelper::createSource(const QString &serviceName, const QString &sourceNa
 
 void EdsHelper::contactChanged()
 {
-    Q_EMIT dataChanged(CONTACTS_SERVICE_NAME, "");
+    if (!m_timeoutTimer.isActive()) {
+        Q_EMIT dataChanged(CONTACTS_SERVICE_NAME, "");
+    }
+}
+
+void EdsHelper::contactDataChanged()
+{
+    // The dataChanged singal is fired during the server startup, Will will wait for some time
+    // before start to accept contact changes, with that will try avoid signals fired during the
+    // server load.
+    m_timeoutTimer.start(CHANGE_TIMEOUT);
 }
 
 void EdsHelper::calendarChanged()
