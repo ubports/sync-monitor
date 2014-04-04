@@ -328,6 +328,9 @@ void SyncAccount::onSessionStatusChanged(const QString &newStatus)
         }
     } else if (newStatus == "done") {
         QString lastStatus = lastSyncStatus(m_syncServiceName);
+        QStringMap lastReport = this->lastReport(m_syncServiceName);
+        qDebug() << "Sync Report";
+        dumpReport(lastReport);
         releaseSession();
         switch (m_state) {
         case SyncAccount::Syncing:
