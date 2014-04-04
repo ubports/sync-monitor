@@ -190,73 +190,61 @@ QStringMap SyncAccount::lastReport(const QString &serviceName) const
     return QStringMap();
 }
 
-QString SyncAccount::statusDescription(const QString &status) const
-{
-    if (status.isEmpty()) {
-        return "";
-    }
-
-    switch(status.toInt())
-    {
-    case 0:
-        return "STATUS_OK";
-    case 200:
-        return "STATUS_HTTP_OK";
-    case 204:
-        return "STATUS_NO_CONTENT";
-    case 207:
-        return "STATUS_DATA_MERGED";
-    case 22001:
-        return "Fail to sync some items";
-    case 22002:
-        return "Last process unexpected die.";
-    case 22000:
-        return "Fail to run \"two-way\" sync";
-    case 403:
-        return "Forbidden / access denied";
-    case 404:
-        return "Object not found / unassigned field";
-    case 405:
-        return "Command not allowed";
-    case 406:
-    case 407:
-    case 420:
-        return "Disk full";
-    default:
-        return "Unkown status";
-    }
-}
-
 QString SyncAccount::syncMode(const QString &serviceName, bool *firstSync) const
 {
     QString lastStatus = lastSyncStatus(serviceName);
-    qDebug() << "Last sync status:" << lastStatus << statusDescription(lastStatus);
+    QString statusMessage = statusDescription(lastStatus);
+    qDebug() << "Last sync status:" << lastStatus << (statusMessage.isEmpty() ? "OK" : statusMessage);
     *firstSync = lastStatus.isEmpty();
     if (lastStatus.isEmpty()) {
         return "slow";
     }
     switch(lastStatus.toInt())
     {
-    case 0:                         // STATUS_OK
-    case 200:                       // STATUS_HTTP_OK
-    case 204:                       // STATUS_NO_CONTENT
-    case 207:                       // STATUS_DATA_MERGED
-        return "two-way";
-    case 22001:                     // fail to sync some items
-    case 22002:                     // last process unexpected die
-        return "two-way";
-    case 22000:                     // fail to run "two-way" sync
+    case 22000:
+        // "Fail to run \"two-way\" sync";
         return "slow";
-    case 403:                       // forbidden / access denied
-    case 404:                       // bject not found / unassigned field
-    case 405:                       // command not allowed
+    case 0:
+    case 200:
+    case 204:
+    case 207:
+        // status ok
+    case 401:
+    case 403:
+        // "Forbidden / access denied";
+    case 404:
+        // "Object not found / unassigned field";
+    case 405:
+        // "Command not allowed";
     case 406:
     case 407:
-    case 420:                       // disk full
-        return "two-way";
+        // "Proxy authentication required";
+    case 420:
+        // "Disk full";
+    case 506:
+        // "Fail to sync due some remote problem";
+    case 22001:
+        // "Fail to sync some items";
+    case 22002:
+        // "Last process unexpected die.";
+    case 20006:
+    case 20007:
+        // "Server sent bad content";
+    case 20020:
+        // "Connection timeout";
+    case 20021:
+        // "Connection certificate has expired";
+    case 20022:
+        // "Connection certificate is invalid";
+    case 20026:
+    case 20027:
+    case 20028:
+        // "Fail to connect with the server";
+    case 20046:
+    case 20047:
+        // "Server not found";
     default:
-        qWarning() << "last status unkown using slow sync:" << lastStatus;
-        return "slow";
+        return "two-way";
     }
 }
 
@@ -442,5 +430,60 @@ void SyncAccount::releaseSession()
         m_currentSession->destroy();
         m_currentSession->deleteLater();
         m_currentSession = 0;
+    }
+}
+
+QString SyncAccount::statusDescription(const QString &status)
+{
+    if (status.isEmpty()) {
+        return "";
+    }
+
+    switch(status.toInt())
+    {
+    case 0:
+    case 200:
+    case 204:
+    case 207:
+        // OK
+        return "";
+    case 401:
+    case 403:
+        return "Forbidden / access denied";
+    case 404:
+        return "Object not found / unassigned field";
+    case 405:
+        return "Command not allowed";
+    case 406:
+    case 407:
+        return "Proxy authentication required";
+    case 420:
+        return "Disk full";
+    case 506:
+        return "Fail to sync due some remote problem";
+    case 22000:
+        return "Fail to run \"two-way\" sync";
+    case 22001:
+        return "Fail to sync some items";
+    case 22002:
+        return "Process unexpected die.";
+    case 20006:
+    case 20007:
+        return "Server sent bad content";
+    case 20020:
+        return "Connection timeout";
+    case 20021:
+        return "Connection certificate has expired";
+    case 20022:
+        return "Connection certificate is invalid";
+    case 20026:
+    case 20027:
+    case 20028:
+        return "Fail to connect with the server";
+    case 20046:
+    case 20047:
+        return "Server not found";
+    default:
+        return "Unknown status";
     }
 }

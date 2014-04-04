@@ -87,7 +87,6 @@ private:
     void setup();
     void sync();
     bool registerService();
-    QString getErrorMessageFromStatus(const QString &status) const;
 };
 
 #endif

@@ -155,38 +155,6 @@ bool SyncDaemon::registerService()
     return true;
 }
 
-QString SyncDaemon::getErrorMessageFromStatus(const QString &status) const
-{
-    if (status.isEmpty()) {
-        return QString();
-    }
-
-    switch(status.toInt())
-    {
-    case 0:                         // STATUS_OK
-    case 200:                       // STATUS_HTTP_OK
-    case 204:                       // STATUS_NO_CONTENT
-    case 207:                       // STATUS_DATA_MERGED
-        return "";
-    case 22001:                     // fail to sync some items
-    case 22002:                     // last process unexpected die
-        return "Fail to sync try again";
-    case 22000:                     // fail to run "two-way" sync
-        return "Fast sync fail, will retry with slow sync";
-    case 403:                       // forbidden / access denied
-    case 404:                       // bject not found / unassigned field
-    case 405:                       // command not allowed
-    case 406:
-    case 407:
-        return "Access denied";
-    case 420:                       // disk full
-        return "Disk is full";
-    default:
-        qWarning() << "invalid last status:" << status;
-        return "Unknow error: " + status;
-    }
-}
-
 void SyncDaemon::run()
 {
     setupAccounts();
@@ -290,7 +258,7 @@ void SyncDaemon::onAccountSyncStarted(const QString &serviceName, bool firstSync
 
 void SyncDaemon::onAccountSyncFinished(const QString &serviceName, const bool firstSync, const QString &status)
 {
-    QString errorMessage = getErrorMessageFromStatus(status);
+    QString errorMessage = SyncAccount::statusDescription(status);
     if (firstSync && errorMessage.isEmpty()) {
         NotifyMessage::instance()->show("Syncronization",
                                         QString("Sync done: %1 (%2)")

@@ -61,6 +61,8 @@ public:
     QStringList availableServices() const;
     uint lastError() const;
 
+    static QString statusDescription(const QString &status);
+
 Q_SIGNALS:
     void stateChanged(AccountState newState);
     void syncStarted(const QString &serviceName, bool firstSync);
@@ -104,7 +106,6 @@ private:
     QString lastSyncStatus(const QString &serviceName) const;
     bool syncService(const QString &serviceName);
     void setupServices();
-    QString statusDescription(const QString &status) const;
 };
 
 #endif
