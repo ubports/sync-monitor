@@ -43,7 +43,7 @@ SyncDaemon::SyncDaemon()
     m_provider = new ProviderTemplate();
     m_provider->load();
 
-    m_syncQueue = new SyncQueue();
+    m_syncQueue = new SyncQueue<SyncAccount>();
 
     m_timeout = new QTimer(this);
     m_timeout->setInterval(DAEMON_SYNC_TIMEOUT);

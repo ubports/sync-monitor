@@ -25,7 +25,6 @@ set(SYNQ_BIN_SRC
     sync-dbus.h
     sync-dbus.cpp
     sync-queue.h
-    sync-queue.cpp
     syncevolution-server-proxy.h
     syncevolution-server-proxy.cpp
     syncevolution-session-proxy.h

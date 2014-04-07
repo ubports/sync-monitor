@@ -5,6 +5,7 @@ Maintainer: Ubuntu Developers <ubuntu-devel-discuss@lists.ubuntu.com>
 Build-Depends: cmake,
                debhelper (>= 9),
                dh-translations,
+               google-mock,
                libaccounts-qt5-dev,
                libnotify-dev,
                pkg-config,
