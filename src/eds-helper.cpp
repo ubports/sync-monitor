@@ -8,6 +8,8 @@
 #include <QtContacts/QContactManager>
 #include <QtContacts/QContactDisplayLabel>
 #include <QtContacts/QContactDetailFilter>
+#include <QtContacts/QContactFetchByIdRequest>
+#include <QtContacts/QContactSyncTarget>
 
 #include "config.h"
 
@@ -22,10 +24,10 @@ EdsHelper::EdsHelper(QObject *parent)
     m_timeoutTimer.setSingleShot(true);
     m_contactEngine = new QContactManager("galera", QMap<QString, QString>());
     connect(m_contactEngine, &QContactManager::contactsAdded,
-            this, &EdsHelper::contactChanged);
-    connect(m_contactEngine, &QContactManager::contactsRemoved,
-            this, &EdsHelper::contactChanged);
+            this, &EdsHelper::contactChangedFilter);
     connect(m_contactEngine, &QContactManager::contactsChanged,
+            this, &EdsHelper::contactChangedFilter);
+    connect(m_contactEngine, &QContactManager::contactsRemoved,
             this, &EdsHelper::contactChanged);
     connect(m_contactEngine, &QContactManager::dataChanged,
             this, &EdsHelper::contactDataChanged);
@@ -54,6 +56,41 @@ void EdsHelper::createSource(const QString &serviceName, const QString &sourceNa
     } else {
         qWarning() << "Service not supported:" << serviceName;
     }
+}
+
+void EdsHelper::contactChangedFilter(const QList<QContactId>& contactIds)
+{
+    QContactFetchByIdRequest *request = new QContactFetchByIdRequest(m_contactEngine);
+    request->setManager(m_contactEngine);
+    request->setIds(contactIds);
+    connect(request, &QContactFetchByIdRequest::stateChanged,
+            this, &EdsHelper::contactFetchStateChanged);
+    request->start();
+}
+
+void EdsHelper::contactFetchStateChanged(QContactAbstractRequest::State newState)
+{
+    if ((newState == QContactAbstractRequest::ActiveState) ||
+        (newState == QContactAbstractRequest::InactiveState)) {
+        return;
+    }
+
+    QContactFetchByIdRequest *request = qobject_cast<QContactFetchByIdRequest*>(QObject::sender());
+    if (newState == QContactAbstractRequest::FinishedState) {
+        QSet<QString> sources;
+        Q_FOREACH(const QContact &contact, request->contacts()) {
+            QContactSyncTarget syncTarget = contact.detail<QContactSyncTarget>();
+            if (!syncTarget.syncTarget().isEmpty()) {
+                sources << syncTarget.syncTarget();
+            }
+        }
+
+        Q_FOREACH(const QString &source, sources) {
+            Q_EMIT dataChanged(CONTACTS_SERVICE_NAME, source);
+        }
+    }
+
+    request->deleteLater();
 }
 
 void EdsHelper::contactChanged()

@@ -25,6 +25,7 @@
 
 #include <QtOrganizer/QOrganizerManager>
 #include <QtContacts/QContactManager>
+#include <QtContacts/QContactAbstractRequest>
 
 #include <QtDBus/QDBusInterface>
 
@@ -40,9 +41,11 @@ Q_SIGNALS:
     void dataChanged(const QString &serviceName, const QString &sourceName);
 
 private Q_SLOTS:
+    void contactChangedFilter(const QList<QtContacts::QContactId>& contactIds);
     void contactChanged();
     void contactDataChanged();
     void calendarChanged();
+    void contactFetchStateChanged(QtContacts::QContactAbstractRequest::State newState);
 
 private:
     QtOrganizer::QOrganizerManager *m_organizerEngine;

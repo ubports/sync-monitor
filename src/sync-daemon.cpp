@@ -84,8 +84,16 @@ void SyncDaemon::setupTriggers()
 
 void SyncDaemon::onDataChanged(const QString &serviceName, const QString &sourceName)
 {
-    // TODO: filter by sourceName
-    syncAll(serviceName);
+    if (sourceName.isEmpty()) {
+        syncAll(serviceName);
+    } else {
+        Q_FOREACH(SyncAccount *acc, m_accounts.values()) {
+            if (acc->displayName() == sourceName) {
+                sync(acc, serviceName);
+                return;
+            }
+        }
+    }
 }
 
 void SyncDaemon::syncAll(const QString &serviceName)
