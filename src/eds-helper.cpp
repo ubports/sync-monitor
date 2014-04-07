@@ -109,9 +109,25 @@ void EdsHelper::contactDataChanged()
     m_timeoutTimer.start(CHANGE_TIMEOUT);
 }
 
-void EdsHelper::calendarChanged()
+void EdsHelper::calendarChanged(const QList<QOrganizerItemId> &itemIds)
 {
-    Q_EMIT dataChanged(CALENDAR_SERVICE_NAME, "");
+    QSet<QString> uniqueColletions;
+    QList<QOrganizerCollection> collections = m_organizerEngine->collections();
+
+    // eds item ids cotains the collection id we can use that instead of query for the full item
+    Q_FOREACH(const QOrganizerItemId &id, itemIds) {
+        QString collectionId = id.toString().split("/").first();
+        uniqueColletions << collectionId;
+    }
+
+    Q_FOREACH(const QString &collectionId, uniqueColletions) {
+        Q_FOREACH(const QOrganizerCollection &collection, collections) {
+            if (collection.id().toString() == collectionId) {
+                Q_EMIT dataChanged(CALENDAR_SERVICE_NAME, collection.metaData(QOrganizerCollection::KeyName).toString());
+                break;
+            }
+        }
+    }
 }
 
 void EdsHelper::createContactsSource(const QString &sourceName)

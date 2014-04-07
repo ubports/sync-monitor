@@ -44,7 +44,7 @@ private Q_SLOTS:
     void contactChangedFilter(const QList<QtContacts::QContactId>& contactIds);
     void contactChanged();
     void contactDataChanged();
-    void calendarChanged();
+    void calendarChanged(const QList<QtOrganizer::QOrganizerItemId> &itemIds);
     void contactFetchStateChanged(QtContacts::QContactAbstractRequest::State newState);
 
 private:
