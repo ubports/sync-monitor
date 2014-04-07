@@ -23,9 +23,14 @@
 #include <gmock/gmock.h>
 #include <QtCore/QStringList>
 
-class SyncAccountMock
+#include "src/sync-account.h"
+
+class SyncAccountMock : public SyncAccount
 {
+    Q_OBJECT
 public:
+    SyncAccountMock() : SyncAccount(0, 0) {}
+
     MOCK_CONST_METHOD0(availableServices, QStringList());
 };
 

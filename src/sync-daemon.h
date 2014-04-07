@@ -29,7 +29,7 @@
 class SyncAccount;
 class EdsHelper;
 class ProviderTemplate;
-template<class AccountClass> class SyncQueue;
+class SyncQueue;
 class SyncDBus;
 
 class SyncDaemon : public QObject
@@ -72,7 +72,7 @@ private:
     Accounts::Manager *m_manager;
     QTimer *m_timeout;
     QHash<Accounts::AccountId, SyncAccount*> m_accounts;
-    SyncQueue<SyncAccount> *m_syncQueue;
+    SyncQueue *m_syncQueue;
     SyncAccount *m_currentAccount;
     QString m_currentServiceName;
     EdsHelper *m_eds;

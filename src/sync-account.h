@@ -47,9 +47,9 @@ public:
     SyncAccount(Accounts::Account *account,
                 QSettings *settings,
                 QObject *parent=0);
-    ~SyncAccount();
+    virtual ~SyncAccount();
 
-    void setup();
+    virtual void setup();
     void cancel(const QString &serviceName = QString());
     void sync(const QString &serviceName = QString());
     void wait();
@@ -58,7 +58,7 @@ public:
     bool enabled() const;
     QString displayName() const;
     int id() const;
-    QStringList availableServices() const;
+    virtual QStringList availableServices() const;
     QStringList enabledServices() const;
     uint lastError() const;
 

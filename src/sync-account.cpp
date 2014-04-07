@@ -48,16 +48,18 @@ SyncAccount::~SyncAccount()
 void SyncAccount::setupServices()
 {
     m_availabeServices.clear();
-    QStringList supportedSevices = m_settings->childGroups();
-    ServiceList enabledServices = m_account->enabledServices();
-    Q_FOREACH(Service service, m_account->services()) {
-        if (supportedSevices.contains(service.serviceType())) {
-            bool enabled = m_account->enabled() && enabledServices.contains(service);
-            m_availabeServices.insert(service.serviceType(), enabled);
+    if (m_settings) {
+        QStringList supportedSevices = m_settings->childGroups();
+        ServiceList enabledServices = m_account->enabledServices();
+        Q_FOREACH(Service service, m_account->services()) {
+            if (supportedSevices.contains(service.serviceType())) {
+                bool enabled = m_account->enabled() && enabledServices.contains(service);
+                m_availabeServices.insert(service.serviceType(), enabled);
+            }
         }
+        qDebug() << "Supported sevices for protocol:" << m_account->providerName() << supportedSevices;
+        qDebug() << "Services available for:" << m_account->displayName() << m_availabeServices;
     }
-    qDebug() << "Supported sevices for protocol:" << m_account->providerName() << supportedSevices;
-    qDebug() << "Services available for:" << m_account->displayName() << m_availabeServices;
 }
 
 QString SyncAccount::sessionName(const QString &serviceName) const
@@ -78,9 +80,11 @@ void SyncAccount::dumpReport(const QStringMap &report) const
 void SyncAccount::setup()
 {
     setupServices();
-    connect(m_account,
-            SIGNAL(enabledChanged(QString,bool)),
-            SLOT(onAccountEnabledChanged(QString,bool)));
+    if (m_account) {
+        connect(m_account,
+                SIGNAL(enabledChanged(QString,bool)),
+                SLOT(onAccountEnabledChanged(QString,bool)));
+    }
 }
 
 void SyncAccount::cancel(const QString &serviceName)

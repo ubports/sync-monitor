@@ -34,7 +34,7 @@ private Q_SLOTS:
     void testRegisterNewAccount()
     {
         QStringList expectedServices;
-        SyncQueue<SyncAccountMock> queue;
+        SyncQueue queue;
         SyncAccountMock account;
 
         expectedServices << "contacts" << "calendar";
@@ -59,7 +59,7 @@ private Q_SLOTS:
     void testRegiterTwoAccounts()
     {
         QStringList expectedServices;
-        SyncQueue<SyncAccountMock> queue;
+        SyncQueue queue;
         SyncAccountMock account;
         SyncAccountMock account2;
 
@@ -84,7 +84,7 @@ private Q_SLOTS:
     void testRemoveAccount()
     {
         QStringList expectedServices;
-        SyncQueue<SyncAccountMock> queue;
+        SyncQueue queue;
         SyncAccountMock account;
         SyncAccountMock account2;
 
@@ -121,7 +121,7 @@ private Q_SLOTS:
     void testPushAccountTwice()
     {
         QStringList expectedServices;
-        SyncQueue<SyncAccountMock> queue;
+        SyncQueue queue;
         SyncAccountMock account;
 
         expectedServices << "contacts" << "calendar";
@@ -145,7 +145,7 @@ private Q_SLOTS:
     void testPopAccount()
     {
         QStringList expectedServices;
-        SyncQueue<SyncAccountMock> queue;
+        SyncQueue queue;
         SyncAccountMock account;
         SyncAccountMock account2;
 
@@ -162,22 +162,22 @@ private Q_SLOTS:
         QString serviceName;
 
         // account with contacts
-        serviceName = queue.popNext(&nextAccount);
+        serviceName = queue.popNext(reinterpret_cast<SyncAccount**>(&nextAccount));
         QCOMPARE(serviceName, expectedServices.first());
         QVERIFY(nextAccount == &account);
 
         // account with calendar
-        serviceName = queue.popNext(&nextAccount);
+        serviceName = queue.popNext(reinterpret_cast<SyncAccount**>(&nextAccount));
         QCOMPARE(serviceName, expectedServices[1]);
         QVERIFY(nextAccount == &account);
 
         // account2 with contacts
-        serviceName = queue.popNext(&nextAccount);
+        serviceName = queue.popNext(reinterpret_cast<SyncAccount**>(&nextAccount));
         QCOMPARE(serviceName, expectedServices.first());
         QVERIFY(nextAccount == &account2);
 
         // acount2 with calendar
-        serviceName = queue.popNext(&nextAccount);
+        serviceName = queue.popNext(reinterpret_cast<SyncAccount**>(&nextAccount));
         QCOMPARE(serviceName, expectedServices[1]);
         QVERIFY(nextAccount == &account2);
     }
