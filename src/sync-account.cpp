@@ -35,6 +35,7 @@ SyncAccount::SyncAccount(Account *account,
       m_settings(settings)
 {
     setup();
+    qDebug() << iconName("contacts");
 }
 
 SyncAccount::~SyncAccount()
@@ -281,6 +282,24 @@ QString SyncAccount::displayName() const
 int SyncAccount::id() const
 {
     return m_account->id();
+}
+
+QString SyncAccount::iconName(const QString &serviceName) const
+{
+    QString iconName;
+    Q_FOREACH(const Service &service, m_account->services()) {
+        if (service.serviceType() == serviceName) {
+            iconName = service.iconName();
+            break;
+        }
+    }
+
+    // use icon name based on the current theme intead of hardcoded name
+    if (iconName.isEmpty()) {
+        return QString("/usr/share/icons/ubuntu-mobile/actions/scalable/reload.svg");
+    } else {
+        return QString("/usr/share/icons/ubuntu-mobile/apps/scalable/%1.svg").arg(iconName);
+    }
 }
 
 QStringList SyncAccount::availableServices() const

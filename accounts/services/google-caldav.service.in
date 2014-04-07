@@ -3,6 +3,7 @@
   <type>calendar</type>
   <name>Google Calendar</name>
   <provider>google</provider>
+  <icon>calendar</icon>
 
   <!-- default settings (account settings have precedence over these) -->
   <template>

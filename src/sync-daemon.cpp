@@ -248,7 +248,8 @@ void SyncDaemon::sync(SyncAccount *syncAcc, const QString &serviceName)
 void SyncDaemon::cancel(SyncAccount *syncAcc, const QString &serviceName)
 {
     NotifyMessage::instance()->show("Syncronization",
-                                    QString("Sync canceled: %1").arg(syncAcc->displayName()));
+                                    QString("Sync canceled: %1").arg(syncAcc->displayName()),
+                                    syncAcc->iconName(serviceName));
     m_syncQueue->remove(syncAcc, serviceName);
     syncAcc->cancel(serviceName);
     Q_EMIT syncError(syncAcc, serviceName, "canceled");
@@ -269,8 +270,9 @@ void SyncDaemon::onAccountSyncStarted(const QString &serviceName, bool firstSync
     if (firstSync) {
         NotifyMessage::instance()->show("Syncronization",
                                         QString("Start sync:  %1 (%2)")
-                                        .arg(m_currentAccount->displayName())
-                                        .arg(serviceName));
+                                            .arg(m_currentAccount->displayName())
+                                            .arg(serviceName),
+                                        m_currentAccount->iconName(serviceName));
     }
     m_syncElapsedTime.restart();
     qDebug() << QString("[%3] Start sync:  %1 (%2)")
@@ -286,14 +288,16 @@ void SyncDaemon::onAccountSyncFinished(const QString &serviceName, const bool fi
     if (firstSync && errorMessage.isEmpty()) {
         NotifyMessage::instance()->show("Syncronization",
                                         QString("Sync done: %1 (%2)")
-                                        .arg(m_currentAccount->displayName())
-                                        .arg(serviceName));
+                                            .arg(m_currentAccount->displayName())
+                                            .arg(serviceName),
+                                        m_currentAccount->iconName(serviceName));
     } else if (!errorMessage.isEmpty()) {
         NotifyMessage::instance()->show("Syncronization",
                                         QString("Fail to sync %1 (%2).\n%3")
-                                        .arg(m_currentAccount->displayName())
-                                        .arg(serviceName)
-                                        .arg(errorMessage));
+                                            .arg(m_currentAccount->displayName())
+                                            .arg(serviceName)
+                                            .arg(errorMessage),
+                                        m_currentAccount->iconName(serviceName));
     }
 
     qDebug() << QString("[%6] Sync done: %1 (%2) Status: %3 Error: %4 Duration: %5s")
@@ -313,9 +317,10 @@ void SyncDaemon::onAccountSyncError(const QString &serviceName, int errorCode)
 {
     NotifyMessage::instance()->show("Syncronization",
                                     QString("Sync error account: %1, %2, %3")
-                                    .arg(m_currentAccount->displayName())
-                                    .arg(serviceName)
-                                    .arg(errorCode));
+                                        .arg(m_currentAccount->displayName())
+                                        .arg(serviceName)
+                                        .arg(errorCode),
+                                    m_currentAccount->iconName(serviceName));
 
     Q_EMIT syncError(m_currentAccount, serviceName, QString(errorCode));
     // sync next account

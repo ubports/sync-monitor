@@ -58,6 +58,7 @@ public:
     bool enabled() const;
     QString displayName() const;
     int id() const;
+    QString iconName(const QString &serviceName) const;
     virtual QStringList availableServices() const;
     QStringList enabledServices() const;
     uint lastError() const;

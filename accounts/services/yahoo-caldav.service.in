@@ -3,6 +3,7 @@
   <type>calendar</type>
   <name>Yahoo Calendar</name>
   <provider>yahoo</provider>
+  <icon>calendar</icon>
 
   <!-- default settings (account settings have precedence over these) -->
   <template>

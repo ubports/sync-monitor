@@ -3,6 +3,7 @@
   <type>contacts</type>
   <name>Yahoo Contacts</name>
   <provider>yahoo</provider>
+  <icon>contacts-app</icon>
 
   <!-- default settings (account settings have precedence over these) -->
   <template>

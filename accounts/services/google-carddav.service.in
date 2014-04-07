@@ -3,6 +3,7 @@
   <type>contacts</type>
   <name>Google Contacts</name>
   <provider>google</provider>
+  <icon>contacts-app</icon>
 
   <!-- default settings (account settings have precedence over these) -->
   <template>
