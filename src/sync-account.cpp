@@ -284,6 +284,15 @@ QStringList SyncAccount::availableServices() const
     return m_availabeServices.keys();
 }
 
+QStringList SyncAccount::enabledServices() const
+{
+    QStringList result;
+    Q_FOREACH(const Service &service, m_account->enabledServices()) {
+        result << service.serviceType();
+    }
+    return result;
+}
+
 uint SyncAccount::lastError() const
 {
     return m_lastError;

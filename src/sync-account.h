@@ -59,6 +59,7 @@ public:
     QString displayName() const;
     int id() const;
     QStringList availableServices() const;
+    QStringList enabledServices() const;
     uint lastError() const;
 
     static QString statusDescription(const QString &status);

@@ -30,6 +30,7 @@ SyncDBus::SyncDBus(const QDBusConnection &connection, SyncDaemon *parent)
     connect(m_parent, SIGNAL(syncError(SyncAccount*,QString,QString)), SLOT(onSyncError(SyncAccount*,QString,QString)));
     connect(m_parent, SIGNAL(syncAboutToStart()), SLOT(updateState()));
     connect(m_parent, SIGNAL(done()), SLOT(updateState()));
+    connect(m_parent, SIGNAL(accountsChanged()), SIGNAL(enabledServicesChanged()));
     updateState();
 }
 
@@ -55,9 +56,14 @@ void SyncDBus::cancel(QStringList services)
     }
 }
 
-QString SyncDBus::state()
+QString SyncDBus::state() const
 {
     return m_state;
+}
+
+QStringList SyncDBus::enabledServices() const
+{
+    return m_parent->enabledServices();
 }
 
 QStringList SyncDBus::servicesAvailable()

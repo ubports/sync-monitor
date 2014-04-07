@@ -38,6 +38,7 @@ class SyncDBus : public QDBusAbstractAdaptor
     Q_CLASSINFO("D-Bus Introspection", ""
 "  <interface name=\"com.canonical.SyncMonitor\">\n"
 "    <property name=\"state\" type=\"s\" access=\"read\"/>\n"
+"    <property name=\"enabledServices\" type=\"as\" access=\"read\"/>\n"
 "    <signal name=\"syncStarted\">\n"
 "      <arg direction=\"out\" type=\"s\" name=\"account\"/>\n"
 "      <arg direction=\"out\" type=\"s\" name=\"service\"/>\n"
@@ -52,6 +53,7 @@ class SyncDBus : public QDBusAbstractAdaptor
 "      <arg direction=\"out\" type=\"s\" name=\"error\"/>\n"
 "    </signal>\n"
 "    <signal name=\"stateChanged\"/>\n"
+"    <signal name=\"enabledServicesChanged\"/>\n"
 "    <method name=\"servicesAvailable\">\n"
 "      <arg direction=\"out\" type=\"as\" name=\"services\"/>\n"
 "    </method>\n"
@@ -64,6 +66,7 @@ class SyncDBus : public QDBusAbstractAdaptor
 "  </interface>\n"
         "")
     Q_PROPERTY(QString state READ state NOTIFY stateChanged)
+    Q_PROPERTY(QStringList enabledServices READ enabledServices NOTIFY enabledServicesChanged)
 
 public:
     SyncDBus(const QDBusConnection &connection, SyncDaemon *parent);
@@ -74,11 +77,13 @@ Q_SIGNALS:
     void syncFinished(const QString &account, const QString &service);
     void syncError(const QString &account, const QString &service, const QString &error);
     void stateChanged();
+    void enabledServicesChanged();
 
 public Q_SLOTS:
     void sync(QStringList service);
     void cancel(QStringList services);
-    QString state();
+    QString state() const;
+    QStringList enabledServices() const;
     QStringList servicesAvailable();
 
 private Q_SLOTS:
@@ -91,8 +96,6 @@ private:
     SyncDaemon *m_parent;
     QDBusConnection m_connection;
     QString m_state;
-
-
 };
 
 #endif

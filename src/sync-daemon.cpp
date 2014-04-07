@@ -73,6 +73,7 @@ void SyncDaemon::setupAccounts()
     connect(m_manager,
             SIGNAL(accountRemoved(Accounts::AccountId)),
             SLOT(removeAccount(Accounts::AccountId)));
+    Q_EMIT accountsChanged();
 }
 
 void SyncDaemon::setupTriggers()
@@ -183,6 +184,20 @@ QStringList SyncDaemon::availableServices() const
     return m_provider->supportedServices("google");
 }
 
+QStringList SyncDaemon::enabledServices() const
+{
+    QSet<QString> services;
+    QStringList available = availableServices();
+    Q_FOREACH(SyncAccount *syncAcc, m_accounts) {
+        Q_FOREACH(const QString &service, syncAcc->enabledServices()) {
+            if (available.contains(service)) {
+                services << service;
+            }
+        }
+    }
+    return services.toList();
+}
+
 void SyncDaemon::addAccount(const AccountId &accountId, bool startSync)
 {
     Account *acc = m_manager->account(accountId);
@@ -207,6 +222,7 @@ void SyncDaemon::addAccount(const AccountId &accountId, bool startSync)
         if (startSync) {
             sync(syncAcc);
         }
+        Q_EMIT accountsChanged();
     }
 }
 
@@ -245,6 +261,7 @@ void SyncDaemon::removeAccount(const AccountId &accountId)
         cancel(syncAcc);
         syncAcc->deleteLater();
     }
+    Q_EMIT accountsChanged();
 }
 
 void SyncDaemon::onAccountSyncStarted(const QString &serviceName, bool firstSync)
@@ -313,6 +330,7 @@ void SyncDaemon::onAccountEnableChanged(const QString &serviceName, bool enabled
     } else {
         cancel(acc, serviceName);
     }
+    Q_EMIT accountsChanged();
 }
 
 void SyncDaemon::onAccountConfigured(const QString &serviceName)

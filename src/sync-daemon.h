@@ -41,6 +41,7 @@ public:
     void run();
     bool isSyncing() const;
     QStringList availableServices() const;
+    QStringList enabledServices() const;
 
 Q_SIGNALS:
     void syncStarted(SyncAccount *syncAcc, const QString &serviceName);
@@ -48,6 +49,7 @@ Q_SIGNALS:
     void syncError(SyncAccount *syncAcc, const QString &serviceName, const QString &error);
     void syncAboutToStart();
     void done();
+    void accountsChanged();
 
 public Q_SLOTS:
     void quit();
