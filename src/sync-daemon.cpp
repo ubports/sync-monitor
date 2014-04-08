@@ -30,7 +30,7 @@
 
 using namespace Accounts;
 
-#define DAEMON_SYNC_TIMEOUT     1000 * 6 // one minute
+#define DAEMON_SYNC_TIMEOUT     1000 * 60 // one minute
 
 SyncDaemon::SyncDaemon()
     : QObject(0),
