@@ -119,11 +119,16 @@ void SyncDaemon::cancel(const QString &serviceName)
     }
 }
 
-void SyncDaemon::sync()
+void SyncDaemon::sync(bool runNow)
 {
     m_syncing = true;
-    // wait some time for new sync requests
-    m_timeout->start();
+    if (runNow) {
+        m_timeout->stop();
+        continueSync();
+    } else {
+        // wait some time for new sync requests
+        m_timeout->start();
+    }
 }
 
 void SyncDaemon::continueSync()
@@ -220,13 +225,13 @@ void SyncDaemon::addAccount(const AccountId &accountId, bool startSync)
         connect(syncAcc, SIGNAL(configured(QString)),
                          SLOT(onAccountConfigured(QString)), Qt::DirectConnection);
         if (startSync) {
-            sync(syncAcc);
+            sync(syncAcc, QString(), true);
         }
         Q_EMIT accountsChanged();
     }
 }
 
-void SyncDaemon::sync(SyncAccount *syncAcc, const QString &serviceName)
+void SyncDaemon::sync(SyncAccount *syncAcc, const QString &serviceName, bool runNow)
 {
     qDebug() << "syn requested for account:" << syncAcc->displayName() << serviceName;
 
@@ -239,7 +244,7 @@ void SyncDaemon::sync(SyncAccount *syncAcc, const QString &serviceName)
         m_syncQueue->push(syncAcc, serviceName);
         // if not syncing start a full sync
         if (!m_syncing) {
-            sync();
+            sync(runNow);
             Q_EMIT syncAboutToStart();
         }
     }
@@ -331,7 +336,7 @@ void SyncDaemon::onAccountEnableChanged(const QString &serviceName, bool enabled
 {
     SyncAccount *acc = qobject_cast<SyncAccount*>(QObject::sender());
     if (enabled) {
-        sync(acc, serviceName);
+        sync(acc, serviceName, true);
     } else {
         cancel(acc, serviceName);
     }

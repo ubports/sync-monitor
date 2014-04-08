@@ -84,10 +84,10 @@ private:
 
     void setupAccounts();
     void setupTriggers();
-    void sync(SyncAccount *syncAcc, const QString &serviceName = QString());
+    void sync(SyncAccount *syncAcc, const QString &serviceName = QString(), bool runNow = false);
     void cancel(SyncAccount *syncAcc, const QString &serviceName = QString());
     void setup();
-    void sync();
+    void sync(bool runNow);
     bool registerService();
 };
 
