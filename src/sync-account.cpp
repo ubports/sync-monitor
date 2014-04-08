@@ -35,7 +35,6 @@ SyncAccount::SyncAccount(Account *account,
       m_settings(settings)
 {
     setup();
-    qDebug() << iconName("contacts");
 }
 
 SyncAccount::~SyncAccount()
