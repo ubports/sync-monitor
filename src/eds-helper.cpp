@@ -10,6 +10,7 @@
 #include <QtContacts/QContactDetailFilter>
 #include <QtContacts/QContactFetchByIdRequest>
 #include <QtContacts/QContactSyncTarget>
+#include <QtContacts/QContactExtendedDetail>
 
 #include "config.h"
 
@@ -55,6 +56,17 @@ void EdsHelper::createSource(const QString &serviceName, const QString &sourceNa
         createOrganizerSource(sourceName);
     } else {
         qWarning() << "Service not supported:" << serviceName;
+    }
+}
+
+void EdsHelper::removeSource(const QString &serviceName, const QString &sourceName)
+{
+    if (serviceName.isEmpty() || (serviceName == CONTACTS_SERVICE_NAME)) {
+        removeContactsSource(sourceName);
+    }
+
+    if (serviceName.isEmpty() || (serviceName == CALENDAR_SERVICE_NAME)) {
+        removeOrganizerSource(sourceName);
     }
 }
 
@@ -138,7 +150,8 @@ void EdsHelper::createContactsSource(const QString &sourceName)
     filter.setValue(QContactType::TypeGroup);
 
     // check if the source already exists
-    Q_FOREACH(const QContact &contact, m_contactEngine->contacts(filter)) {
+    QList<QContact> sources = m_contactEngine->contacts(filter);
+    Q_FOREACH(const QContact &contact, sources) {
         if (contact.detail<QContactDisplayLabel>().label() == sourceName) {
             return;
         }
@@ -152,8 +165,44 @@ void EdsHelper::createContactsSource(const QString &sourceName)
     label.setLabel(sourceName);
     contact.saveDetail(&label);
 
+    // set the new source as default if there is only the local source
+    if (sources.size() == 1) {
+        QContactExtendedDetail isDefault;
+        isDefault.setName("IS-PRIMARY");
+        isDefault.setData(true);
+        contact.saveDetail(&isDefault);
+    }
+
     if (!m_contactEngine->saveContact(&contact)) {
         qWarning() << "Fail to create contact source:" << sourceName;
+    }
+}
+
+void EdsHelper::removeOrganizerSource(const QString &sourceName)
+{
+    QOrganizerCollectionId collectionId;
+    QList<QOrganizerCollection> result = m_organizerEngine->collections();
+    Q_FOREACH(const QOrganizerCollection &collection, result) {
+        if (collection.metaData(QOrganizerCollection::KeyName).toString() == sourceName) {
+            collectionId = collection.id();
+            break;
+        }
+    }
+
+    if (!collectionId.isNull()) {
+        if (!m_organizerEngine->removeCollection(collectionId)) {
+            qWarning() << "Fail to remove calendar source" <<  sourceName;
+        }
+    } else {
+        qWarning() << "Calendar source not found" << sourceName;
+    }
+}
+
+void EdsHelper::removeContactsSource(const QString &sourceName)
+{
+    QContactId sourceId = QContactId::fromString(QString("qtcontacts:galera::%1").arg(sourceName));
+    if (!m_contactEngine->removeContact(sourceId)) {
+        qWarning() << "Fail to remove contact source:" << sourceName;
     }
 }
 

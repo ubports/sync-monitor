@@ -17,17 +17,37 @@
  */
 
 #include <QtCore/QString>
+#include <QtCore/QObject>
 
-class NotifyMessage
+#include <libnotify/notify.h>
+
+class NotifyMessage : public QObject
 {
+    Q_OBJECT
 public:
-    void destroy();
-    void show(const QString &title, const QString &msg, const QString &iconName);
-
-    static NotifyMessage *instance();
-private:
-    static NotifyMessage *m_instance;
-
-    NotifyMessage();
+    NotifyMessage(bool singleMessage, QObject *parent = 0);
     ~NotifyMessage();
+
+    void show(const QString &title, const QString &msg, const QString &iconName);
+    void askYesOrNo(const QString &title, const QString &msg, const QString &iconName);
+
+Q_SIGNALS:
+    void questionAccepted();
+    void questionRejected();
+    void messageClosed();
+
+private:
+    NotifyNotification *m_notification;
+    bool m_singleMessage;
+
+    static int m_instanceCount;
+
+    static void onQuestionAccepted(NotifyNotification *notification,
+                                   char *action,
+                                   NotifyMessage *self);
+    static void onQuestionRejected(NotifyNotification *notification,
+                                   char *action,
+                                   NotifyMessage *self);
+    static void onNotificationClosed(NotifyNotification *notification,
+                                     NotifyMessage *self);
 };

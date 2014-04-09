@@ -36,6 +36,7 @@ public:
     EdsHelper(QObject *parent = 0);
     ~EdsHelper();
     void createSource(const QString &serviceName, const QString &sourceName);
+    void removeSource(const QString &serviceName, const QString &sourceName);
 
 Q_SIGNALS:
     void dataChanged(const QString &serviceName, const QString &sourceName);
@@ -54,6 +55,9 @@ private:
 
     void createOrganizerSource(const QString &sourceName);
     void createContactsSource(const QString &sourceName);
+
+    void removeOrganizerSource(const QString &sourceName);
+    void removeContactsSource(const QString &sourceName);
 };
 
 #endif
