@@ -10,8 +10,9 @@ NotifyMessage::~NotifyMessage()
 {
 }
 
-void NotifyMessage::show(const QString &title, const QString &msg)
+void NotifyMessage::show(const QString &title, const QString &msg, const QString &icon)
 {
+    Q_UNUSED(icon);
     qDebug() << title << "\t" << msg;
 }
 

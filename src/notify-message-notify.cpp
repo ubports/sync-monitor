@@ -35,10 +35,11 @@ NotifyMessage::~NotifyMessage()
     notify_uninit();
 }
 
-void NotifyMessage::show(const QString &title, const QString &msg)
+void NotifyMessage::show(const QString &title, const QString &msg, const QString &iconName)
 {
     NotifyNotification *notify = notify_notification_new(title.toUtf8().data(),
-                                                         msg.toUtf8().data(), 0);
+                                                         msg.toUtf8().data(),
+                                                         iconName.isEmpty() ? (const char*) 0 : iconName.toUtf8().constData());
     notify_notification_set_timeout(notify, NOTIFY_EXPIRES_DEFAULT);
     notify_notification_show(notify, 0);
     g_signal_connect_after(notify,

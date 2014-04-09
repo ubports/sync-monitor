@@ -21,13 +21,16 @@
 
 #include <QtCore/QObject>
 #include <QtCore/QHash>
-#include <QtCore/QQueue>
 #include <QtCore/QTimer>
+#include <QtCore/QElapsedTimer>
 
 #include <Accounts/Manager>
 
 class SyncAccount;
-class AddressBookTrigger;
+class EdsHelper;
+class ProviderTemplate;
+class SyncQueue;
+class SyncDBus;
 
 class SyncDaemon : public QObject
 {
@@ -36,38 +39,56 @@ public:
     SyncDaemon();
     ~SyncDaemon();
     void run();
+    bool isSyncing() const;
+    QStringList availableServices() const;
+    QStringList enabledServices() const;
+
+Q_SIGNALS:
+    void syncStarted(SyncAccount *syncAcc, const QString &serviceName);
+    void syncFinished(SyncAccount *syncAcc, const QString &serviceName);
+    void syncError(SyncAccount *syncAcc, const QString &serviceName, const QString &error);
+    void syncAboutToStart();
+    void done();
+    void accountsChanged();
 
 public Q_SLOTS:
     void quit();
+    void syncAll(const QString &serviceName = QString());
+    void cancel(const QString &serviceName = QString());
 
 private Q_SLOTS:
-    void syncAll();
     void continueSync();
     void addAccount(const Accounts::AccountId &accountId, bool startSync=true);
     void removeAccount(const Accounts::AccountId &accountId);
 
-    void onAccountSyncStarted();
-    void onAccountSyncFinished();
-    void onAccountSyncError(int errorCode);
-    void onAccountEnableChanged(bool enabled);
-    void onAccountConfigured();
+    void onAccountSyncStarted(const QString &serviceName, bool firstSync);
+    void onAccountSyncFinished(const QString &serviceName, bool firstSync, const QString &status);
+    void onAccountSyncError(const QString &serviceName, int errorCode);
+    void onAccountEnableChanged(const QString &serviceName, bool enabled);
+    void onAccountConfigured(const QString &serviceName);
+    void onDataChanged(const QString &serviceName, const QString &sourceName);
 
 private:
     Accounts::Manager *m_manager;
     QTimer *m_timeout;
     QHash<Accounts::AccountId, SyncAccount*> m_accounts;
-    QQueue<SyncAccount*> m_syncQueue;
-    SyncAccount *m_currenctAccount;
-    AddressBookTrigger *m_addressbook;
+    SyncQueue *m_syncQueue;
+    SyncAccount *m_currentAccount;
+    QString m_currentServiceName;
+    EdsHelper *m_eds;
+    ProviderTemplate *m_provider;
+    SyncDBus *m_dbusAddaptor;
     bool m_syncing;
     bool m_aboutToQuit;
+    QElapsedTimer m_syncElapsedTime;
 
     void setupAccounts();
     void setupTriggers();
-    void sync(SyncAccount *syncAcc);
-    void cancel(SyncAccount *syncAcc);
+    void sync(SyncAccount *syncAcc, const QString &serviceName = QString(), bool runNow = false);
+    void cancel(SyncAccount *syncAcc, const QString &serviceName = QString());
     void setup();
-    void sync();
+    void sync(bool runNow);
+    bool registerService();
 };
 
 #endif

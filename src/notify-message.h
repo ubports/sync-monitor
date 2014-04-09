@@ -22,7 +22,7 @@ class NotifyMessage
 {
 public:
     void destroy();
-    void show(const QString &title, const QString &msg);
+    void show(const QString &title, const QString &msg, const QString &iconName);
 
     static NotifyMessage *instance();
 private:

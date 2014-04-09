@@ -23,9 +23,13 @@ configure_file("${CMAKE_CURRENT_SOURCE_DIR}/cmake_uninstall.cmake.in"
 add_custom_target(uninstall "${CMAKE_COMMAND}"
                   -P "${CMAKE_CURRENT_BINARY_DIR}/cmake_uninstall.cmake")
 
+enable_testing()
 add_subdirectory(3rd_party)
 add_subdirectory(src)
 add_subdirectory(upstart)
 add_subdirectory(accounts)
+add_subdirectory(templates)
+add_subdirectory(data)
+add_subdirectory(tests)
 
 configure_file(config.h.in ${CMAKE_CURRENT_BINARY_DIR}/config.h)

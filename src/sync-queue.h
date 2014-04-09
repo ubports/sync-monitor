@@ -16,30 +16,32 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef __ADDRESS_BOOK_TRIGGER_H__
-#define __ADDRESS_BOOK_TRIGGER_H__
+#ifndef __SYNC_QUEUE_H__
+#define __SYNC_QUEUE_H__
 
-#include <QtCore/QObject>
+#include <QtCore/QString>
 #include <QtCore/QStringList>
+#include <QtCore/QMap>
 
-#include <QtDBus/QDBusInterface>
+class SyncAccount;
 
-class AddressBookTrigger : public QObject
+class SyncQueue
 {
-    Q_OBJECT
 public:
-    AddressBookTrigger(QObject *parent = 0);
-    ~AddressBookTrigger();
-    void createSource(const QString &sourceName);
+    void push(SyncAccount *account, const QString &serviceName = QString());
+    QString popNext(SyncAccount **account);
+    SyncAccount *popNext();
+    void remove(SyncAccount *account, const QString &serviceName = QString());
 
-Q_SIGNALS:
-    void contactsUpdated();
-
-private Q_SLOTS:
-    void changed(QStringList ids);
+    bool contains(SyncAccount *account, const QString &serviceName) const;
+    int count() const;
+    bool isEmpty() const;
 
 private:
-    QDBusInterface *m_iface;
+    QMap<SyncAccount*, QStringList> m_queue;
 };
 
+
+
 #endif
+

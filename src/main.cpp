@@ -20,6 +20,7 @@
 #include "dbustypes.h"
 
 #include <QtCore/QCoreApplication>
+#include <QtCore/QDebug>
 
 int main(int argc, char** argv)
 {
@@ -29,6 +30,7 @@ int main(int argc, char** argv)
     QCoreApplication app(argc, argv);
     app.setApplicationName("Synq");
     SyncDaemon *daemon = new SyncDaemon();
+    qputenv("QORGANIZER_EDS_DEBUG", "on");
     daemon->connect(&app, SIGNAL(aboutToQuit()), SLOT(quit()));
     daemon->run();
     return app.exec();

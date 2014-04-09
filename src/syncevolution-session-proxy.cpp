@@ -112,11 +112,19 @@ bool SyncEvolutionSessionProxy::saveConfig(const QString &configName,
                                            QStringMultiMap config)
 {
     Q_ASSERT(isValid());
-    QDBusReply<void> reply = m_iface->call("SetNamedConfig",
-                                           configName,
-                                           false,
-                                           false,
-                                           QVariant::fromValue(config));
+    QDBusReply<void> reply;
+    if (configName.isEmpty()) {
+        reply = m_iface->call("SetConfig",
+                              false,
+                              false,
+                              QVariant::fromValue(config));
+    } else {
+        reply = m_iface->call("SetNamedConfig",
+                              configName,
+                              false,
+                              false,
+                              QVariant::fromValue(config));
+    }
     if (reply.error().isValid()) {
         qWarning() << "Fail to save named config" << reply.error().message();
         return false;
@@ -129,10 +137,9 @@ bool SyncEvolutionSessionProxy::isValid() const
     return (m_iface != 0);
 }
 
-void SyncEvolutionSessionProxy::sync(QStringMap services)
+void SyncEvolutionSessionProxy::sync(QString mode, QStringMap services)
 {
     Q_ASSERT(isValid());
-    qDebug() << "sync flags" << services;
     QDBusReply<void> reply = m_iface->call("Sync", QString(), QVariant::fromValue(services));
     if (reply.error().isValid()) {
         qWarning() << "Fail to sync account" << reply.error().message();
@@ -151,12 +158,12 @@ QArrayOfStringMap SyncEvolutionSessionProxy::reports(uint start, uint maxCount)
     }
 }
 
-void SyncEvolutionSessionProxy::onSessionStatusChanged(const QString &status, uint error, QSyncStatusMap source)
+void SyncEvolutionSessionProxy::onSessionStatusChanged(const QString &status, uint errorNuber, QSyncStatusMap source)
 {
     Q_UNUSED(source);
     Q_EMIT statusChanged(status);
-    if (error != 0) {
-        Q_EMIT this->error(error);
+    if (errorNuber != 0) {
+        Q_EMIT error(errorNuber);
     }
 }
 

@@ -1,44 +1,46 @@
 Source: sync-monitor
 Section: gnome
-Priority: extra
+Priority: optional
 Maintainer: Ubuntu Developers <ubuntu-devel-discuss@lists.ubuntu.com>
 Build-Depends: cmake,
                debhelper (>= 9),
                dh-translations,
+               google-mock,
                libaccounts-qt5-dev,
                libnotify-dev,
                pkg-config,
                qt5-default,
                qtbase5-dev,
-Standards-Version: 3.9.3
+               qtpim5-dev,
+Standards-Version: 3.9.5
 Homepage: https://launchpad.net/sync-monitor
+# if you don't have have commit access to this branch but would like to upload
+# directly to Ubuntu, don't worry: your changes will be merged back into the
+# upstream branch
+Vcs-Bzr: lp:sync-monitor
 
 Package: sync-monitor
 Architecture: any
+Multi-Arch: same
+Pre-Depends: ${misc:Pre-Depends},
 Depends: ${misc:Depends},
          ${shlibs:Depends},
          account-plugin-google,
          address-book-service,
-         syncevolution-dbus,
+         syncevolution-dbus (>= 1.4),
+         syncevolution-provider-uoa (>= 1.4),
+         qtcontact5-galera,
+         qtorganizer5-eds,
 Description: Ubuntu online account sync monitor plugin
- Keep track of Ubuntu online accounts and sync with with the cloud
-
-Package: sync-monitor-dbg
-Architecture: any
-Section: debug
-Priority: extra
-Depends: sync-monitor (= ${binary:Version}),
-         ${misc:Depends},
-Description: debugging symbols for sync-monitor
- Keep track of Ubuntu online accounts and sync it with the cloud.
- .
- This package contains the debugging symbols for sync-monitor-app
+ Keep track of Ubuntu online accounts and sync with the cloud
 
 Package: sync-monitor-uoa
 Architecture: all
+Multi-Arch: foreign
+Pre-Depends: ${misc:Pre-Depends},
 Depends: ${misc:Depends},
-         sync-monitor (= ${binary:Version}),
+         sync-monitor (>= ${binary:Version}),
 Description: Ubuntu online account sync monitor plugin
- Keep track of Ubuntu online accounts and sync with with the cloud.
+ Keep track of Ubuntu online accounts and sync with the cloud.
  .
  This package contains the ubuntu online accounts service files.

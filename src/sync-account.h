@@ -21,12 +21,15 @@
 
 #include <QtCore/QObject>
 #include <QtCore/QHash>
+#include <QtCore/QSettings>
 
 #include <Accounts/Account>
 
 #include "dbustypes.h"
 
 class SyncEvolutionSessionProxy;
+class SyncConfigure;
+
 class SyncAccount : public QObject
 {
     Q_OBJECT
@@ -35,36 +38,45 @@ public:
     static const QString GoogleContactService;
 
     enum AccountState {
-        Empty,
-        Configuring,
+        Configuring = 0,
         Syncing,
         Idle,
         Invalid
     };
 
-    SyncAccount(Accounts::Account *account, QObject *parent=0);
-    ~SyncAccount();
+    SyncAccount(Accounts::Account *account,
+                QSettings *settings,
+                QObject *parent=0);
+    virtual ~SyncAccount();
 
-    void setup();
-    void cancel();
-    void sync();
+    virtual void setup();
+    void cancel(const QString &serviceName = QString());
+    void sync(const QString &serviceName = QString());
     void wait();
     void status() const;
     AccountState state() const;
-    QDateTime lastSyncDate() const;
     bool enabled() const;
     QString displayName() const;
     int id() const;
+    QString iconName(const QString &serviceName) const;
+    virtual QStringList availableServices() const;
+    QStringList enabledServices() const;
+    uint lastError() const;
+
+    static QString statusDescription(const QString &status);
 
 Q_SIGNALS:
     void stateChanged(AccountState newState);
-    void syncStarted();
-    void syncFinished();
-    void syncError(int);
-    void enableChanged(bool enable);
-    void configured();
+    void syncStarted(const QString &serviceName, bool firstSync);
+    void syncFinished(const QString &serviceName, bool firstSync, const QString &status);
+    void syncError(const QString &serviceName, int errorCode);
+    void enableChanged(const QString &serviceName, bool enable);
+    void configured(const QString &serviceName);
 
 private Q_SLOTS:
+    void onAccountConfigured();
+    void onAccountConfigureError();
+
     void onAccountEnabledChanged(const QString &serviceName, bool enabled);
     void onSessionStatusChanged(const QString &newStatus);
     void onSessionProgressChanged(int progress);
@@ -73,22 +85,31 @@ private Q_SLOTS:
 private:
     Accounts::Account *m_account;
     SyncEvolutionSessionProxy *m_currentSession;
+    QSettings *m_settings;
 
-    QString m_sessionName;
-    QStringMap m_syncOperation;
+    QMap<QString, bool> m_availabeServices;
     AccountState m_state;
     QList<QMetaObject::Connection> m_sessionConnections;
+    QList<SyncConfigure*> m_pendingConfigs;
+    uint m_lastError;
 
-    void configure();
-    void continueConfigure();
-    bool configSync();
-    bool configTarget();
+    // current sync information
+    QString m_syncMode;
+    QString m_syncServiceName;
+    bool m_firstSync;
+
+    void configure(const QString &serviceName);
     void setState(AccountState state);
-    void continueSync();
+    void continueSync(const QString &serviceName);
     void attachSession(SyncEvolutionSessionProxy *session);
     void releaseSession();
-    QStringMap lastReport() const;
-    QString lastSyncStatus() const;
+    QStringMap lastReport(const QString &serviceName) const;
+    QString syncMode(const QString &serviceName, bool *firstSync) const;
+    QString lastSyncStatus(const QString &serviceName) const;
+    bool syncService(const QString &serviceName);
+    void setupServices();
+    QString sessionName(const QString &serviceName) const;
+    void dumpReport(const QStringMap &report) const;
 };
 
 #endif
