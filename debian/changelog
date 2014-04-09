@@ -1,5 +1,28 @@
-sync-monitor (0.1-0ubuntu1) UNRELEASED; urgency=medium
+sync-monitor (0.1+14.04.20140409-0ubuntu1) trusty; urgency=medium
 
+  [ Renato Araujo Oliveira Filho ]
   * Initial release.
+  * Initial commit.
+  * Added missing files.
+  * Implemented notify messages to report account sync progress. For
+    each account a new address book is created.
+  * Avoid syn the same account twice, during one sync cycle.
+  * Added license headers.
+  * Added license file.
+  * Added missing build deps.
+  * Fixed upstart script install path.
+  * fixed install path of upstart sevice on .install file.
+  * Fixed account applications install path.
+  * Fixed upstart file.
+  * Added "libnotify-dev" as build dep.
+  * Fixed notify during sync start.
+  * Used account displayName as evolution database name.
+  * Avoid data backup before sync.
+  * Fixed accounts database configuration.
+  * Fixed support for sync only one account.
 
- -- Renato Araujo Oliveira Filho <renato@canonical.com>  Thu, 06 Feb 2014 11:35:36 -0300
+  [ Timo Jyrinki ]
+  * Add LICENSE.LGPL, fix debian/copyright line changes, expand package
+    descriptions.
+
+ -- Ubuntu daily release <ps-jenkins@lists.canonical.com>  Wed, 09 Apr 2014 06:47:06 +0000
