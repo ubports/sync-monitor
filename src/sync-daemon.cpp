@@ -133,6 +133,12 @@ void SyncDaemon::sync(bool runNow)
 
 void SyncDaemon::continueSync()
 {
+    // flush any change in EDS
+    m_eds->flush();
+
+    // freeze notifications during the sync, to save some CPU
+    m_eds->freezeNotify();
+
     // sync the next service on the queue
     if (!m_aboutToQuit && !m_syncQueue->isEmpty()) {
         m_currentServiceName = m_syncQueue->popNext(&m_currentAccount);
@@ -141,6 +147,8 @@ void SyncDaemon::continueSync()
         m_currentAccount = 0;
         m_currentServiceName.clear();
         m_syncing = false;
+        // The sync has done, unblock notifications
+        m_eds->unfreezeNotify();
         Q_EMIT done();
     }
 }
@@ -314,6 +322,7 @@ void SyncDaemon::onAccountSyncFinished(const QString &serviceName, const bool fi
                 .arg(QDateTime::currentDateTime().toString(Qt::SystemLocaleShortDate));
 
     Q_EMIT syncFinished(m_currentAccount, serviceName);
+
     // sync next account
     continueSync();
 }

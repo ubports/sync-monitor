@@ -18,12 +18,15 @@
 using namespace QtOrganizer;
 using namespace QtContacts;
 
-EdsHelper::EdsHelper(QObject *parent)
-    : QObject(parent)
+EdsHelper::EdsHelper(QObject *parent,
+                     const QString &contactManager,
+                     const QString &organizerManager)
+    : QObject(parent),
+      m_freezed(false)
 {
     m_timeoutTimer.setSingleShot(true);
 
-    m_contactEngine = new QContactManager("galera", QMap<QString, QString>());
+    m_contactEngine = new QContactManager(contactManager, QMap<QString, QString>());
     connect(m_contactEngine, &QContactManager::contactsAdded,
             this, &EdsHelper::contactChangedFilter);
     connect(m_contactEngine, &QContactManager::contactsChanged,
@@ -33,7 +36,7 @@ EdsHelper::EdsHelper(QObject *parent)
     connect(m_contactEngine, &QContactManager::dataChanged,
             this, &EdsHelper::contactDataChanged);
 
-    m_organizerEngine = new QOrganizerManager("eds", QMap<QString, QString>());
+    m_organizerEngine = new QOrganizerManager(organizerManager, QMap<QString, QString>());
     connect(m_organizerEngine, &QOrganizerManager::itemsAdded,
             this, &EdsHelper::calendarChanged);
     connect(m_organizerEngine, &QOrganizerManager::itemsRemoved,
@@ -61,14 +64,44 @@ void EdsHelper::createSource(const QString &serviceName, const QString &sourceNa
     }
 }
 
+void EdsHelper::freezeNotify()
+{
+    m_freezed = true;
+}
+
+void EdsHelper::unfreezeNotify()
+{
+    m_freezed = false;
+}
+
+void EdsHelper::flush()
+{
+    m_freezed = false;
+    contactChangedFilter(m_pendingContacts.toList());
+    m_pendingContacts.clear();
+
+    Q_FOREACH(const QString &calendar, m_pendingCalendars) {
+        Q_EMIT dataChanged(CALENDAR_SERVICE_NAME, calendar);
+    }
+    m_pendingCalendars.clear();
+}
+
 void EdsHelper::contactChangedFilter(const QList<QContactId>& contactIds)
 {
-    QContactFetchByIdRequest *request = new QContactFetchByIdRequest(m_contactEngine);
-    request->setManager(m_contactEngine);
-    request->setIds(contactIds);
-    connect(request, &QContactFetchByIdRequest::stateChanged,
-            this, &EdsHelper::contactFetchStateChanged);
-    request->start();
+    if (m_freezed) {
+        m_pendingContacts += contactIds.toSet();
+    } else {
+        QContactFetchByIdRequest *request = new QContactFetchByIdRequest(m_contactEngine);
+        request->setManager(m_contactEngine);
+        request->setIds(contactIds);
+
+        QContactFetchHint hint;
+        hint.setDetailTypesHint(QList<QContactDetail::DetailType>() << QContactDetail::TypeSyncTarget);
+        request->setFetchHint(hint);
+        connect(request, &QContactFetchByIdRequest::stateChanged,
+                this, &EdsHelper::contactFetchStateChanged);
+        request->start();
+    }
 }
 
 void EdsHelper::contactFetchStateChanged(QContactAbstractRequest::State newState)
@@ -101,6 +134,11 @@ void EdsHelper::calendarCollectionsChanged()
     m_calendarCollections.clear();
 }
 
+QString EdsHelper::getCollectionIdFromItemId(const QOrganizerItemId &itemId) const
+{
+    return itemId.toString().split("/").first();
+}
+
 void EdsHelper::contactChanged()
 {
     if (!m_timeoutTimer.isActive()) {
@@ -123,8 +161,7 @@ void EdsHelper::calendarChanged(const QList<QOrganizerItemId> &itemIds)
 
     // eds item ids cotains the collection id we can use that instead of query for the full item
     Q_FOREACH(const QOrganizerItemId &id, itemIds) {
-        QString collectionId = id.toString().split("/").first();
-        uniqueColletions << collectionId;
+        uniqueColletions << getCollectionIdFromItemId(id);
     }
 
     if (uniqueColletions.isEmpty()) {
@@ -138,7 +175,12 @@ void EdsHelper::calendarChanged(const QList<QOrganizerItemId> &itemIds)
     Q_FOREACH(const QString &collectionId, uniqueColletions) {
         Q_FOREACH(const QOrganizerCollection &collection, m_calendarCollections) {
             if (collection.id().toString() == collectionId) {
-                Q_EMIT dataChanged(CALENDAR_SERVICE_NAME, collection.metaData(QOrganizerCollection::KeyName).toString());
+                QString collectionName = collection.metaData(QOrganizerCollection::KeyName).toString();
+                if (m_freezed) {
+                    m_pendingCalendars << collectionName;
+                } else {
+                    Q_EMIT dataChanged(CALENDAR_SERVICE_NAME, collectionName);
+                }
                 break;
             }
         }

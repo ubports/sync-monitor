@@ -1,7 +1,7 @@
 macro(declare_test TESTNAME)
     add_executable(${TESTNAME}
                    ${ARGN})
-    qt5_use_modules(${TESTNAME} Core Test)
+    qt5_use_modules(${TESTNAME} Core Test Contacts)
 
     target_link_libraries(${TESTNAME}
                           ${ACCOUNTS_LIBRARIES}
@@ -23,4 +23,9 @@ include_directories(
 declare_test(sync-queue-test
              sync-queue-test.cpp
              sync-account-mock.h
+)
+
+declare_test(eds-helper-test
+             eds-helper-test.cpp
+             eds-helper-mock.h
 )
