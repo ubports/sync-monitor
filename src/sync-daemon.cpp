@@ -97,13 +97,13 @@ void SyncDaemon::onDataChanged(const QString &serviceName, const QString &source
     }
 }
 
-void SyncDaemon::syncAll(const QString &serviceName)
+void SyncDaemon::syncAll(const QString &serviceName, bool runNow)
 {
     Q_FOREACH(SyncAccount *acc, m_accounts.values()) {
         if (serviceName.isEmpty()) {
-            sync(acc);
+            sync(acc, runNow);
         } else if (acc->availableServices().contains(serviceName)) {
-            sync(acc, serviceName);
+            sync(acc, serviceName, runNow);
         }
     }
 }

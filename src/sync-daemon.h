@@ -53,7 +53,7 @@ Q_SIGNALS:
 
 public Q_SLOTS:
     void quit();
-    void syncAll(const QString &serviceName = QString());
+    void syncAll(const QString &serviceName = QString(), bool runNow=false);
     void cancel(const QString &serviceName = QString());
 
 private Q_SLOTS:
