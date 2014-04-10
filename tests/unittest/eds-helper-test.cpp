@@ -72,15 +72,12 @@ private Q_SLOTS:
         ev.setDescription("test");
         ev.setDisplayLabel("display test");
         ev.setStartDateTime(QDateTime::currentDateTime());
-
-        EXPECT_CALL(mock, getCollectionIdFromItemId(::testing::_))
-             .Times(1)
-             .WillOnce(::testing::Return("qtorganizer:memory:id=:1&#58;qtorganizer&#58;memory&#58;id="));
+        mock.trackCollectionFromItem(&ev);
 
         mock.organizerEngine()->saveItem(&ev);
 
         // check if the signal dataChanged was fired with contacts
-        QCOMPARE(spy.count(), 1);
+        QTRY_COMPARE(spy.count(), 1);
         QList<QVariant> args = spy.takeFirst();
         QCOMPARE(args[0].toString(), QStringLiteral(CALENDAR_SERVICE_NAME));
         QCOMPARE(args[1].toString(), QStringLiteral("Default Collection"));
@@ -112,10 +109,7 @@ private Q_SLOTS:
         ev.setDescription("test");
         ev.setDisplayLabel("display test");
         ev.setStartDateTime(QDateTime::currentDateTime());
-
-        EXPECT_CALL(mock, getCollectionIdFromItemId(::testing::_))
-             .Times(1)
-             .WillOnce(::testing::Return("qtorganizer:memory:id=:1&#58;qtorganizer&#58;memory&#58;id="));
+        mock.trackCollectionFromItem(&ev);
 
         mock.organizerEngine()->saveItem(&ev);
         QCOMPARE(spy.count(), 0);

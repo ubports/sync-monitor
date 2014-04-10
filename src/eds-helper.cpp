@@ -38,13 +38,13 @@ EdsHelper::EdsHelper(QObject *parent,
 
     m_organizerEngine = new QOrganizerManager(organizerManager, QMap<QString, QString>());
     connect(m_organizerEngine, &QOrganizerManager::itemsAdded,
-            this, &EdsHelper::calendarChanged);
+            this, &EdsHelper::calendarChanged, Qt::QueuedConnection);
     connect(m_organizerEngine, &QOrganizerManager::itemsRemoved,
-            this, &EdsHelper::calendarChanged);
+            this, &EdsHelper::calendarChanged, Qt::QueuedConnection);
     connect(m_organizerEngine, &QOrganizerManager::itemsChanged,
-            this, &EdsHelper::calendarChanged);
+            this, &EdsHelper::calendarChanged, Qt::QueuedConnection);
     connect(m_organizerEngine, &QOrganizerManager::collectionsModified,
-            this, &EdsHelper::calendarCollectionsChanged);
+            this, &EdsHelper::calendarCollectionsChanged, Qt::QueuedConnection);
 }
 
 EdsHelper::~EdsHelper()

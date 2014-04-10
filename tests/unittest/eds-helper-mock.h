@@ -19,10 +19,10 @@
 #ifndef __EDS_HELPER_MOCK__
 #define __EDS_HELPER_MOCK__
 
-
 #include <gmock/gmock.h>
 
 #include <QtCore/QList>
+#include <QtCore/QUrl>
 
 #include <QtContacts/QContactId>
 #include <QtContacts/QContactAbstractRequest>
@@ -40,10 +40,20 @@ public:
     {}
 
 
-    QtOrganizer::QOrganizerManager *organizerEngine() { return m_organizerEngine; }
-    QtContacts::QContactManager *contactEngine() { return m_contactEngine; }
+    QtOrganizer::QOrganizerManager *organizerEngine()
+    { return m_organizerEngine; }
 
-    MOCK_CONST_METHOD1(getCollectionIdFromItemId, QString(const QtOrganizer::QOrganizerItemId&));
+    QtContacts::QContactManager *contactEngine()
+    { return m_contactEngine; }
+
+    void trackCollectionFromItem(QtOrganizer::QOrganizerItem *item)
+    { m_trackedItem = item; }
+
+    virtual QString getCollectionIdFromItemId(const QtOrganizer::QOrganizerItemId&) const
+    { return m_trackedItem->collectionId().toString(); }
+
+private:
+    QtOrganizer::QOrganizerItem *m_trackedItem;
 };
 
 #endif
