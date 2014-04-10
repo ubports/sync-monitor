@@ -46,11 +46,15 @@ private Q_SLOTS:
     void contactDataChanged();
     void calendarChanged(const QList<QtOrganizer::QOrganizerItemId> &itemIds);
     void contactFetchStateChanged(QtContacts::QContactAbstractRequest::State newState);
+    void calendarCollectionsChanged();
 
 private:
     QtOrganizer::QOrganizerManager *m_organizerEngine;
     QtContacts::QContactManager *m_contactEngine;
     QTimer m_timeoutTimer;
+
+    // cache calendar collections
+    QList<QtOrganizer::QOrganizerCollection> m_calendarCollections;
 
     void createOrganizerSource(const QString &sourceName);
     void createContactsSource(const QString &sourceName);

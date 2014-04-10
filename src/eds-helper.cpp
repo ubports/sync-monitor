@@ -22,6 +22,7 @@ EdsHelper::EdsHelper(QObject *parent)
     : QObject(parent)
 {
     m_timeoutTimer.setSingleShot(true);
+
     m_contactEngine = new QContactManager("galera", QMap<QString, QString>());
     connect(m_contactEngine, &QContactManager::contactsAdded,
             this, &EdsHelper::contactChangedFilter);
@@ -39,6 +40,8 @@ EdsHelper::EdsHelper(QObject *parent)
             this, &EdsHelper::calendarChanged);
     connect(m_organizerEngine, &QOrganizerManager::itemsChanged,
             this, &EdsHelper::calendarChanged);
+    connect(m_organizerEngine, &QOrganizerManager::collectionsModified,
+            this, &EdsHelper::calendarCollectionsChanged);
 }
 
 EdsHelper::~EdsHelper()
@@ -93,6 +96,11 @@ void EdsHelper::contactFetchStateChanged(QContactAbstractRequest::State newState
     request->deleteLater();
 }
 
+void EdsHelper::calendarCollectionsChanged()
+{
+    m_calendarCollections.clear();
+}
+
 void EdsHelper::contactChanged()
 {
     if (!m_timeoutTimer.isActive()) {
@@ -112,7 +120,6 @@ void EdsHelper::contactDataChanged()
 void EdsHelper::calendarChanged(const QList<QOrganizerItemId> &itemIds)
 {
     QSet<QString> uniqueColletions;
-    QList<QOrganizerCollection> collections = m_organizerEngine->collections();
 
     // eds item ids cotains the collection id we can use that instead of query for the full item
     Q_FOREACH(const QOrganizerItemId &id, itemIds) {
@@ -120,8 +127,16 @@ void EdsHelper::calendarChanged(const QList<QOrganizerItemId> &itemIds)
         uniqueColletions << collectionId;
     }
 
+    if (uniqueColletions.isEmpty()) {
+        return;
+    }
+
+    if (m_calendarCollections.isEmpty()) {
+        m_calendarCollections = m_organizerEngine->collections();
+    }
+
     Q_FOREACH(const QString &collectionId, uniqueColletions) {
-        Q_FOREACH(const QOrganizerCollection &collection, collections) {
+        Q_FOREACH(const QOrganizerCollection &collection, m_calendarCollections) {
             if (collection.id().toString() == collectionId) {
                 Q_EMIT dataChanged(CALENDAR_SERVICE_NAME, collection.metaData(QOrganizerCollection::KeyName).toString());
                 break;
