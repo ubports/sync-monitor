@@ -38,23 +38,25 @@ SyncConfigure::~SyncConfigure()
     Q_ASSERT(m_sessions.size() == 0);
 }
 
-void SyncConfigure::configure(const QString &serviceName)
+void SyncConfigure::configure(const QString &serviceName, const QString &syncMode)
 {
+    m_syncMode = syncMode;
     m_originalServiceName = serviceName;
     if (serviceName.isEmpty()) {
-        configureAll();
+        configureAll(syncMode);
     } else {
         m_services << serviceName;
+        configureServices(syncMode);
     }
-    configureServices();
+
 }
 
-void SyncConfigure::configureAll()
+void SyncConfigure::configureAll(const QString &syncMode)
 {
     Q_FOREACH(Service service, m_account->services()) {
         m_services << service.serviceType();
     }
-    configureServices();
+    configureServices(syncMode);
 }
 
 QString SyncConfigure::serviceName() const
@@ -62,7 +64,7 @@ QString SyncConfigure::serviceName() const
     return m_originalServiceName;
 }
 
-void SyncConfigure::configureServices()
+void SyncConfigure::configureServices(const QString &syncMode)
 {
     SyncEvolutionServerProxy *proxy = SyncEvolutionServerProxy::instance();
     qDebug() << "start configure for services" << m_services;
@@ -85,17 +87,15 @@ void SyncConfigure::configureServices()
 
         qDebug() << "\tconfig session created" << sessionName << session->status();
         if (session->status() != "queueing") {
-            configureService(serviceName);
+            configureService(serviceName, syncMode);
         }
     }
 }
 
-void SyncConfigure::configureService(const QString &serviceName)
+void SyncConfigure::configureService(const QString &serviceName, const QString &syncMode)
 {
     SyncEvolutionServerProxy *proxy = SyncEvolutionServerProxy::instance();
-
     QStringList configs = proxy->configs();
-    AccountId accountId = m_account->id();
 
     QString targetSuffix = QString("%1-%2-%3")
             .arg(m_account->providerName())
@@ -108,13 +108,16 @@ void SyncConfigure::configureService(const QString &serviceName)
         qDebug() << "\tCreate target:" << targetConfigName;
         isConfigured = configTarget(targetConfigName, serviceName);
     }
+
     if (isConfigured && !configs.contains(targetSuffix)) {
         qDebug() << "\tCreate sync config:" << targetSuffix;
-        isConfigured = configSync(targetSuffix, serviceName);
+        isConfigured = configSync(targetSuffix, serviceName, syncMode);
+    } else if (isConfigured) {
+        isConfigured = changeSyncMode(targetSuffix, serviceName, syncMode);
     }
 
     if (!isConfigured) {
-        qWarning() << "Fail to configure account:" << accountId << serviceName;
+        qWarning() << "Fail to configure account:" << m_account->displayName() << m_account->id() << serviceName;
     }
 
     removeService(serviceName);
@@ -174,7 +177,27 @@ bool SyncConfigure::configTarget(const QString &targetName, const QString &servi
     return true;
 }
 
-bool SyncConfigure::configSync(const QString &targetName, const QString &serviceName)
+bool SyncConfigure::changeSyncMode(const QString &targetName, const QString &serviceName, const QString &syncMode)
+{
+    SyncEvolutionSessionProxy *session = m_sessions.value(serviceName, 0);
+    QStringMultiMap config = session->getConfig(targetName, false);
+    Q_ASSERT(!config.isEmpty());
+
+    AccountId accountId = m_account->id();
+    QString sourceName = QString("%1_uoa_%2").arg(serviceName).arg(accountId);
+    QString sourceFullName = QString("source/%1").arg(sourceName);
+
+    config[sourceFullName]["sync"] = syncMode;
+
+    bool result = session->saveConfig(targetName, config);
+    if (!result) {
+        qWarning() << "Fail to save account client config";
+        return false;
+    }
+    return result;
+}
+
+bool SyncConfigure::configSync(const QString &targetName, const QString &serviceName, const QString &syncMode)
 {
     AccountId accountId = m_account->id();
     SyncEvolutionSessionProxy *session = m_sessions.value(serviceName, 0);
@@ -210,8 +233,8 @@ bool SyncConfigure::configSync(const QString &targetName, const QString &service
     if (!clientUri.isNull()) {
         config[sourceFullName]["uri"] = clientUri;
     }
-    // disable default sync
-    config[sourceFullName]["sync"] = "disabled";
+
+    config[sourceFullName]["sync"] = syncMode;
 
     bool result = session->saveConfig(targetName, config);
     if (!result) {
@@ -225,7 +248,7 @@ void SyncConfigure::onSessionStatusChanged(const QString &newStatus)
 {
     SyncEvolutionSessionProxy *session = qobject_cast<SyncEvolutionSessionProxy*>(QObject::sender());
     if (newStatus != "queueing") {
-        configureService(m_sessions.key(session));
+        configureService(m_sessions.key(session), m_syncMode);
     }
 }
 

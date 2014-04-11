@@ -39,7 +39,7 @@ public:
     bool saveConfig(const QString &configName, QStringMultiMap config);
     void detach();
     bool isValid() const;
-    void sync(QString mode, QStringMap services);
+    void sync(QStringMap services);
     QArrayOfStringMap reports(uint start, uint maxCount);
 
 Q_SIGNALS:

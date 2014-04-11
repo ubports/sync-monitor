@@ -21,6 +21,7 @@
 
 #include <QtCore/QCoreApplication>
 #include <QtCore/QDebug>
+#include <QtCore/QTimer>
 
 int main(int argc, char** argv)
 {
@@ -33,5 +34,10 @@ int main(int argc, char** argv)
     qputenv("QORGANIZER_EDS_DEBUG", "on");
     daemon->connect(&app, SIGNAL(aboutToQuit()), SLOT(quit()));
     daemon->run();
+
+    if ((argc == 2) && (strcmp(argv[1], "--sync") == 0)) {
+        qDebug() << "Start manual sync";
+        QTimer::singleShot(1000, daemon, SLOT(syncAll()));
+    }
     return app.exec();
 }
