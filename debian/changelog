@@ -1,3 +1,14 @@
+sync-monitor (0.1+14.04.20140415.3-0ubuntu1) trusty; urgency=low
+
+  [ Renato Araujo Oliveira Filho ]
+  * Force sync to start immediately if use dbus call. (LP: #1306070)
+  * Keep a collection cache to compare with changed events. (LP:
+    #1306112)
+  * If the sync fails use the last sync mode in the next sync. (LP:
+    #1306096)
+
+ -- Ubuntu daily release <ps-jenkins@lists.canonical.com>  Tue, 15 Apr 2014 22:20:51 +0000
+
 sync-monitor (0.1+14.04.20140409-0ubuntu1) trusty; urgency=medium
 
   [ Renato Araujo Oliveira Filho ]
