@@ -23,6 +23,11 @@
 
 #include "config.h"
 
+extern "C" {
+#include <libintl.h>
+#define _(String) gettext (String)
+}
+
 using namespace Accounts;
 
 SyncAccount::SyncAccount(Account *account,
@@ -493,41 +498,41 @@ QString SyncAccount::statusDescription(const QString &status)
         return "";
     case 401:
     case 403:
-        return "Forbidden / access denied";
+        return _("Forbidden / access denied");
     case 404:
-        return "Object not found / unassigned field";
+        return _("Object not found / unassigned field");
     case 405:
-        return "Command not allowed";
+        return _("Command not allowed");
     case 406:
     case 407:
-        return "Proxy authentication required";
+        return _("Proxy authentication required");
     case 420:
-        return "Disk full";
+        return _("Disk full");
     case 506:
-        return "Fail to sync due some remote problem";
+        return _("Fail to sync due some remote problem");
     case 22000:
-        return "Fail to run \"two-way\" sync";
+        return _("Fail to run \"two-way\" sync");
     case 22001:
-        return "Fail to sync some items";
+        return _("Fail to sync some items");
     case 22002:
-        return "Process unexpected die.";
+        return _("Process unexpected die.");
     case 20006:
     case 20007:
-        return "Server sent bad content";
+        return _("Server sent bad content");
     case 20020:
-        return "Connection timeout";
+        return _("Connection timeout");
     case 20021:
-        return "Connection certificate has expired";
+        return _("Connection certificate has expired");
     case 20022:
-        return "Connection certificate is invalid";
+        return _("Connection certificate is invalid");
     case 20026:
     case 20027:
     case 20028:
-        return "Fail to connect with the server";
+        return _("Fail to connect with the server");
     case 20046:
     case 20047:
-        return "Server not found";
+        return _( "Server not found");
     default:
-        return "Unknown status";
+        return _("Unknown status");
     }
 }

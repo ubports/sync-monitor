@@ -22,13 +22,23 @@
 #include <QtCore/QCoreApplication>
 #include <QtCore/QDebug>
 
+namespace C {
+#include <libintl.h>
+}
+
+#include "config.h"
+
 int main(int argc, char** argv)
 {
     // register all syncevolution dbus types
     syncevolution_qt_dbus_register_types();
 
     QCoreApplication app(argc, argv);
-    app.setApplicationName("Synq");
+    app.setApplicationName("sync-monitor");
+
+    C::bindtextdomain("sync-monitor", LOCALE_PATH);
+    C::textdomain("sync-monitor");
+
     SyncDaemon *daemon = new SyncDaemon();
     qputenv("QORGANIZER_EDS_DEBUG", "on");
     daemon->connect(&app, SIGNAL(aboutToQuit()), SLOT(quit()));
