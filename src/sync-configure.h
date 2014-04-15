@@ -35,8 +35,8 @@ public:
                   QObject *parent = 0);
     ~SyncConfigure();
 
-    void configure(const QString &serviceName);
-    void configureAll();
+    void configure(const QString &serviceName, const QString &syncMode);
+    void configureAll(const QString &syncMode);
     QString serviceName() const;
 
 Q_SIGNALS:
@@ -53,13 +53,15 @@ private:
     QSettings *m_settings;
     QStringList m_services;
     QString m_originalServiceName;
+    QString m_syncMode;
 
     void continueConfigure();
-    void configureServices();
-    void configureService(const QString &serviceName);
+    void configureServices(const QString &syncMode);
+    void configureService(const QString &serviceName, const QString &syncMode);
     void removeService(const QString &serviceName);
     bool configTarget(const QString &targetName, const QString &serviceName);
-    bool configSync(const QString &targetName, const QString &serviceName);
+    bool configSync(const QString &targetName, const QString &serviceName, const QString &syncMode);
+    bool changeSyncMode(const QString &targetName, const QString &serviceName, const QString &syncMode);
 };
 
 #endif
