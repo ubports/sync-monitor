@@ -156,6 +156,7 @@ bool SyncConfigure::configTarget(const QString &targetName, const QString &servi
     config[""]["consumerReady"] = "0";
     config[""]["dumpData"] = "0";
     config[""]["printChanges"] = "0";
+    config[""]["maxlogdirs"] = "2";
 
     QString expectedSource;
     if (serviceName == CONTACTS_SERVICE_NAME) {
@@ -191,6 +192,7 @@ bool SyncConfigure::configSync(const QString &targetName, const QString &service
     config[""]["password"] = QString();
     config[""]["dumpData"] = "0";
     config[""]["printChanges"] = "0";
+    config[""]["maxlogdirs"] = "2";
 
     // remove default sources
     config.remove("source/addressbook");
