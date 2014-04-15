@@ -22,6 +22,7 @@
 #include <QtCore/QObject>
 #include <QtCore/QStringList>
 #include <QtCore/QTimer>
+#include <QtCore/QSet>
 
 #include <QtOrganizer/QOrganizerManager>
 #include <QtContacts/QContactManager>
@@ -29,28 +30,49 @@
 
 #include <QtDBus/QDBusInterface>
 
+// necessary for singna/slot signatures;
+using namespace QtContacts;
+using namespace QtOrganizer;
+
 class EdsHelper : public QObject
 {
     Q_OBJECT
 public:
-    EdsHelper(QObject *parent = 0);
+    EdsHelper(QObject *parent = 0,
+              const QString &contactManager = "galera",
+              const QString &organizerManager = "eds");
     ~EdsHelper();
     void createSource(const QString &serviceName, const QString &sourceName);
+    void freezeNotify();
+    void unfreezeNotify();
+    void flush();
 
 Q_SIGNALS:
     void dataChanged(const QString &serviceName, const QString &sourceName);
 
 private Q_SLOTS:
-    void contactChangedFilter(const QList<QtContacts::QContactId>& contactIds);
+    void contactChangedFilter(const QList<QContactId>& contactIds);
     void contactChanged();
     void contactDataChanged();
-    void calendarChanged(const QList<QtOrganizer::QOrganizerItemId> &itemIds);
-    void contactFetchStateChanged(QtContacts::QContactAbstractRequest::State newState);
+    void calendarChanged(const QList<QOrganizerItemId> &itemIds);
+    void contactFetchStateChanged(QContactAbstractRequest::State newState);
+    void calendarCollectionsChanged();
 
-private:
+protected:
     QtOrganizer::QOrganizerManager *m_organizerEngine;
     QtContacts::QContactManager *m_contactEngine;
+
+    virtual QString getCollectionIdFromItemId(const QtOrganizer::QOrganizerItemId &itemId) const;
+
+private:
     QTimer m_timeoutTimer;
+    bool m_freezed;
+
+    // cache calendar collections
+    QList<QtOrganizer::QOrganizerCollection> m_calendarCollections;
+
+    QSet<QtContacts::QContactId> m_pendingContacts;
+    QSet<QString> m_pendingCalendars;
 
     void createOrganizerSource(const QString &sourceName);
     void createContactsSource(const QString &sourceName);
