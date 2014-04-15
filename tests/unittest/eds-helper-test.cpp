@@ -57,7 +57,7 @@ private Q_SLOTS:
         mock.contactEngine()->saveContact(&c);
 
         // check if the signal dataChanged was fired with contacts
-        QCOMPARE(spy.count() , 1);
+        QTRY_COMPARE(spy.count() , 1);
         QList<QVariant> args = spy.takeFirst();
         QCOMPARE(args[0].toString(), QStringLiteral(CONTACTS_SERVICE_NAME));
         QCOMPARE(args[1].toString(), QStringLiteral("address-book-test"));

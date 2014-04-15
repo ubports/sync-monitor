@@ -30,6 +30,10 @@
 
 #include <QtDBus/QDBusInterface>
 
+// necessary for singna/slot signatures;
+using namespace QtContacts;
+using namespace QtOrganizer;
+
 class EdsHelper : public QObject
 {
     Q_OBJECT
@@ -47,11 +51,11 @@ Q_SIGNALS:
     void dataChanged(const QString &serviceName, const QString &sourceName);
 
 private Q_SLOTS:
-    void contactChangedFilter(const QList<QtContacts::QContactId>& contactIds);
+    void contactChangedFilter(const QList<QContactId>& contactIds);
     void contactChanged();
     void contactDataChanged();
-    void calendarChanged(const QList<QtOrganizer::QOrganizerItemId> &itemIds);
-    void contactFetchStateChanged(QtContacts::QContactAbstractRequest::State newState);
+    void calendarChanged(const QList<QOrganizerItemId> &itemIds);
+    void contactFetchStateChanged(QContactAbstractRequest::State newState);
     void calendarCollectionsChanged();
 
 protected:

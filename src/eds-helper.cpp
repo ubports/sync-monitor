@@ -24,27 +24,41 @@ EdsHelper::EdsHelper(QObject *parent,
     : QObject(parent),
       m_freezed(false)
 {
+    qRegisterMetaType<QList<QOrganizerItemId> >("QList<QOrganizerItemId>");
+
     m_timeoutTimer.setSingleShot(true);
 
     m_contactEngine = new QContactManager(contactManager, QMap<QString, QString>());
-    connect(m_contactEngine, &QContactManager::contactsAdded,
-            this, &EdsHelper::contactChangedFilter);
-    connect(m_contactEngine, &QContactManager::contactsChanged,
-            this, &EdsHelper::contactChangedFilter);
-    connect(m_contactEngine, &QContactManager::contactsRemoved,
-            this, &EdsHelper::contactChanged);
-    connect(m_contactEngine, &QContactManager::dataChanged,
-            this, &EdsHelper::contactDataChanged);
+    connect(m_contactEngine,
+            SIGNAL(contactsAdded(QList<QContactId>)),
+            SLOT(contactChangedFilter(QList<QContactId>)),
+            Qt::QueuedConnection);
+    connect(m_contactEngine,
+            SIGNAL(contactsChanged(QList<QContactId>)),
+            SLOT(contactChangedFilter(QList<QContactId>)),
+            Qt::QueuedConnection);
+    connect(m_contactEngine,
+            SIGNAL(contactsRemoved(QList<QContactId>)),
+            SLOT(contactChanged()),
+            Qt::QueuedConnection);
+    connect(m_contactEngine,
+            SIGNAL(dataChanged()),
+            SLOT(contactDataChanged()),
+            Qt::QueuedConnection);
 
     m_organizerEngine = new QOrganizerManager(organizerManager, QMap<QString, QString>());
-    connect(m_organizerEngine, &QOrganizerManager::itemsAdded,
-            this, &EdsHelper::calendarChanged, Qt::QueuedConnection);
-    connect(m_organizerEngine, &QOrganizerManager::itemsRemoved,
-            this, &EdsHelper::calendarChanged, Qt::QueuedConnection);
-    connect(m_organizerEngine, &QOrganizerManager::itemsChanged,
-            this, &EdsHelper::calendarChanged, Qt::QueuedConnection);
-    connect(m_organizerEngine, &QOrganizerManager::collectionsModified,
-            this, &EdsHelper::calendarCollectionsChanged, Qt::QueuedConnection);
+    connect(m_organizerEngine,
+            SIGNAL(itemsAdded(QList<QOrganizerItemId>)),
+            SLOT(calendarChanged(QList<QOrganizerItemId>)), Qt::QueuedConnection);
+    connect(m_organizerEngine,
+            SIGNAL(itemsRemoved(QList<QOrganizerItemId>)),
+            SLOT(calendarChanged(QList<QOrganizerItemId>)), Qt::QueuedConnection);
+    connect(m_organizerEngine,
+            SIGNAL(itemsChanged(QList<QOrganizerItemId>)),
+            SLOT(calendarChanged(QList<QOrganizerItemId>)), Qt::QueuedConnection);
+    connect(m_organizerEngine,
+            SIGNAL(collectionsModified(QList<QPair<QOrganizerCollectionId,QOrganizerManager::Operation> >)),
+            SLOT(calendarCollectionsChanged()));
 }
 
 EdsHelper::~EdsHelper()
@@ -98,8 +112,8 @@ void EdsHelper::contactChangedFilter(const QList<QContactId>& contactIds)
         QContactFetchHint hint;
         hint.setDetailTypesHint(QList<QContactDetail::DetailType>() << QContactDetail::TypeSyncTarget);
         request->setFetchHint(hint);
-        connect(request, &QContactFetchByIdRequest::stateChanged,
-                this, &EdsHelper::contactFetchStateChanged);
+        connect(request, SIGNAL(stateChanged(QContactAbstractRequest::State)),
+                SLOT(contactFetchStateChanged(QContactAbstractRequest::State)));
         request->start();
     }
 }
