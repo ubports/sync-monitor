@@ -25,6 +25,7 @@ EdsHelper::EdsHelper(QObject *parent,
       m_freezed(false)
 {
     qRegisterMetaType<QList<QOrganizerItemId> >("QList<QOrganizerItemId>");
+    qRegisterMetaType<QList<QContactId> >("QList<QContactId>");
 
     m_timeoutTimer.setSingleShot(true);
 
