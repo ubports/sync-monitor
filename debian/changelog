@@ -1,3 +1,11 @@
+sync-monitor (0.1+14.04.20140423-0ubuntu1) trusty; urgency=low
+
+  [ Renato Araujo Oliveira Filho ]
+  * Register "QList<QContactId>" into metatype to allow queue signals
+    with this signature. (LP: #1311719) (LP: #1311719)
+
+ -- Ubuntu daily release <ps-jenkins@lists.canonical.com>  Wed, 23 Apr 2014 18:32:19 +0000
+
 sync-monitor (0.1+14.04.20140415.3-0ubuntu1) trusty; urgency=low
 
   [ Renato Araujo Oliveira Filho ]
