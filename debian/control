@@ -11,6 +11,7 @@ Build-Depends: cmake,
                pkg-config,
                qt5-default,
                qtbase5-dev,
+               qtdeclarative5-dev,
                qtpim5-dev,
 Standards-Version: 3.9.5
 Homepage: https://launchpad.net/sync-monitor
