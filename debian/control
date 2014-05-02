@@ -11,6 +11,7 @@ Build-Depends: cmake,
                pkg-config,
                qt5-default,
                qtbase5-dev,
+               qtdeclarative5-dev,
                qtpim5-dev,
 Standards-Version: 3.9.5
 Homepage: https://launchpad.net/sync-monitor
@@ -50,3 +51,16 @@ Description: Ubuntu online account sync monitor plugin - service files
  with the cloud.
  .
  This package contains the ubuntu online accounts service files.
+
+
+Package: qtdeclarative5-ubuntu-syncmonitor0.1
+Architecture: any
+Multi-Arch: same
+Pre-Depends: dpkg (>= 1.15.6~)
+Depends: ${misc:Depends},
+         ${shlibs:Depends},
+Description: Ubuntu online account sync monitor plugin - QML bindings
+ sync-monitor manages data synchronization of contacts and calendars
+ .
+ This package contains the QML plugin providing the features from the sync
+ monitor to applications.

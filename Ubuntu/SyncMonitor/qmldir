@@ -1,0 +1,2 @@
+module Ubuntu.SyncMonitor
+plugin syncmonitor-qml
