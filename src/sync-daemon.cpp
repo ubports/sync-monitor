@@ -21,17 +21,13 @@
 #include "sync-account.h"
 #include "sync-queue.h"
 #include "sync-dbus.h"
+#include "sync-i18n.h"
 #include "eds-helper.h"
 #include "notify-message.h"
 #include "provider-template.h"
 
 #include <QtCore/QDebug>
 #include <QtCore/QTimer>
-
-extern "C" {
-#include <libintl.h>
-#define _(String) gettext (String)
-}
 
 using namespace Accounts;
 

@@ -20,13 +20,9 @@
 #include "sync-configure.h"
 #include "syncevolution-server-proxy.h"
 #include "syncevolution-session-proxy.h"
+#include "sync-i18n.h"
 
 #include "config.h"
-
-extern "C" {
-#include <libintl.h>
-#define _(String) gettext (String)
-}
 
 using namespace Accounts;
 

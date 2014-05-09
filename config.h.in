@@ -23,6 +23,7 @@
 #define CONTACTS_SERVICE_NAME           "contacts"
 #define CALENDAR_SERVICE_NAME           "calendar"
 
-#define LOCALE_PATH                     "@CMAKE_INSTALL_FULL_LOCALEDIR@"
+#define GETTEXT_LOCALEDIR               "@CMAKE_INSTALL_FULL_LOCALEDIR@"
+#define GETTEXT_PACKAGE                 "sync-monitor"
 
 #endif

@@ -37,8 +37,9 @@ int main(int argc, char** argv)
     QCoreApplication app(argc, argv);
     app.setApplicationName("sync-monitor");
 
-    C::bindtextdomain("sync-monitor", LOCALE_PATH);
-    C::textdomain("sync-monitor");
+    setlocale(LC_ALL, "");
+    C::bindtextdomain(GETTEXT_PACKAGE, GETTEXT_LOCALEDIR);
+    C::bind_textdomain_codeset(GETTEXT_PACKAGE, "UTF-8");
 
     SyncDaemon *daemon = new SyncDaemon();
     qputenv("QORGANIZER_EDS_DEBUG", "on");
