@@ -1,6 +1,6 @@
 Source: sync-monitor
 Section: gnome
-Priority: extra
+Priority: optional
 Maintainer: Ubuntu Developers <ubuntu-devel-discuss@lists.ubuntu.com>
 Build-Depends: cmake,
                debhelper (>= 9),
@@ -11,12 +11,19 @@ Build-Depends: cmake,
                pkg-config,
                qt5-default,
                qtbase5-dev,
+               qtdeclarative5-dev,
                qtpim5-dev,
-Standards-Version: 3.9.3
+Standards-Version: 3.9.5
 Homepage: https://launchpad.net/sync-monitor
+# if you don't have have commit access to this branch but would like to upload
+# directly to Ubuntu, don't worry: your changes will be merged back into the
+# upstream branch
+Vcs-Bzr: lp:sync-monitor
 
 Package: sync-monitor
 Architecture: any
+Multi-Arch: same
+Pre-Depends: ${misc:Pre-Depends},
 Depends: ${misc:Depends},
          ${shlibs:Depends},
          account-plugin-google,
@@ -26,24 +33,34 @@ Depends: ${misc:Depends},
          qtcontact5-galera,
          qtorganizer5-eds,
 Description: Ubuntu online account sync monitor plugin
- Keep track of Ubuntu online accounts and sync with with the cloud
-
-Package: sync-monitor-dbg
-Architecture: any
-Section: debug
-Priority: extra
-Depends: sync-monitor (= ${binary:Version}),
-         ${misc:Depends},
-Description: debugging symbols for sync-monitor
- Keep track of Ubuntu online accounts and sync it with the cloud.
+ sync-monitor manages data synchronization of contacts and calendars
  .
- This package contains the debugging symbols for sync-monitor-app
+ With this package you can keep track of Ubuntu online accounts and sync 
+ with the cloud.
 
 Package: sync-monitor-uoa
 Architecture: all
+Multi-Arch: foreign
+Pre-Depends: ${misc:Pre-Depends},
 Depends: ${misc:Depends},
-         sync-monitor (= ${binary:Version}),
-Description: Ubuntu online account sync monitor plugin
- Keep track of Ubuntu online accounts and sync with with the cloud.
+         sync-monitor (>= ${binary:Version}),
+Description: Ubuntu online account sync monitor plugin - service files
+ sync-monitor manages data synchronization of contacts and calendars
+ .
+ With this package you can keep track of Ubuntu online accounts and sync 
+ with the cloud.
  .
  This package contains the ubuntu online accounts service files.
+
+
+Package: qtdeclarative5-ubuntu-syncmonitor0.1
+Architecture: any
+Multi-Arch: same
+Pre-Depends: dpkg (>= 1.15.6~)
+Depends: ${misc:Depends},
+         ${shlibs:Depends},
+Description: Ubuntu online account sync monitor plugin - QML bindings
+ sync-monitor manages data synchronization of contacts and calendars
+ .
+ This package contains the QML plugin providing the features from the sync
+ monitor to applications.

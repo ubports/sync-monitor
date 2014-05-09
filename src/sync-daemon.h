@@ -53,7 +53,7 @@ Q_SIGNALS:
 
 public Q_SLOTS:
     void quit();
-    void syncAll(const QString &serviceName = QString());
+    void syncAll(const QString &serviceName = QString(), bool runNow=false);
     void cancel(const QString &serviceName = QString());
 
 private Q_SLOTS:
@@ -86,10 +86,10 @@ private:
 
     void setupAccounts();
     void setupTriggers();
-    void sync(SyncAccount *syncAcc, const QString &serviceName = QString());
+    void sync(SyncAccount *syncAcc, const QString &serviceName = QString(), bool runNow = false);
     void cancel(SyncAccount *syncAcc, const QString &serviceName = QString());
     void setup();
-    void sync();
+    void sync(bool runNow);
     bool registerService();
 };
 

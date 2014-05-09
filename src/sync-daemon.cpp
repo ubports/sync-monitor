@@ -30,6 +30,7 @@
 
 using namespace Accounts;
 
+
 #define DAEMON_SYNC_TIMEOUT     1000 * 6 // one minute
 #define SYNC_MONITOR_ICON_PATH  "/usr/share/icons/ubuntu-mobile/actions/scalable/reload.svg"
 
@@ -98,13 +99,13 @@ void SyncDaemon::onDataChanged(const QString &serviceName, const QString &source
     }
 }
 
-void SyncDaemon::syncAll(const QString &serviceName)
+void SyncDaemon::syncAll(const QString &serviceName, bool runNow)
 {
     Q_FOREACH(SyncAccount *acc, m_accounts.values()) {
         if (serviceName.isEmpty()) {
-            sync(acc);
+            sync(acc, QString(), runNow);
         } else if (acc->availableServices().contains(serviceName)) {
-            sync(acc, serviceName);
+            sync(acc, serviceName, runNow);
         }
     }
 }
@@ -120,15 +121,26 @@ void SyncDaemon::cancel(const QString &serviceName)
     }
 }
 
-void SyncDaemon::sync()
+void SyncDaemon::sync(bool runNow)
 {
     m_syncing = true;
-    // wait some time for new sync requests
-    m_timeout->start();
+    if (runNow) {
+        m_timeout->stop();
+        continueSync();
+    } else {
+        // wait some time for new sync requests
+        m_timeout->start();
+    }
 }
 
 void SyncDaemon::continueSync()
 {
+    // flush any change in EDS
+    m_eds->flush();
+
+    // freeze notifications during the sync, to save some CPU
+    m_eds->freezeNotify();
+
     // sync the next service on the queue
     if (!m_aboutToQuit && !m_syncQueue->isEmpty()) {
         m_currentServiceName = m_syncQueue->popNext(&m_currentAccount);
@@ -137,6 +149,8 @@ void SyncDaemon::continueSync()
         m_currentAccount = 0;
         m_currentServiceName.clear();
         m_syncing = false;
+        // The sync has done, unblock notifications
+        m_eds->unfreezeNotify();
         Q_EMIT done();
     }
 }
@@ -221,13 +235,13 @@ void SyncDaemon::addAccount(const AccountId &accountId, bool startSync)
         connect(syncAcc, SIGNAL(configured(QString)),
                          SLOT(onAccountConfigured(QString)), Qt::DirectConnection);
         if (startSync) {
-            sync(syncAcc);
+            sync(syncAcc, QString(), true);
         }
         Q_EMIT accountsChanged();
     }
 }
 
-void SyncDaemon::sync(SyncAccount *syncAcc, const QString &serviceName)
+void SyncDaemon::sync(SyncAccount *syncAcc, const QString &serviceName, bool runNow)
 {
     qDebug() << "syn requested for account:" << syncAcc->displayName() << serviceName;
 
@@ -240,7 +254,7 @@ void SyncDaemon::sync(SyncAccount *syncAcc, const QString &serviceName)
         m_syncQueue->push(syncAcc, serviceName);
         // if not syncing start a full sync
         if (!m_syncing) {
-            sync();
+            sync(runNow);
             Q_EMIT syncAboutToStart();
         }
     }
@@ -340,6 +354,7 @@ void SyncDaemon::onAccountSyncFinished(const QString &serviceName, const bool fi
                 .arg(QDateTime::currentDateTime().toString(Qt::SystemLocaleShortDate));
 
     Q_EMIT syncFinished(m_currentAccount, serviceName);
+
     // sync next account
     continueSync();
 }
@@ -363,7 +378,7 @@ void SyncDaemon::onAccountEnableChanged(const QString &serviceName, bool enabled
 {
     SyncAccount *acc = qobject_cast<SyncAccount*>(QObject::sender());
     if (enabled) {
-        sync(acc, serviceName);
+        sync(acc, serviceName, true);
     } else {
         cancel(acc, serviceName);
     }

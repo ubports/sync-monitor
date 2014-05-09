@@ -98,18 +98,21 @@ private:
     QString m_syncServiceName;
     bool m_firstSync;
 
-    void configure(const QString &serviceName);
+    void configure(const QString &serviceName, const QString &syncMode);
     void setState(AccountState state);
     void continueSync(const QString &serviceName);
     void attachSession(SyncEvolutionSessionProxy *session);
     void releaseSession();
     QStringMap lastReport(const QString &serviceName) const;
     QString syncMode(const QString &serviceName, bool *firstSync) const;
-    QString lastSyncStatus(const QString &serviceName) const;
+    QString lastSyncStatus(const QString &serviceName, QString *lastSyncMode) const;
     bool syncService(const QString &serviceName);
     void setupServices();
-    QString sessionName(const QString &serviceName) const;
     void dumpReport(const QStringMap &report) const;
+    bool prepareSession(const QString &serviceName);
+
+    QString sessionName(const QString &serviceName) const;
+    QString sourceName(const QString &serviceName) const;
 };
 
 #endif

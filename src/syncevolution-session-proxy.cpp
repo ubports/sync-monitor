@@ -137,7 +137,7 @@ bool SyncEvolutionSessionProxy::isValid() const
     return (m_iface != 0);
 }
 
-void SyncEvolutionSessionProxy::sync(QString mode, QStringMap services)
+void SyncEvolutionSessionProxy::sync(QStringMap services)
 {
     Q_ASSERT(isValid());
     QDBusReply<void> reply = m_iface->call("Sync", QString(), QVariant::fromValue(services));

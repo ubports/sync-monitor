@@ -1,5 +1,55 @@
-sync-monitor (0.1-0ubuntu1) trusty; urgency=medium
+sync-monitor (0.1+14.10.20140502-0ubuntu1) utopic; urgency=low
 
+  [ Renato Araujo Oliveira Filho ]
+  * Created QML bindings to access the sync monitor information. (LP:
+    #1311125)
+
+ -- Ubuntu daily release <ps-jenkins@lists.canonical.com>  Fri, 02 May 2014 17:07:50 +0000
+
+sync-monitor (0.1+14.04.20140423-0ubuntu1) trusty; urgency=low
+
+  [ Renato Araujo Oliveira Filho ]
+  * Register "QList<QContactId>" into metatype to allow queue signals
+    with this signature. (LP: #1311719) (LP: #1311719)
+
+ -- Ubuntu daily release <ps-jenkins@lists.canonical.com>  Wed, 23 Apr 2014 18:32:19 +0000
+
+sync-monitor (0.1+14.04.20140415.3-0ubuntu1) trusty; urgency=low
+
+  [ Renato Araujo Oliveira Filho ]
+  * Force sync to start immediately if use dbus call. (LP: #1306070)
+  * Keep a collection cache to compare with changed events. (LP:
+    #1306112)
+  * If the sync fails use the last sync mode in the next sync. (LP:
+    #1306096)
+
+ -- Ubuntu daily release <ps-jenkins@lists.canonical.com>  Tue, 15 Apr 2014 22:20:51 +0000
+
+sync-monitor (0.1+14.04.20140409-0ubuntu1) trusty; urgency=medium
+
+  [ Renato Araujo Oliveira Filho ]
   * Initial release.
+  * Initial commit.
+  * Added missing files.
+  * Implemented notify messages to report account sync progress. For
+    each account a new address book is created.
+  * Avoid syn the same account twice, during one sync cycle.
+  * Added license headers.
+  * Added license file.
+  * Added missing build deps.
+  * Fixed upstart script install path.
+  * fixed install path of upstart sevice on .install file.
+  * Fixed account applications install path.
+  * Fixed upstart file.
+  * Added "libnotify-dev" as build dep.
+  * Fixed notify during sync start.
+  * Used account displayName as evolution database name.
+  * Avoid data backup before sync.
+  * Fixed accounts database configuration.
+  * Fixed support for sync only one account.
 
- -- Renato Araujo Oliveira Filho <renato@canonical.com>  Thu, 06 Feb 2014 11:35:36 -0300
+  [ Timo Jyrinki ]
+  * Add LICENSE.LGPL, fix debian/copyright line changes, expand package
+    descriptions.
+
+ -- Ubuntu daily release <ps-jenkins@lists.canonical.com>  Wed, 09 Apr 2014 06:47:06 +0000

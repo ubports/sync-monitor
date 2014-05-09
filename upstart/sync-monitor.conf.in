@@ -6,4 +6,4 @@ stop on session-end
 
 respawn
 
-exec @CMAKE_INSTALL_FULL_LIBEXECDIR@/sync-monitor
+exec @CMAKE_INSTALL_FULL_LIBDIR@/sync-monitor/sync-monitor
