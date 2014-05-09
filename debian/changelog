@@ -1,3 +1,30 @@
+sync-monitor (0.1+14.10.20140502-0ubuntu1) utopic; urgency=low
+
+  [ Renato Araujo Oliveira Filho ]
+  * Created QML bindings to access the sync monitor information. (LP:
+    #1311125)
+
+ -- Ubuntu daily release <ps-jenkins@lists.canonical.com>  Fri, 02 May 2014 17:07:50 +0000
+
+sync-monitor (0.1+14.04.20140423-0ubuntu1) trusty; urgency=low
+
+  [ Renato Araujo Oliveira Filho ]
+  * Register "QList<QContactId>" into metatype to allow queue signals
+    with this signature. (LP: #1311719) (LP: #1311719)
+
+ -- Ubuntu daily release <ps-jenkins@lists.canonical.com>  Wed, 23 Apr 2014 18:32:19 +0000
+
+sync-monitor (0.1+14.04.20140415.3-0ubuntu1) trusty; urgency=low
+
+  [ Renato Araujo Oliveira Filho ]
+  * Force sync to start immediately if use dbus call. (LP: #1306070)
+  * Keep a collection cache to compare with changed events. (LP:
+    #1306112)
+  * If the sync fails use the last sync mode in the next sync. (LP:
+    #1306096)
+
+ -- Ubuntu daily release <ps-jenkins@lists.canonical.com>  Tue, 15 Apr 2014 22:20:51 +0000
+
 sync-monitor (0.1+14.04.20140409-0ubuntu1) trusty; urgency=medium
 
   [ Renato Araujo Oliveira Filho ]

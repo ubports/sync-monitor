@@ -32,5 +32,6 @@ add_subdirectory(templates)
 add_subdirectory(data)
 add_subdirectory(tests)
 add_subdirectory(po)
+add_subdirectory(Ubuntu)
 
 configure_file(config.h.in ${CMAKE_CURRENT_BINARY_DIR}/config.h)

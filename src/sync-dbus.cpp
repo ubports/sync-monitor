@@ -37,10 +37,10 @@ SyncDBus::SyncDBus(const QDBusConnection &connection, SyncDaemon *parent)
 void SyncDBus::sync(QStringList services)
 {
     if (services.isEmpty()) {
-        m_parent->syncAll();
+        m_parent->syncAll(QString(), true);
     } else {
         Q_FOREACH(const QString &service, services) {
-            m_parent->syncAll(service);
+            m_parent->syncAll(service, true);
         }
     }
 }
