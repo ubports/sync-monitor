@@ -23,13 +23,24 @@
 #include <QtCore/QDebug>
 #include <QtCore/QTimer>
 
+namespace C {
+#include <libintl.h>
+}
+
+#include "config.h"
+
 int main(int argc, char** argv)
 {
     // register all syncevolution dbus types
     syncevolution_qt_dbus_register_types();
 
     QCoreApplication app(argc, argv);
-    app.setApplicationName("Synq");
+    app.setApplicationName("sync-monitor");
+
+    setlocale(LC_ALL, "");
+    C::bindtextdomain(GETTEXT_PACKAGE, GETTEXT_LOCALEDIR);
+    C::bind_textdomain_codeset(GETTEXT_PACKAGE, "UTF-8");
+
     SyncDaemon *daemon = new SyncDaemon();
     qputenv("QORGANIZER_EDS_DEBUG", "on");
     daemon->connect(&app, SIGNAL(aboutToQuit()), SLOT(quit()));

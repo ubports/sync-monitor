@@ -18,6 +18,7 @@ set(SYNQ_LIB_SRC
     sync-daemon.cpp
     sync-dbus.h
     sync-dbus.cpp
+    sync-i18n.h
     sync-queue.h
     sync-queue.cpp
     syncevolution-server-proxy.h
