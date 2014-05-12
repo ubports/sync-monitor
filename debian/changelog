@@ -1,3 +1,13 @@
+sync-monitor (0.1+14.10.20140512-0ubuntu1) utopic; urgency=low
+
+  [ Renato Araujo Oliveira Filho ]
+  * Added support for i18n.
+  * *Make sure that the first online account created is set as default
+    account *After removing a online account ask the user if he wants to
+    keep the contacts or remove it. (LP: #1306101)
+
+ -- Ubuntu daily release <ps-jenkins@lists.canonical.com>  Mon, 12 May 2014 19:34:57 +0000
+
 sync-monitor (0.1+14.10.20140502-0ubuntu1) utopic; urgency=low
 
   [ Renato Araujo Oliveira Filho ]
