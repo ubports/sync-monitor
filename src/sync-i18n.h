@@ -16,14 +16,14 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef __CONFIG_H__
-#define __CONFIG_H__
+#ifndef __SYNC_I18N_H__
+#define __SYNC_I18N_H__
 
-#define PROVIDER_TEMPLATE_PATH          "@CMAKE_INSTALL_FULL_DATADIR@/sync-monitor/templates"
-#define CONTACTS_SERVICE_NAME           "contacts"
-#define CALENDAR_SERVICE_NAME           "calendar"
+#include "config.h"
 
-#define GETTEXT_LOCALEDIR               "@CMAKE_INSTALL_FULL_LOCALEDIR@"
-#define GETTEXT_PACKAGE                 "sync-monitor"
+extern "C" {
+#include <libintl.h>
+#define _(String) dgettext (GETTEXT_PACKAGE, String)
+}
 
 #endif

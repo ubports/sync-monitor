@@ -1,0 +1,114 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR Canonical Ltd.
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: sync-monitor\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2014-04-15 15:55-0300\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=CHARSET\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+#: src/sync-account.cpp:505
+msgid "Command not allowed"
+msgstr ""
+
+#: src/sync-account.cpp:525
+msgid "Connection certificate has expired"
+msgstr ""
+
+#: src/sync-account.cpp:527
+msgid "Connection certificate is invalid"
+msgstr ""
+
+#: src/sync-account.cpp:523
+msgid "Connection timeout"
+msgstr ""
+
+#: src/sync-account.cpp:510
+msgid "Disk full"
+msgstr ""
+
+#: src/sync-account.cpp:531
+msgid "Fail to connect with the server"
+msgstr ""
+
+#: src/sync-account.cpp:514
+msgid "Fail to run \"two-way\" sync"
+msgstr ""
+
+#: src/sync-daemon.cpp:306
+#, qt-format
+msgid ""
+"Fail to sync %1 (%2).\n"
+"%3"
+msgstr ""
+
+#: src/sync-account.cpp:512
+msgid "Fail to sync due some remote problem"
+msgstr ""
+
+#: src/sync-account.cpp:516
+msgid "Fail to sync some items"
+msgstr ""
+
+#: src/sync-account.cpp:501
+msgid "Forbidden / access denied"
+msgstr ""
+
+#: src/sync-account.cpp:503
+msgid "Object not found / unassigned field"
+msgstr ""
+
+#: src/sync-account.cpp:518
+msgid "Process unexpected die."
+msgstr ""
+
+#: src/sync-account.cpp:508
+msgid "Proxy authentication required"
+msgstr ""
+
+#: src/sync-account.cpp:534
+msgid "Server not found"
+msgstr ""
+
+#: src/sync-account.cpp:521
+msgid "Server sent bad content"
+msgstr ""
+
+#: src/sync-daemon.cpp:282
+#, qt-format
+msgid "Start sync:  %1 (%2)"
+msgstr ""
+
+#: src/sync-daemon.cpp:261
+#, qt-format
+msgid "Sync canceled: %1"
+msgstr ""
+
+#: src/sync-daemon.cpp:300
+#, qt-format
+msgid "Sync done: %1 (%2)"
+msgstr ""
+
+#: src/sync-daemon.cpp:329
+#, qt-format
+msgid "Sync error account: %1, %2, %3"
+msgstr ""
+
+#: src/sync-daemon.cpp:260 src/sync-daemon.cpp:281 src/sync-daemon.cpp:299
+#: src/sync-daemon.cpp:305 src/sync-daemon.cpp:328
+msgid "Syncronization"
+msgstr ""
+
+#: src/sync-account.cpp:536
+msgid "Unknown status"
+msgstr ""

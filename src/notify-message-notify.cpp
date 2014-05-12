@@ -26,7 +26,6 @@ static void notificationClosed(NotifyNotification *notification, gpointer data);
 
 NotifyMessage::NotifyMessage()
 {
-    qDebug() << "Notify init";
     notify_init(QCoreApplication::instance()->applicationName().toUtf8());
 }
 

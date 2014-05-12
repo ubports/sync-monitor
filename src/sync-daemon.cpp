@@ -21,6 +21,7 @@
 #include "sync-account.h"
 #include "sync-queue.h"
 #include "sync-dbus.h"
+#include "sync-i18n.h"
 #include "eds-helper.h"
 #include "notify-message.h"
 #include "provider-template.h"
@@ -260,8 +261,8 @@ void SyncDaemon::sync(SyncAccount *syncAcc, const QString &serviceName, bool run
 
 void SyncDaemon::cancel(SyncAccount *syncAcc, const QString &serviceName)
 {
-    NotifyMessage::instance()->show("Syncronization",
-                                    QString("Sync canceled: %1").arg(syncAcc->displayName()),
+    NotifyMessage::instance()->show(_("Syncronization"),
+                                    QString(_("Sync canceled: %1")).arg(syncAcc->displayName()),
                                     syncAcc->iconName(serviceName));
     m_syncQueue->remove(syncAcc, serviceName);
     syncAcc->cancel(serviceName);
@@ -281,8 +282,8 @@ void SyncDaemon::removeAccount(const AccountId &accountId)
 void SyncDaemon::onAccountSyncStarted(const QString &serviceName, bool firstSync)
 {
     if (firstSync) {
-        NotifyMessage::instance()->show("Syncronization",
-                                        QString("Start sync:  %1 (%2)")
+        NotifyMessage::instance()->show(_("Syncronization"),
+                                        QString(_("Start sync:  %1 (%2)"))
                                             .arg(m_currentAccount->displayName())
                                             .arg(serviceName),
                                         m_currentAccount->iconName(serviceName));
@@ -299,14 +300,14 @@ void SyncDaemon::onAccountSyncFinished(const QString &serviceName, const bool fi
 {
     QString errorMessage = SyncAccount::statusDescription(status);
     if (firstSync && errorMessage.isEmpty()) {
-        NotifyMessage::instance()->show("Syncronization",
-                                        QString("Sync done: %1 (%2)")
+        NotifyMessage::instance()->show(_("Syncronization"),
+                                        QString(_("Sync done: %1 (%2)"))
                                             .arg(m_currentAccount->displayName())
                                             .arg(serviceName),
                                         m_currentAccount->iconName(serviceName));
     } else if (!errorMessage.isEmpty()) {
-        NotifyMessage::instance()->show("Syncronization",
-                                        QString("Fail to sync %1 (%2).\n%3")
+        NotifyMessage::instance()->show(_("Syncronization"),
+                                        QString(_("Fail to sync %1 (%2).\n%3"))
                                             .arg(m_currentAccount->displayName())
                                             .arg(serviceName)
                                             .arg(errorMessage),
@@ -329,8 +330,8 @@ void SyncDaemon::onAccountSyncFinished(const QString &serviceName, const bool fi
 
 void SyncDaemon::onAccountSyncError(const QString &serviceName, int errorCode)
 {
-    NotifyMessage::instance()->show("Syncronization",
-                                    QString("Sync error account: %1, %2, %3")
+    NotifyMessage::instance()->show(_("Syncronization"),
+                                    QString(_("Sync error account: %1, %2, %3"))
                                         .arg(m_currentAccount->displayName())
                                         .arg(serviceName)
                                         .arg(errorCode),
