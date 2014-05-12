@@ -60,6 +60,8 @@ private Q_SLOTS:
     void continueSync();
     void addAccount(const Accounts::AccountId &accountId, bool startSync=true);
     void removeAccount(const Accounts::AccountId &accountId);
+    void removeAccountSource();
+    void destroyAccount();
 
     void onAccountSyncStarted(const QString &serviceName, bool firstSync);
     void onAccountSyncFinished(const QString &serviceName, bool firstSync, const QString &status);

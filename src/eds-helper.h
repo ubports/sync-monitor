@@ -43,6 +43,7 @@ public:
               const QString &organizerManager = "eds");
     ~EdsHelper();
     void createSource(const QString &serviceName, const QString &sourceName);
+    void removeSource(const QString &serviceName, const QString &sourceName);
     void freezeNotify();
     void unfreezeNotify();
     void flush();
@@ -76,6 +77,9 @@ private:
 
     void createOrganizerSource(const QString &sourceName);
     void createContactsSource(const QString &sourceName);
+
+    void removeOrganizerSource(const QString &sourceName);
+    void removeContactsSource(const QString &sourceName);
 };
 
 #endif

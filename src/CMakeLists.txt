@@ -3,12 +3,6 @@ project(synq-src)
 set(SYNQ_BIN sync-monitor)
 set(SYNQ_LIB synq-lib)
 
-if (LIBNOTIFY_FOUND)
-    set(SYNQ_NOTIFY_SRC notify-message-notify.cpp)
-else()
-    set(SYNQ_NOTIFY_SRC notify-message-mock.cpp)
-endif()
-
 set(SYNQ_LIB_SRC
     eds-helper.h
     eds-helper.cpp
@@ -31,7 +25,6 @@ set(SYNQ_LIB_SRC
     syncevolution-server-proxy.cpp
     syncevolution-session-proxy.h
     syncevolution-session-proxy.cpp
-    ${SYNQ_NOTIFY_SRC}
 )
 
 add_library(${SYNQ_LIB} STATIC
