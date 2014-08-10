@@ -38,20 +38,33 @@ Description: Ubuntu online account sync monitor plugin
  With this package you can keep track of Ubuntu online accounts and sync 
  with the cloud.
 
-Package: sync-monitor-uoa
+Package: sync-monitor-uoa-contacts
 Architecture: all
 Multi-Arch: foreign
 Pre-Depends: ${misc:Pre-Depends},
 Depends: ${misc:Depends},
          sync-monitor (>= ${binary:Version}),
 Description: Ubuntu online account sync monitor plugin - service files
- sync-monitor manages data synchronization of contacts and calendars
+ sync-monitor manages data synchronization of contacts.
  .
  With this package you can keep track of Ubuntu online accounts and sync 
  with the cloud.
  .
  This package contains the ubuntu online accounts service files.
 
+Package: sync-monitor-uoa-calendar
+Architecture: all
+Multi-Arch: foreign
+Pre-Depends: ${misc:Pre-Depends},
+Depends: ${misc:Depends},
+         sync-monitor (>= ${binary:Version}),
+Description: Ubuntu online account sync monitor plugin - service files
+ sync-monitor manages data synchronization of calendars.
+ .
+ With this package you can keep track of Ubuntu online accounts and sync 
+ with the cloud.
+ .
+ This package contains the ubuntu online accounts service files.
 
 Package: qtdeclarative5-ubuntu-syncmonitor0.1
 Architecture: any
