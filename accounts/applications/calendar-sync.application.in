@@ -6,7 +6,7 @@
 
   <service-types>
     <service-type id="calendar">
-      <_description>Syncronize your calendar</_description>
+      <_description>Synchronize your calendar</_description>
     </service-type>
   </service-types>
 </application>
