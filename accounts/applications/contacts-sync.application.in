@@ -6,7 +6,7 @@
 
   <service-types>
     <service-type id="contacts">
-      <_description>Syncronize your contacts</_description>
+      <_description>Synchronize your contacts</_description>
     </service-type>
   </service-types>
 </application>
