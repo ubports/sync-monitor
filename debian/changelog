@@ -1,3 +1,15 @@
+sync-monitor (0.1+14.10.20140905-0ubuntu1) utopic; urgency=low
+
+  [ Sebastien Bacher ]
+  * Correctly spell 'synchronization' (LP: #1350842)
+  * Tweak translation setup so the template is correctly generated (LP:
+    #1350534)
+
+  [ Mirco Müller ]
+  * Added use of non-shaped-icon hint. (LP: #1350282)
+
+ -- Ubuntu daily release <ps-jenkins@lists.canonical.com>  Fri, 05 Sep 2014 15:36:59 +0000
+
 sync-monitor (0.1+14.10.20140512-0ubuntu1) utopic; urgency=low
 
   [ Renato Araujo Oliveira Filho ]
