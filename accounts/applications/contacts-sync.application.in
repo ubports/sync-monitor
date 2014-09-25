@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<application id="contacts-sync">
+  <_description>Contacts</_description>
+  <desktop-entry>sync-monitor-contacts.desktop</desktop-entry>
+  <translations>contacts-sync</translations>
+
+  <service-types>
+    <service-type id="contacts">
+      <_description>Synchronize your contacts</_description>
+    </service-type>
+  </service-types>
+</application>
