@@ -75,6 +75,9 @@ void NotifyMessage::askYesOrNo(const QString &title,
     notify_notification_set_hint_string(m_notification,
                                         "x-canonical-private-button-tint",
                                         "true");
+    notify_notification_set_hint_string(m_notification,
+                                        "x-canonical-non-shaped-icon",
+                                        "true");
     notify_notification_add_action(m_notification,
                                    "action_accept", "Yes",
                                    (NotifyActionCallback) NotifyMessage::onQuestionAccepted,

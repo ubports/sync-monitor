@@ -19,6 +19,7 @@ Homepage: https://launchpad.net/sync-monitor
 # directly to Ubuntu, don't worry: your changes will be merged back into the
 # upstream branch
 Vcs-Bzr: lp:sync-monitor
+X-Ubuntu-Use-Langpack: yes
 
 Package: sync-monitor
 Architecture: any
