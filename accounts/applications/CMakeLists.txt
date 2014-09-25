@@ -1,11 +1,9 @@
 set(APPLICATION_FILES
     contacts-sync.application
-    calendar-sync.application
 )
 
 set(APPLICATION_OUTPUT_FILES
     ${CMAKE_CURRENT_BINARY_DIR}/contacts-sync.application
-    ${CMAKE_CURRENT_BINARY_DIR}/calendar-sync.application
 )
 
 
