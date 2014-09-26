@@ -46,6 +46,7 @@ Pre-Depends: ${misc:Pre-Depends},
 Depends: ${misc:Depends},
          sync-monitor (>= ${binary:Version}),
 Replaces: sync-monitor-uoa
+Breaks: sync-monitor-uoa
 Description: Ubuntu online account sync monitor plugin - service files
  sync-monitor manages data synchronization of contacts.
  .
@@ -61,6 +62,7 @@ Pre-Depends: ${misc:Pre-Depends},
 Depends: ${misc:Depends},
          sync-monitor (>= ${binary:Version}),
 Replaces: sync-monitor-uoa
+Breaks: sync-monitor-uoa
 Description: Ubuntu online account sync monitor plugin - service files
  sync-monitor manages data synchronization of calendars.
  .
