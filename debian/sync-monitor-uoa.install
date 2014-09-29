@@ -1,3 +1,7 @@
-usr/share/accounts
+usr/share/accounts/services/google-caldav.service
+usr/share/accounts/services/yahoo-caldav.service
+usr/share/accounts/services/google-carddav.service
+usr/share/accounts/services/yahoo-carddav.service
 usr/share/applications/sync-monitor-contacts.desktop
 usr/share/applications/sync-monitor-calendar.desktop
+usr/share/accounts/applications/contacts-sync.application
