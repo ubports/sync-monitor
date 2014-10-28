@@ -34,6 +34,11 @@ bool SyncQueue::isEmpty() const
     return m_queue.isEmpty();
 }
 
+void SyncQueue::clear()
+{
+    m_queue.clear();;
+}
+
 void SyncQueue::push(SyncAccount *account, const QString &serviceName)
 {
     QStringList services = m_queue.value(account);

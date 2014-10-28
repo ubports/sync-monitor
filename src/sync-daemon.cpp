@@ -25,6 +25,7 @@
 #include "eds-helper.h"
 #include "notify-message.h"
 #include "provider-template.h"
+#include "sync-network.h"
 
 #include <QtCore/QDebug>
 #include <QtCore/QTimer>
@@ -47,6 +48,7 @@ SyncDaemon::SyncDaemon()
     m_provider->load();
 
     m_syncQueue = new SyncQueue();
+    m_networkStatus = new SyncNetwork(this);
 
     m_timeout = new QTimer(this);
     m_timeout->setInterval(DAEMON_SYNC_TIMEOUT);
@@ -57,6 +59,8 @@ SyncDaemon::SyncDaemon()
 SyncDaemon::~SyncDaemon()
 {
     quit();
+    delete m_syncQueue;
+    delete m_networkStatus;
 }
 
 void SyncDaemon::setupAccounts()
@@ -136,6 +140,13 @@ void SyncDaemon::sync(bool runNow)
 
 void SyncDaemon::continueSync()
 {
+    if (!m_networkStatus->isOnline()) {
+        qDebug() << "Device is offline we will skip the sync.";
+        m_syncQueue->clear();
+        Q_EMIT done();
+        return;
+    }
+
     // flush any change in EDS
     m_eds->flush();
 
@@ -418,5 +429,9 @@ void SyncDaemon::quit()
     if (m_manager) {
         delete m_manager;
         m_manager = 0;
+    }
+
+    if (m_networkStatus) {
+        delete m_networkStatus;
     }
 }

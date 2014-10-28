@@ -31,6 +31,7 @@ class EdsHelper;
 class ProviderTemplate;
 class SyncQueue;
 class SyncDBus;
+class SyncNetwork;
 
 class SyncDaemon : public QObject
 {
@@ -80,6 +81,7 @@ private:
     EdsHelper *m_eds;
     ProviderTemplate *m_provider;
     SyncDBus *m_dbusAddaptor;
+    SyncNetwork *m_networkStatus;
     bool m_syncing;
     bool m_aboutToQuit;
     QElapsedTimer m_syncElapsedTime;

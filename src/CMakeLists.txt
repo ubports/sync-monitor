@@ -21,6 +21,8 @@ set(SYNQ_LIB_SRC
     sync-i18n.h
     sync-queue.h
     sync-queue.cpp
+    sync-network.h
+    sync-network.cpp
     syncevolution-server-proxy.h
     syncevolution-server-proxy.cpp
     syncevolution-session-proxy.h
@@ -37,7 +39,7 @@ target_link_libraries(${SYNQ_LIB}
     syncevolution-qt
 )
 
-qt5_use_modules(${SYNQ_LIB} Core DBus Organizer Contacts)
+qt5_use_modules(${SYNQ_LIB} Core DBus Organizer Contacts Network)
 
 set(SYNQ_BIN_SRC
     main.cpp
@@ -51,7 +53,7 @@ target_link_libraries(${SYNQ_BIN}
     ${SYNQ_LIB}
 )
 
-qt5_use_modules(${SYNQ_BIN} Core)
+qt5_use_modules(${SYNQ_BIN} Core )
 
 include_directories(
     ${CMAKE_SOURCE_DIR}

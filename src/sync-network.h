@@ -16,33 +16,33 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef __SYNC_QUEUE_H__
-#define __SYNC_QUEUE_H__
+#ifndef __SYNC_NETWORK_H__
+#define __SYNC_NETWORK_H__
 
-#include <QtCore/QString>
-#include <QtCore/QStringList>
-#include <QtCore/QMap>
+#include <QtCore/QScopedPointer>
+#include <QtNetwork/QNetworkConfigurationManager>
 
-class SyncAccount;
 
-class SyncQueue
+class SyncNetwork : public QObject
 {
-public:
-    void push(SyncAccount *account, const QString &serviceName = QString());
-    QString popNext(SyncAccount **account);
-    SyncAccount *popNext();
-    void remove(SyncAccount *account, const QString &serviceName = QString());
+    Q_OBJECT
+    Q_PROPERTY(bool online READ isOnline NOTIFY onlineChanged)
 
-    bool contains(SyncAccount *account, const QString &serviceName) const;
-    int count() const;
-    bool isEmpty() const;
-    void clear();
+public:
+    SyncNetwork(QObject *parent=0);
+    ~SyncNetwork();
+
+    bool isOnline() const;
+
+Q_SIGNALS:
+    void onlineChanged(bool isOnline);
+
+private Q_SLOTS:
+    void refresh();
 
 private:
-    QMap<SyncAccount*, QStringList> m_queue;
+    QScopedPointer<QNetworkConfigurationManager> m_configManager;
+    bool m_isOnline;
 };
 
-
-
 #endif
-
