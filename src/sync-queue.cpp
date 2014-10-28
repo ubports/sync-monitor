@@ -66,6 +66,7 @@ void SyncQueue::push(const QMap<SyncAccount *, QStringList> &values)
     QMap<SyncAccount *, QStringList>::const_iterator i = values.constBegin();
     while (i != values.constEnd()) {
         m_queue.insert(i.key(), i.value());
+        i++;
     }
 }
 
