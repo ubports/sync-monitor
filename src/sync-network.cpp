@@ -31,12 +31,9 @@ bool SyncNetwork::isOnline() const
 void SyncNetwork::refresh()
 {
     bool isOnline = m_configManager->isOnline();
-    qDebug() << "Refresh" << isOnline;
-
     // Check if is connected in a wifi or network
     QList<QNetworkConfiguration> activeConfigs = m_configManager->allConfigurations(QNetworkConfiguration::Active);
     Q_FOREACH(const QNetworkConfiguration &config, activeConfigs) {
-        qDebug() << "Active beareType:" << config.bearerType();
         if ((config.bearerType() > 0) && (config.bearerType() <= QNetworkConfiguration::BearerWLAN)) {
             isOnline = true;
         } else {
@@ -47,7 +44,7 @@ void SyncNetwork::refresh()
 
     if (m_isOnline != isOnline) {
         m_isOnline = isOnline;
-        qDebug() << "Network is online" << m_isOnline;
+        qDebug() << "Network state changed:" << (m_isOnline ? "Online" : "Offline");
         Q_EMIT onlineChanged(m_isOnline);
     }
 }

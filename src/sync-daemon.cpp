@@ -33,7 +33,7 @@
 using namespace Accounts;
 
 
-#define DAEMON_SYNC_TIMEOUT     1000 * 6 // one minute
+#define DAEMON_SYNC_TIMEOUT     1000 * 60 // one minute
 #define SYNC_MONITOR_ICON_PATH  "/usr/share/icons/ubuntu-mobile/actions/scalable/reload.svg"
 
 SyncDaemon::SyncDaemon()
