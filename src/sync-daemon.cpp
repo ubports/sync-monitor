@@ -160,6 +160,7 @@ void SyncDaemon::continueSync()
         m_offlineQueue->push(m_syncQueue->values());
         m_syncQueue->clear();
         m_currentAccount = 0;
+        m_syncing = false;
         Q_EMIT done();
         return;
     }
