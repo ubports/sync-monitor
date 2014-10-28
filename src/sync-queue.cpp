@@ -39,6 +39,11 @@ void SyncQueue::clear()
     m_queue.clear();;
 }
 
+QMap<SyncAccount *, QStringList> SyncQueue::values() const
+{
+    return m_queue;
+}
+
 void SyncQueue::push(SyncAccount *account, const QString &serviceName)
 {
     QStringList services = m_queue.value(account);
@@ -53,6 +58,14 @@ void SyncQueue::push(SyncAccount *account, const QString &serviceName)
         m_queue.remove(account);
     } else {
         m_queue.insert(account, services);
+    }
+}
+
+void SyncQueue::push(const QMap<SyncAccount *, QStringList> &values)
+{
+    QMap<SyncAccount *, QStringList>::const_iterator i = values.constBegin();
+    while (i != values.constEnd()) {
+        m_queue.insert(i.key(), i.value());
     }
 }
 

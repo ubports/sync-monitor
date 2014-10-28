@@ -48,7 +48,9 @@ SyncDaemon::SyncDaemon()
     m_provider->load();
 
     m_syncQueue = new SyncQueue();
+    m_offlineQueue = new SyncQueue();
     m_networkStatus = new SyncNetwork(this);
+    connect(m_networkStatus, SIGNAL(onlineChanged(bool)), SLOT(onOnlineStatusChanged(bool)));
 
     m_timeout = new QTimer(this);
     m_timeout->setInterval(DAEMON_SYNC_TIMEOUT);
@@ -60,6 +62,7 @@ SyncDaemon::~SyncDaemon()
 {
     quit();
     delete m_syncQueue;
+    delete m_offlineQueue;
     delete m_networkStatus;
 }
 
@@ -104,6 +107,18 @@ void SyncDaemon::onDataChanged(const QString &serviceName, const QString &source
     }
 }
 
+void SyncDaemon::onOnlineStatusChanged(bool isOnline)
+{
+    if (isOnline) {
+        qDebug() << "Network is online sync pending changes";
+        m_syncQueue->push(m_offlineQueue->values());
+        m_offlineQueue->clear();
+        if (!m_syncing) {
+            sync(true);
+        }
+    }
+}
+
 void SyncDaemon::syncAll(const QString &serviceName, bool runNow)
 {
     Q_FOREACH(SyncAccount *acc, m_accounts.values()) {
@@ -142,7 +157,9 @@ void SyncDaemon::continueSync()
 {
     if (!m_networkStatus->isOnline()) {
         qDebug() << "Device is offline we will skip the sync.";
+        m_offlineQueue->push(m_syncQueue->values());
         m_syncQueue->clear();
+        m_currentAccount = 0;
         Q_EMIT done();
         return;
     }
@@ -420,6 +437,13 @@ void SyncDaemon::quit()
 
     // cancel all sync operation
     while(m_syncQueue->count()) {
+        SyncAccount *acc = m_syncQueue->popNext();
+        acc->cancel();
+        acc->wait();
+        delete acc;
+    }
+
+    while(m_offlineQueue->count()) {
         SyncAccount *acc = m_syncQueue->popNext();
         acc->cancel();
         acc->wait();

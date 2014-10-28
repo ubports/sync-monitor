@@ -71,11 +71,14 @@ private Q_SLOTS:
     void onAccountConfigured(const QString &serviceName);
     void onDataChanged(const QString &serviceName, const QString &sourceName);
 
+    void onOnlineStatusChanged(bool isOnline);
+
 private:
     Accounts::Manager *m_manager;
     QTimer *m_timeout;
     QHash<Accounts::AccountId, SyncAccount*> m_accounts;
     SyncQueue *m_syncQueue;
+    SyncQueue *m_offlineQueue;
     SyncAccount *m_currentAccount;
     QString m_currentServiceName;
     EdsHelper *m_eds;
