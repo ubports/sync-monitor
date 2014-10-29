@@ -221,13 +221,13 @@ void SyncDaemon::run()
 bool SyncDaemon::isPending() const
 {
     // there is a sync request on the buffer
-    return m_syncing;
+    return (m_syncQueue && (m_syncQueue->count() > 0));
 }
 
 bool SyncDaemon::isSyncing() const
 {
     // the sync is happening right now
-    return (m_currentAccount != 0);
+    return (m_syncing && (m_currentAccount != 0));
 }
 
 QStringList SyncDaemon::availableServices() const
