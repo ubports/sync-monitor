@@ -90,7 +90,13 @@ void SyncDBus::onSyncError(SyncAccount *syncAcc, const QString &serviceName, con
 
 void SyncDBus::updateState()
 {
-    QString newState = (m_parent->isSyncing() ? "syncing" : "idle");
+    QString newState = "idle";
+    if (m_parent->isPending()) {
+        newState = "pending";
+    } else if (m_parent->isSyncing()) {
+        newState = "syncing";
+    }
+
     if (newState != m_state) {
         m_state = newState;
         Q_EMIT stateChanged();

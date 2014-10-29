@@ -40,6 +40,7 @@ public:
     SyncDaemon();
     ~SyncDaemon();
     void run();
+    bool isPending() const;
     bool isSyncing() const;
     QStringList availableServices() const;
     QStringList enabledServices() const;
