@@ -113,7 +113,7 @@ void SyncDaemon::onOnlineStatusChanged(bool isOnline)
         qDebug() << "Device is online sync pending changes";
         m_syncQueue->push(m_offlineQueue->values());
         m_offlineQueue->clear();
-        if (!m_syncing) {
+        if (!m_syncing && !m_syncQueue->isEmpty()) {
             sync(true);
         }
     }
