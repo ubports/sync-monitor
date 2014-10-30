@@ -29,6 +29,7 @@ class SyncQueue
 {
 public:
     void push(SyncAccount *account, const QString &serviceName = QString());
+    void push(SyncAccount *account, const QStringList &serviceNames);
     void push(const QMap<SyncAccount*, QStringList> &values);
     QString popNext(SyncAccount **account);
     SyncAccount *popNext();
