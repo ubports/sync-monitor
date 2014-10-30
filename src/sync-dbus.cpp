@@ -78,7 +78,7 @@ void SyncDBus::attach()
     Q_EMIT clientAttached(m_clientCount);
 }
 
-void SyncDBus::deattach()
+void SyncDBus::detach()
 {
     m_clientCount--;
     Q_EMIT clientDeattached(m_clientCount);

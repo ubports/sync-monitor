@@ -55,7 +55,7 @@ SyncMonitorQml::SyncMonitorQml(QObject *parent)
 SyncMonitorQml::~SyncMonitorQml()
 {
     if (m_iface) {
-        m_iface->call("deattach");
+        m_iface->call("detach");
         delete m_iface;
         m_iface = 0;
     }

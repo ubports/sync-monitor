@@ -64,7 +64,7 @@ class SyncDBus : public QDBusAbstractAdaptor
 "      <arg direction=\"in\" type=\"as\"/>\n"
 "    </method>\n"
 "    <method name=\"attach\"/>\n"
-"    <method name=\"deattach\"/>\n"
+"    <method name=\"detach\"/>\n"
 "  </interface>\n"
         "")
     Q_PROPERTY(QString state READ state NOTIFY stateChanged)
@@ -90,7 +90,7 @@ public Q_SLOTS:
     QStringList enabledServices() const;
     QStringList servicesAvailable();
     void attach();
-    void deattach();
+    void detach();
 
 private Q_SLOTS:
     void onSyncStarted(SyncAccount *syncAcc, const QString &serviceName);
