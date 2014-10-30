@@ -1,9 +1,0 @@
-description "sync-monitor"
-author "Renato Oliveira Filho <renato.filho@canonical.com>"
-
-start on started address-book-service and started unity8
-stop on session-end
-
-respawn
-
-exec @CMAKE_INSTALL_FULL_LIBDIR@/sync-monitor/sync-monitor
