@@ -28,39 +28,8 @@ EdsHelper::EdsHelper(QObject *parent,
     qRegisterMetaType<QList<QOrganizerItemId> >("QList<QOrganizerItemId>");
     qRegisterMetaType<QList<QContactId> >("QList<QContactId>");
 
-    m_timeoutTimer.setSingleShot(true);
-
     m_contactEngine = new QContactManager(contactManager, QMap<QString, QString>());
-    connect(m_contactEngine,
-            SIGNAL(contactsAdded(QList<QContactId>)),
-            SLOT(contactChangedFilter(QList<QContactId>)),
-            Qt::QueuedConnection);
-    connect(m_contactEngine,
-            SIGNAL(contactsChanged(QList<QContactId>)),
-            SLOT(contactChangedFilter(QList<QContactId>)),
-            Qt::QueuedConnection);
-    connect(m_contactEngine,
-            SIGNAL(contactsRemoved(QList<QContactId>)),
-            SLOT(contactChanged()),
-            Qt::QueuedConnection);
-    connect(m_contactEngine,
-            SIGNAL(dataChanged()),
-            SLOT(contactDataChanged()),
-            Qt::QueuedConnection);
-
     m_organizerEngine = new QOrganizerManager(organizerManager, QMap<QString, QString>());
-    connect(m_organizerEngine,
-            SIGNAL(itemsAdded(QList<QOrganizerItemId>)),
-            SLOT(calendarChanged(QList<QOrganizerItemId>)), Qt::QueuedConnection);
-    connect(m_organizerEngine,
-            SIGNAL(itemsRemoved(QList<QOrganizerItemId>)),
-            SLOT(calendarChanged(QList<QOrganizerItemId>)), Qt::QueuedConnection);
-    connect(m_organizerEngine,
-            SIGNAL(itemsChanged(QList<QOrganizerItemId>)),
-            SLOT(calendarChanged(QList<QOrganizerItemId>)), Qt::QueuedConnection);
-    connect(m_organizerEngine,
-            SIGNAL(collectionsModified(QList<QPair<QOrganizerCollectionId,QOrganizerManager::Operation> >)),
-            SLOT(calendarCollectionsChanged()));
 }
 
 EdsHelper::~EdsHelper()
@@ -112,6 +81,44 @@ void EdsHelper::flush()
         Q_EMIT dataChanged(CALENDAR_SERVICE_NAME, calendar);
     }
     m_pendingCalendars.clear();
+}
+
+void EdsHelper::setEnabled(bool enabled)
+{
+    if (enabled) {
+        connect(m_contactEngine,
+                SIGNAL(contactsAdded(QList<QContactId>)),
+                SLOT(contactChangedFilter(QList<QContactId>)),
+                Qt::QueuedConnection);
+        connect(m_contactEngine,
+                SIGNAL(contactsChanged(QList<QContactId>)),
+                SLOT(contactChangedFilter(QList<QContactId>)),
+                Qt::QueuedConnection);
+        connect(m_contactEngine,
+                SIGNAL(contactsRemoved(QList<QContactId>)),
+                SLOT(contactChanged()),
+                Qt::QueuedConnection);
+        connect(m_contactEngine,
+                SIGNAL(dataChanged()),
+                SLOT(contactDataChanged()),
+                Qt::QueuedConnection);
+
+        connect(m_organizerEngine,
+                SIGNAL(itemsAdded(QList<QOrganizerItemId>)),
+                SLOT(calendarChanged(QList<QOrganizerItemId>)), Qt::QueuedConnection);
+        connect(m_organizerEngine,
+                SIGNAL(itemsRemoved(QList<QOrganizerItemId>)),
+                SLOT(calendarChanged(QList<QOrganizerItemId>)), Qt::QueuedConnection);
+        connect(m_organizerEngine,
+                SIGNAL(itemsChanged(QList<QOrganizerItemId>)),
+                SLOT(calendarChanged(QList<QOrganizerItemId>)), Qt::QueuedConnection);
+        connect(m_organizerEngine,
+                SIGNAL(collectionsModified(QList<QPair<QOrganizerCollectionId,QOrganizerManager::Operation> >)),
+                SLOT(calendarCollectionsChanged()));
+    } else {
+        m_contactEngine->disconnect(this);
+        m_organizerEngine->disconnect(this);
+    }
 }
 
 void EdsHelper::contactChangedFilter(const QList<QContactId>& contactIds)
@@ -169,18 +176,12 @@ QString EdsHelper::getCollectionIdFromItemId(const QOrganizerItemId &itemId) con
 
 void EdsHelper::contactChanged()
 {
-    if (!m_timeoutTimer.isActive()) {
-        Q_EMIT dataChanged(CONTACTS_SERVICE_NAME, "");
-    }
+    Q_EMIT dataChanged(CONTACTS_SERVICE_NAME, "");
 }
 
 void EdsHelper::contactDataChanged()
 {
-    // The dataChanged signal is fired during the server startup.
-    // Some contact data is loaded async like Avatar, a signal with contactChanged will be fired
-    // late during the server startup. Because of that We will wait for some time before start to
-    // accept contact changes signals, to avoid unnecessary syncs.
-    m_timeoutTimer.start(CHANGE_TIMEOUT);
+    // nothing
 }
 
 void EdsHelper::calendarChanged(const QList<QOrganizerItemId> &itemIds)

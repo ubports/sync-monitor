@@ -23,7 +23,8 @@
 SyncDBus::SyncDBus(const QDBusConnection &connection, SyncDaemon *parent)
     : QDBusAbstractAdaptor(parent),
       m_parent(parent),
-      m_connection(connection)
+      m_connection(connection),
+      m_clientCount(0)
 {
     connect(m_parent, SIGNAL(syncStarted(SyncAccount*,QString)), SLOT(onSyncStarted(SyncAccount*,QString)));
     connect(m_parent, SIGNAL(syncFinished(SyncAccount*,QString)), SLOT(onSyncFinished(SyncAccount*,QString)));
@@ -69,6 +70,18 @@ QStringList SyncDBus::enabledServices() const
 QStringList SyncDBus::servicesAvailable()
 {
     return m_parent->availableServices();
+}
+
+void SyncDBus::attach()
+{
+    m_clientCount++;
+    Q_EMIT clientAttached(m_clientCount);
+}
+
+void SyncDBus::deattach()
+{
+    m_clientCount--;
+    Q_EMIT clientDeattached(m_clientCount);
 }
 
 void SyncDBus::onSyncStarted(SyncAccount *syncAcc, const QString &serviceName)

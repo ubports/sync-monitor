@@ -47,6 +47,7 @@ public:
     void freezeNotify();
     void unfreezeNotify();
     void flush();
+    void setEnabled(bool enabled);
 
 Q_SIGNALS:
     void dataChanged(const QString &serviceName, const QString &sourceName);
@@ -66,7 +67,6 @@ protected:
     virtual QString getCollectionIdFromItemId(const QtOrganizer::QOrganizerItemId &itemId) const;
 
 private:
-    QTimer m_timeoutTimer;
     bool m_freezed;
 
     // cache calendar collections

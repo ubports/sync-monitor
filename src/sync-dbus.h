@@ -63,6 +63,8 @@ class SyncDBus : public QDBusAbstractAdaptor
 "    <method name=\"cancel\">\n"
 "      <arg direction=\"in\" type=\"as\"/>\n"
 "    </method>\n"
+"    <method name=\"attach\"/>\n"
+"    <method name=\"deattach\"/>\n"
 "  </interface>\n"
         "")
     Q_PROPERTY(QString state READ state NOTIFY stateChanged)
@@ -78,6 +80,8 @@ Q_SIGNALS:
     void syncError(const QString &account, const QString &service, const QString &error);
     void stateChanged();
     void enabledServicesChanged();
+    void clientAttached(int count);
+    void clientDeattached(int count);
 
 public Q_SLOTS:
     void sync(QStringList service);
@@ -85,6 +89,8 @@ public Q_SLOTS:
     QString state() const;
     QStringList enabledServices() const;
     QStringList servicesAvailable();
+    void attach();
+    void deattach();
 
 private Q_SLOTS:
     void onSyncStarted(SyncAccount *syncAcc, const QString &serviceName);
@@ -96,6 +102,7 @@ private:
     SyncDaemon *m_parent;
     QDBusConnection m_connection;
     QString m_state;
+    int m_clientCount;
 };
 
 #endif
