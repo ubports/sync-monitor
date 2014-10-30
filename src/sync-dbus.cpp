@@ -31,6 +31,7 @@ SyncDBus::SyncDBus(const QDBusConnection &connection, SyncDaemon *parent)
     connect(m_parent, SIGNAL(syncAboutToStart()), SLOT(updateState()));
     connect(m_parent, SIGNAL(done()), SLOT(updateState()));
     connect(m_parent, SIGNAL(accountsChanged()), SIGNAL(enabledServicesChanged()));
+    connect(m_parent, SIGNAL(isOnlineChanged(bool)), SIGNAL(enabledServicesChanged()));
     updateState();
 }
 
@@ -63,7 +64,12 @@ QString SyncDBus::state() const
 
 QStringList SyncDBus::enabledServices() const
 {
-    return m_parent->enabledServices();
+    // return enabled sercives only in online mode
+    if (m_parent->isOnline()) {
+        return m_parent->enabledServices();
+    } else {
+        return QStringList();
+    }
 }
 
 QStringList SyncDBus::servicesAvailable()

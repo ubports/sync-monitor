@@ -109,6 +109,7 @@ void SyncDaemon::onDataChanged(const QString &serviceName, const QString &source
 
 void SyncDaemon::onOnlineStatusChanged(bool isOnline)
 {
+    Q_EMIT isOnlineChanged(isOnline);
     if (isOnline) {
         qDebug() << "Device is online sync pending changes";
         m_syncQueue->push(m_offlineQueue->values());
@@ -248,6 +249,11 @@ QStringList SyncDaemon::enabledServices() const
         }
     }
     return services.toList();
+}
+
+bool SyncDaemon::isOnline() const
+{
+    return m_networkStatus->isOnline();
 }
 
 void SyncDaemon::addAccount(const AccountId &accountId, bool startSync)

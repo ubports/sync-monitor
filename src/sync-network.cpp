@@ -31,6 +31,7 @@ bool SyncNetwork::isOnline() const
 void SyncNetwork::refresh()
 {
     bool isOnline = m_configManager->isOnline();
+
     // Check if is connected in a wifi or network
     QList<QNetworkConfiguration> activeConfigs = m_configManager->allConfigurations(QNetworkConfiguration::Active);
     Q_FOREACH(const QNetworkConfiguration &config, activeConfigs) {

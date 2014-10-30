@@ -44,6 +44,7 @@ public:
     bool isSyncing() const;
     QStringList availableServices() const;
     QStringList enabledServices() const;
+    bool isOnline() const;
 
 Q_SIGNALS:
     void syncStarted(SyncAccount *syncAcc, const QString &serviceName);
@@ -52,6 +53,7 @@ Q_SIGNALS:
     void syncAboutToStart();
     void done();
     void accountsChanged();
+    void isOnlineChanged(bool isOnline);
 
 public Q_SLOTS:
     void quit();
