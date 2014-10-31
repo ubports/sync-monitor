@@ -34,6 +34,25 @@ bool SyncQueue::isEmpty() const
     return m_queue.isEmpty();
 }
 
+void SyncQueue::clear()
+{
+    m_queue.clear();;
+}
+
+QMap<SyncAccount *, QStringList> SyncQueue::values() const
+{
+    return m_queue;
+}
+
+void SyncQueue::push(SyncAccount *account, const QStringList &serviceNames)
+{
+    if (serviceNames.isEmpty()) {
+        m_queue.remove(account);
+    } else {
+        m_queue.insert(account, serviceNames);
+    }
+}
+
 void SyncQueue::push(SyncAccount *account, const QString &serviceName)
 {
     QStringList services = m_queue.value(account);
@@ -43,11 +62,17 @@ void SyncQueue::push(SyncAccount *account, const QString &serviceName)
     } else if (!services.contains(serviceName)) {
         services.push_back(serviceName);
     }
+    push(account, services);
+}
 
-    if (services.isEmpty()) {
-        m_queue.remove(account);
-    } else {
-        m_queue.insert(account, services);
+void SyncQueue::push(const QMap<SyncAccount *, QStringList> &values)
+{
+    if (!values.isEmpty()) {
+        QMap<SyncAccount *, QStringList>::const_iterator i = values.constBegin();
+        while (i != values.constEnd()) {
+            push(i.key(), i.value());
+            i++;
+        }
     }
 }
 

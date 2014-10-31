@@ -147,6 +147,7 @@ bool SyncAccount::syncService(const QString &serviceName)
     }
 
     if (prepareSession(serviceName)) {
+        Q_ASSERT(m_currentSession);
         QStringMap syncFlags;
         syncFlags.insert(sourceName(serviceName), m_syncMode);
         m_currentSession->sync(syncFlags);
@@ -185,6 +186,10 @@ QStringMap SyncAccount::lastReport(const QString &serviceName) const
 {
     const uint pageSize = 100;
     uint index = 0;
+    if (!m_currentSession) {
+        qDebug() << "Session cancelled";
+        return QStringMap();
+    }
 
     QArrayOfStringMap reports = m_currentSession->reports(index, pageSize);
     if (reports.isEmpty()) {
