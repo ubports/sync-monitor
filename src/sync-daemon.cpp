@@ -62,6 +62,7 @@ SyncDaemon::SyncDaemon()
 SyncDaemon::~SyncDaemon()
 {
     quit();
+    delete m_timeout;
     delete m_syncQueue;
     delete m_offlineQueue;
     delete m_networkStatus;
@@ -312,7 +313,14 @@ void SyncDaemon::sync(SyncAccount *syncAcc, const QString &serviceName, bool run
         if (!m_syncing) {
             sync(runNow);
             Q_EMIT syncAboutToStart();
+            return;
         }
+    }
+
+    // immediately request, force sync to start
+    if (runNow && !isSyncing()) {
+        sync(runNow);
+        Q_EMIT syncAboutToStart();
     }
 }
 
