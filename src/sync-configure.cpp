@@ -166,8 +166,14 @@ bool SyncConfigure::configTarget(const QString &targetName, const QString &servi
         expectedSource = QString("source/addressbook");
     } else if (serviceName == CALENDAR_SERVICE_NAME) {
         expectedSource = QString("source/calendar");
-    } else {
-        expectedSource = QString("source/%1").arg(serviceName);
+    }
+
+    // remove any extra source
+    QStringList keys = config.keys();
+    Q_FOREACH(const QString &key, keys) {
+        if ((key != expectedSource) && key.startsWith("source/")) {
+            config.remove(key);
+        }
     }
 
     bool result = session->saveConfig(targetName, config);
@@ -217,26 +223,38 @@ bool SyncConfigure::configSync(const QString &targetName, const QString &service
     config[""]["printChanges"] = "0";
     config[""]["maxlogdirs"] = "2";
 
-    // remove default sources
-    config.remove("source/addressbook");
-    config.remove("source/calendar");
-    config.remove("source/todo");
-    config.remove("source/memo");
+
+    QString expectedSource;
+    if (serviceName == CONTACTS_SERVICE_NAME) {
+        expectedSource = QString("source/addressbook");
+    } else if (serviceName == CALENDAR_SERVICE_NAME) {
+        expectedSource = QString("source/calendar");
+    }
+
+    QStringMap newConfig = config.take(expectedSource);
+
+    // remove any extra source
+    QStringList keys = config.keys();
+    Q_FOREACH(const QString &key, keys) {
+        if (key.startsWith("source/")) {
+            config.remove(key);
+        }
+    }
 
     // database
-    QString sourceName = QString("%1_uoa_%2").arg(serviceName).arg(accountId);
-    QString sourceFullName = QString("source/%1").arg(sourceName);
-
-    config[sourceFullName]["database"] = m_account->displayName();
+    newConfig["database"] = m_account->displayName();
     if (!clientBackend.isNull()) {
-        config[sourceFullName]["backend"] = clientBackend;
+        newConfig["backend"] = clientBackend;
     }
     //TODO: create one for each database
     if (!clientUri.isNull()) {
-        config[sourceFullName]["uri"] = clientUri;
+        newConfig["uri"] = clientUri;
     }
+    newConfig["sync"] = syncMode;
 
-    config[sourceFullName]["sync"] = syncMode;
+    // insert new source
+    QString sourceName = QString("source/%1_uoa_%2").arg(serviceName).arg(accountId);
+    config.insert(sourceName, newConfig);
 
     bool result = session->saveConfig(targetName, config);
     if (!result) {
