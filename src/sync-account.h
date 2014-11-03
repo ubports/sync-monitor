@@ -62,6 +62,7 @@ public:
     virtual QStringList availableServices() const;
     QStringList enabledServices() const;
     uint lastError() const;
+    void removeConfig();
 
     static QString statusDescription(const QString &status);
 

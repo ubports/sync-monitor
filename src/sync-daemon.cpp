@@ -366,8 +366,9 @@ void SyncDaemon::removeAccountSource()
 void SyncDaemon::destroyAccount()
 {
     QObject *sender = QObject::sender();
-    QObject *acc = sender->property("ACCOUNT").value<QObject*>();
+    SyncAccount *acc =  qobject_cast<SyncAccount*>(sender->property("ACCOUNT").value<QObject*>());
     Q_ASSERT(acc);
+    acc->removeConfig();
     acc->deleteLater();
 }
 

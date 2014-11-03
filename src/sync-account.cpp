@@ -348,6 +348,28 @@ uint SyncAccount::lastError() const
     return m_lastError;
 }
 
+void SyncAccount::removeConfig()
+{
+    QString configPath;
+    Q_FOREACH(const QString &service, m_availabeServices.keys()) {
+        configPath = QString("%1/%2-%3-%4")
+                .arg(QStandardPaths::locate(QStandardPaths::ConfigLocation,
+                                            QStringLiteral("syncevolution"),
+                                            QStandardPaths::LocateDirectory))
+                .arg(m_account->providerName())
+                .arg(service)
+                .arg(m_account->id());
+        QDir configDir(configPath);
+        if (configDir.exists()) {
+            if (configDir.removeRecursively()) {
+                qDebug() << "Config dir removed" << configPath;
+            } else {
+                qWarning() << "Fail to remove config dir" << configPath;
+            }
+        }
+    }
+}
+
 void SyncAccount::onAccountEnabledChanged(const QString &serviceName, bool enabled)
 {
     // empty service name means that the hole account has been enabled/disabled
