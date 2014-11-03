@@ -29,6 +29,8 @@ class SyncQueue
 {
 public:
     void push(SyncAccount *account, const QString &serviceName = QString());
+    void push(SyncAccount *account, const QStringList &serviceNames);
+    void push(const QMap<SyncAccount*, QStringList> &values);
     QString popNext(SyncAccount **account);
     SyncAccount *popNext();
     void remove(SyncAccount *account, const QString &serviceName = QString());
@@ -36,6 +38,8 @@ public:
     bool contains(SyncAccount *account, const QString &serviceName) const;
     int count() const;
     bool isEmpty() const;
+    void clear();
+    QMap<SyncAccount*, QStringList> values() const;
 
 private:
     QMap<SyncAccount*, QStringList> m_queue;

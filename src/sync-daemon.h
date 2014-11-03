@@ -31,6 +31,7 @@ class EdsHelper;
 class ProviderTemplate;
 class SyncQueue;
 class SyncDBus;
+class SyncNetwork;
 
 class SyncDaemon : public QObject
 {
@@ -39,9 +40,11 @@ public:
     SyncDaemon();
     ~SyncDaemon();
     void run();
+    bool isPending() const;
     bool isSyncing() const;
     QStringList availableServices() const;
     QStringList enabledServices() const;
+    bool isOnline() const;
 
 Q_SIGNALS:
     void syncStarted(SyncAccount *syncAcc, const QString &serviceName);
@@ -50,6 +53,7 @@ Q_SIGNALS:
     void syncAboutToStart();
     void done();
     void accountsChanged();
+    void isOnlineChanged(bool isOnline);
 
 public Q_SLOTS:
     void quit();
@@ -70,16 +74,20 @@ private Q_SLOTS:
     void onAccountConfigured(const QString &serviceName);
     void onDataChanged(const QString &serviceName, const QString &sourceName);
 
+    void onOnlineStatusChanged(bool isOnline);
+
 private:
     Accounts::Manager *m_manager;
     QTimer *m_timeout;
     QHash<Accounts::AccountId, SyncAccount*> m_accounts;
     SyncQueue *m_syncQueue;
+    SyncQueue *m_offlineQueue;
     SyncAccount *m_currentAccount;
     QString m_currentServiceName;
     EdsHelper *m_eds;
     ProviderTemplate *m_provider;
     SyncDBus *m_dbusAddaptor;
+    SyncNetwork *m_networkStatus;
     bool m_syncing;
     bool m_aboutToQuit;
     QElapsedTimer m_syncElapsedTime;
