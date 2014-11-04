@@ -142,6 +142,7 @@ bool SyncAccount::syncService(const QString &serviceName)
 {
     bool enabledService = m_availabeServices.value(serviceName, false);
     if (!enabledService) {
+        qDebug() << "Service" << serviceName << "not enabled. Skip sync.";
         setState(SyncAccount::Idle);
         Q_EMIT syncFinished(serviceName, false, "");
         return true;

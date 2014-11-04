@@ -122,8 +122,15 @@ void SyncDaemon::onOnlineStatusChanged(bool isOnline)
             qDebug() << "No change to sync";
         }
     } else {
-        qDebug() << "Device is offline cancel active syncs";
-        cancel();
+        qDebug() << "Device is offline cancel active syncs. There is a sync in progress?" << (m_currentAccount ? "Yes" : "No");
+        if (m_currentAccount) {
+            m_offlineQueue->push(m_currentAccount, m_currentServiceName);
+            m_currentAccount->cancel(m_currentServiceName);
+        }
+        if (m_timeout->isActive()) {
+            m_timeout->stop();
+            continueSync();
+        }
     }
     // make accounts availabel or not based on online status
     Q_EMIT accountsChanged();
