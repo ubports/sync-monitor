@@ -99,6 +99,7 @@ private:
     void setup();
     void sync(bool runNow);
     bool registerService();
+    void syncFinished();
 };
 
 #endif

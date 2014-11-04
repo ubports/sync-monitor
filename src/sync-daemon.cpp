@@ -191,12 +191,9 @@ void SyncDaemon::continueSync()
     if (m_currentAccount) {
         m_currentAccount->sync(m_currentServiceName);
     } else {
-        m_currentAccount = 0;
-        m_currentServiceName.clear();
-        m_syncing = false;
+        syncFinished();
         // The sync has done, unblock notifications
         m_eds->unfreezeNotify();
-        Q_EMIT done();
     }
 }
 
@@ -222,6 +219,16 @@ bool SyncDaemon::registerService()
         }
     }
     return true;
+}
+
+void SyncDaemon::syncFinished()
+{
+    m_timeout->stop();
+    m_currentAccount = 0;
+    m_currentServiceName.clear();
+    m_syncing = false;
+    Q_EMIT done();
+    qDebug() << "All syncs finished";
 }
 
 void SyncDaemon::run()
@@ -307,7 +314,7 @@ void SyncDaemon::sync(SyncAccount *syncAcc, const QString &serviceName, bool run
         (m_currentAccount == syncAcc) && (serviceName.isEmpty() || (serviceName == m_currentServiceName))) {
         qDebug() << "Account aready in the queue";
     } else {
-        qDebug() << "Pushed into queue";
+        qDebug() << "Pushed into queue with immediately sync?" << runNow;
         m_syncQueue->push(syncAcc, serviceName);
         // if not syncing start a full sync
         if (!m_syncing) {
@@ -327,10 +334,12 @@ void SyncDaemon::sync(SyncAccount *syncAcc, const QString &serviceName, bool run
 void SyncDaemon::cancel(SyncAccount *syncAcc, const QString &serviceName)
 {
     m_syncQueue->remove(syncAcc, serviceName);
-    syncAcc->cancel(serviceName);
+    syncAcc->cancel();
     if (m_currentAccount == syncAcc) {
         qDebug() << "Current sync canceled";
         m_currentAccount = 0;
+    } else if (m_syncQueue->isEmpty()) {
+        syncFinished();
     }
     Q_EMIT syncError(syncAcc, serviceName, "canceled");
 }
@@ -438,6 +447,7 @@ void SyncDaemon::onAccountSyncError(const QString &serviceName, int errorCode)
                      .arg(errorCode),
                  acc->iconName(serviceName));
 
+    qWarning() << "Account sync error" << acc->displayName() << serviceName << errorCode;
     Q_EMIT syncError(acc, serviceName, QString(errorCode));
     // sync next account
     continueSync();

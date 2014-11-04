@@ -101,6 +101,7 @@ void SyncAccount::cancel(const QString &serviceName)
     if (m_currentSession) {
         m_currentSession->destroy();
         m_currentSession = 0;
+        setState(SyncAccount::Idle);
     }
 }
 
@@ -426,7 +427,7 @@ void SyncAccount::onSessionProgressChanged(int progress)
 void SyncAccount::onSessionError(uint error)
 {
     qWarning() << "Session error" << error;
-    setState(SyncAccount::Invalid);
+    setState(SyncAccount::Idle);
 }
 
 // configure syncevolution with the necessary information for sync
