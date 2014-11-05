@@ -144,7 +144,7 @@ bool SyncAccount::syncService(const QString &serviceName)
     if (!enabledService) {
         qDebug() << "Service" << serviceName << "not enabled. Skip sync.";
         setState(SyncAccount::Idle);
-        Q_EMIT syncFinished(serviceName, false, "");
+        Q_EMIT syncFinished(serviceName, false, "", "");
         return true;
     }
 
@@ -399,13 +399,14 @@ void SyncAccount::onSessionStatusChanged(const QString &newStatus)
         {
             QString currentServiceName = m_syncServiceName;
             bool firstSync = m_firstSync;
+            QString currentSyncMode = m_syncMode;
 
             m_syncMode.clear();
             m_syncServiceName.clear();
             m_firstSync = false;
             setState(SyncAccount::Idle);
 
-            Q_EMIT syncFinished(currentServiceName, firstSync, lastStatus);
+            Q_EMIT syncFinished(currentServiceName, firstSync, lastStatus, currentSyncMode);
             break;
         }
         default:

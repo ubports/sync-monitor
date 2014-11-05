@@ -68,8 +68,7 @@ public:
 Q_SIGNALS:
     void stateChanged(AccountState newState);
     void syncStarted(const QString &serviceName, bool firstSync);
-    void syncFinished(const QString &serviceName, bool firstSync, const QString &status);
-    void syncError(const QString &serviceName, int errorCode);
+    void syncFinished(const QString &serviceName, bool firstSync, const QString &status, const QString &mode);
     void enableChanged(const QString &serviceName, bool enable);
     void configured(const QString &serviceName);
 
