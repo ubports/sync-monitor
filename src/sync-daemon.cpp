@@ -117,7 +117,8 @@ void SyncDaemon::onOnlineStatusChanged(bool isOnline)
         m_syncQueue->push(m_offlineQueue->values());
         m_offlineQueue->clear();
         if (!m_syncing && !m_syncQueue->isEmpty()) {
-            sync(true);
+            qDebug() << "Will sync in" << DAEMON_SYNC_TIMEOUT / 1000 << "secs;";
+            m_timeout->start();
         } else {
             qDebug() << "No change to sync";
         }
@@ -126,13 +127,14 @@ void SyncDaemon::onOnlineStatusChanged(bool isOnline)
         if (m_currentAccount) {
             m_offlineQueue->push(m_currentAccount, m_currentServiceName);
             m_currentAccount->cancel(m_currentServiceName);
+            qDebug() << "Current account pushed to late sync with sevice" << m_currentServiceName;
         }
         if (m_timeout->isActive()) {
             m_timeout->stop();
-            continueSync();
         }
+        continueSync();
     }
-    // make accounts availabel or not based on online status
+    // make accounts available or not based on online status
     Q_EMIT accountsChanged();
 }
 
@@ -318,8 +320,8 @@ void SyncDaemon::sync(SyncAccount *syncAcc, const QString &serviceName, bool run
 
     // check if the service is already in the sync queue or is the current operation
     if (m_syncQueue->contains(syncAcc, serviceName) ||
-        (m_currentAccount == syncAcc) && (serviceName.isEmpty() || (serviceName == m_currentServiceName))) {
-        qDebug() << "Account aready in the queue";
+        ((m_currentAccount == syncAcc) && (serviceName.isEmpty() || (serviceName == m_currentServiceName))) ) {
+        qDebug() << "Account aready in the queue, ignore request;";
     } else {
         qDebug() << "Pushed into queue with immediately sync?" << runNow;
         m_syncQueue->push(syncAcc, serviceName);
