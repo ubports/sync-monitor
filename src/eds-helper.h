@@ -54,7 +54,7 @@ Q_SIGNALS:
 
 private Q_SLOTS:
     void contactChangedFilter(const QList<QContactId>& contactIds);
-    void contactChanged();
+    void contactChanged(const QString &sourceName = QString());
     void contactDataChanged();
     void calendarChanged(const QList<QOrganizerItemId> &itemIds);
     void contactFetchStateChanged(QContactAbstractRequest::State newState);
@@ -67,6 +67,7 @@ protected:
     virtual QString getCollectionIdFromItemId(const QtOrganizer::QOrganizerItemId &itemId) const;
 
 private:
+    QTimer m_timeoutTimer;
     bool m_freezed;
 
     // cache calendar collections

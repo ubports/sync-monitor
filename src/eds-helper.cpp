@@ -14,7 +14,7 @@
 
 #include "config.h"
 
-#define CHANGE_TIMEOUT      1000
+#define CHANGE_TIMEOUT      3000
 
 using namespace QtOrganizer;
 using namespace QtContacts;
@@ -30,6 +30,8 @@ EdsHelper::EdsHelper(QObject *parent,
 
     m_contactEngine = new QContactManager(contactManager, QMap<QString, QString>());
     m_organizerEngine = new QOrganizerManager(organizerManager, QMap<QString, QString>());
+
+    m_timeoutTimer.setSingleShot(true);
 }
 
 EdsHelper::~EdsHelper()
@@ -68,7 +70,10 @@ void EdsHelper::freezeNotify()
 
 void EdsHelper::unfreezeNotify()
 {
+    m_pendingContacts.clear();
+    m_pendingCalendars.clear();
     m_freezed = false;
+    m_timeoutTimer.start(CHANGE_TIMEOUT);
 }
 
 void EdsHelper::flush()
@@ -157,7 +162,7 @@ void EdsHelper::contactFetchStateChanged(QContactAbstractRequest::State newState
         }
 
         Q_FOREACH(const QString &source, sources) {
-            Q_EMIT dataChanged(CONTACTS_SERVICE_NAME, source);
+            contactChanged(source);
         }
     }
 
@@ -174,14 +179,22 @@ QString EdsHelper::getCollectionIdFromItemId(const QOrganizerItemId &itemId) con
     return itemId.toString().split("/").first();
 }
 
-void EdsHelper::contactChanged()
+void EdsHelper::contactChanged(const QString& sourceName)
 {
-    Q_EMIT dataChanged(CONTACTS_SERVICE_NAME, "");
+    if (!m_timeoutTimer.isActive()) {
+        Q_EMIT dataChanged(CONTACTS_SERVICE_NAME, sourceName);
+    } else {
+        qDebug() << "Ignore contact changed:" << sourceName;
+    }
 }
 
 void EdsHelper::contactDataChanged()
 {
-    // nothing
+    // The dataChanged signal is fired during the server startup.
+    // Some contact data is loaded async like Avatar, a signal with contactChanged will be fired
+    // late during the server startup. Because of that We will wait for some time before start to
+    // accept contact changes signals, to avoid unnecessary syncs.
+    m_timeoutTimer.start(CHANGE_TIMEOUT);
 }
 
 void EdsHelper::calendarChanged(const QList<QOrganizerItemId> &itemIds)

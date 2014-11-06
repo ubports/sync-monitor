@@ -101,6 +101,7 @@ void SyncAccount::cancel(const QString &serviceName)
     if (m_currentSession) {
         m_currentSession->destroy();
         m_currentSession = 0;
+        setState(SyncAccount::Idle);
     }
 }
 
@@ -141,8 +142,9 @@ bool SyncAccount::syncService(const QString &serviceName)
 {
     bool enabledService = m_availabeServices.value(serviceName, false);
     if (!enabledService) {
+        qDebug() << "Service" << serviceName << "not enabled. Skip sync.";
         setState(SyncAccount::Idle);
-        Q_EMIT syncFinished(serviceName, false, "");
+        Q_EMIT syncFinished(serviceName, false, "", "");
         return true;
     }
 
@@ -397,13 +399,14 @@ void SyncAccount::onSessionStatusChanged(const QString &newStatus)
         {
             QString currentServiceName = m_syncServiceName;
             bool firstSync = m_firstSync;
+            QString currentSyncMode = m_syncMode;
 
             m_syncMode.clear();
             m_syncServiceName.clear();
             m_firstSync = false;
             setState(SyncAccount::Idle);
 
-            Q_EMIT syncFinished(currentServiceName, firstSync, lastStatus);
+            Q_EMIT syncFinished(currentServiceName, firstSync, lastStatus, currentSyncMode);
             break;
         }
         default:
@@ -426,7 +429,7 @@ void SyncAccount::onSessionProgressChanged(int progress)
 void SyncAccount::onSessionError(uint error)
 {
     qWarning() << "Session error" << error;
-    setState(SyncAccount::Invalid);
+    setState(SyncAccount::Idle);
 }
 
 // configure syncevolution with the necessary information for sync
