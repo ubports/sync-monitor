@@ -118,6 +118,7 @@ void SyncDaemon::onOnlineStatusChanged(bool isOnline)
         m_offlineQueue->clear();
         if (!m_syncing && !m_syncQueue->isEmpty()) {
             qDebug() << "Will sync in" << DAEMON_SYNC_TIMEOUT / 1000 << "secs;";
+            m_syncing = true;
             m_timeout->start();
         } else {
             qDebug() << "No change to sync";
@@ -183,6 +184,7 @@ void SyncDaemon::continueSync()
         Q_EMIT done();
         return;
     }
+    m_syncing = true;
 
     // flush any change in EDS
     m_eds->flush();
@@ -200,7 +202,7 @@ void SyncDaemon::continueSync()
     if (m_currentAccount) {
         m_currentAccount->sync(m_currentServiceName);
     } else {
-        syncFinished();
+        syncFinishedImpl();
         // The sync has done, unblock notifications
         m_eds->unfreezeNotify();
     }
@@ -230,7 +232,7 @@ bool SyncDaemon::registerService()
     return true;
 }
 
-void SyncDaemon::syncFinished()
+void SyncDaemon::syncFinishedImpl()
 {
     m_timeout->stop();
     m_currentAccount = 0;
@@ -346,7 +348,7 @@ void SyncDaemon::cancel(SyncAccount *syncAcc, const QString &serviceName)
         qDebug() << "Current sync canceled";
         m_currentAccount = 0;
     } else if (m_syncQueue->isEmpty()) {
-        syncFinished();
+        syncFinishedImpl();
     }
     Q_EMIT syncError(syncAcc, serviceName, "canceled");
 }
