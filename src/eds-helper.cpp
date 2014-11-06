@@ -14,7 +14,7 @@
 
 #include "config.h"
 
-#define CHANGE_TIMEOUT      1000
+#define CHANGE_TIMEOUT      3000
 
 using namespace QtOrganizer;
 using namespace QtContacts;
@@ -99,7 +99,10 @@ void EdsHelper::freezeNotify()
 
 void EdsHelper::unfreezeNotify()
 {
+    m_pendingContacts.clear();
+    m_pendingCalendars.clear();
     m_freezed = false;
+    m_timeoutTimer.start(CHANGE_TIMEOUT);
 }
 
 void EdsHelper::flush()
@@ -150,7 +153,7 @@ void EdsHelper::contactFetchStateChanged(QContactAbstractRequest::State newState
         }
 
         Q_FOREACH(const QString &source, sources) {
-            Q_EMIT dataChanged(CONTACTS_SERVICE_NAME, source);
+            contactChanged(source);
         }
     }
 
@@ -167,10 +170,12 @@ QString EdsHelper::getCollectionIdFromItemId(const QOrganizerItemId &itemId) con
     return itemId.toString().split("/").first();
 }
 
-void EdsHelper::contactChanged()
+void EdsHelper::contactChanged(const QString& sourceName)
 {
     if (!m_timeoutTimer.isActive()) {
-        Q_EMIT dataChanged(CONTACTS_SERVICE_NAME, "");
+        Q_EMIT dataChanged(CONTACTS_SERVICE_NAME, sourceName);
+    } else {
+        qDebug() << "Ignore contact changed:" << sourceName;
     }
 }
 
