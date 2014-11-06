@@ -1,3 +1,0 @@
-[D-BUS Service]
-Name=com.canonical.SyncMonitor
-Exec=@CMAKE_INSTALL_FULL_LIBDIR@/sync-monitor/sync-monitor

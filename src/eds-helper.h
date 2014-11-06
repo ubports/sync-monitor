@@ -47,6 +47,7 @@ public:
     void freezeNotify();
     void unfreezeNotify();
     void flush();
+    void setEnabled(bool enabled);
 
 Q_SIGNALS:
     void dataChanged(const QString &serviceName, const QString &sourceName);

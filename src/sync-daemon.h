@@ -72,6 +72,7 @@ private Q_SLOTS:
     void onAccountEnableChanged(const QString &serviceName, bool enabled);
     void onAccountConfigured(const QString &serviceName);
     void onDataChanged(const QString &serviceName, const QString &sourceName);
+    void onClientAttached();
 
     void onOnlineStatusChanged(bool isOnline);
 
@@ -90,6 +91,7 @@ private:
     bool m_syncing;
     bool m_aboutToQuit;
     QElapsedTimer m_syncElapsedTime;
+    bool m_firstClient;
 
     void setupAccounts();
     void setupTriggers();

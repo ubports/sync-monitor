@@ -41,9 +41,10 @@ SyncDaemon::SyncDaemon()
       m_manager(0),
       m_eds(0),
       m_dbusAddaptor(0),
+      m_currentAccount(0),
       m_syncing(false),
       m_aboutToQuit(false),
-      m_currentAccount(0)
+      m_firstClient(true)
 {
     m_provider = new ProviderTemplate();
     m_provider->load();
@@ -107,6 +108,16 @@ void SyncDaemon::onDataChanged(const QString &serviceName, const QString &source
             }
         }
     }
+}
+
+void SyncDaemon::onClientAttached()
+{
+    if (m_firstClient) {
+        m_firstClient = false;
+        // accept eds changes
+        qDebug() << "First client connected, will auto-sync on next EDS change";
+        m_eds->setEnabled(true);
+     }
 }
 
 void SyncDaemon::onOnlineStatusChanged(bool isOnline)
@@ -221,13 +232,13 @@ bool SyncDaemon::registerService()
         }
 
         m_dbusAddaptor = new SyncDBus(connection, this);
-        if (!connection.registerObject(SYNCMONITOR_OBJECT_PATH, this))
-        {
+        if (!connection.registerObject(SYNCMONITOR_OBJECT_PATH, this)) {
             qWarning() << "Could not register object!" << SYNCMONITOR_OBJECT_PATH;
             delete m_dbusAddaptor;
             m_dbusAddaptor = 0;
             return false;
         }
+        connect(m_dbusAddaptor, SIGNAL(clientAttached(int)), SLOT(onClientAttached()));
     }
     return true;
 }
