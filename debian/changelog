@@ -1,3 +1,17 @@
+sync-monitor (0.1+15.04.20141106.1~rtm-0ubuntu1) 14.09; urgency=low
+
+  [ Ubuntu daily release ]
+  * New rebuild forced
+
+  [ Renato Araujo Oliveira Filho ]
+  * Check for network connection before sync. Append sync request to run
+    later if no network. (LP: #1380094)
+  * Do not start sync monitor with upstart. The sync monitor will be
+    started by the dbus service only when requested by apps. (LP:
+    #1384707)
+
+ -- Ubuntu daily release <ps-jenkins@lists.canonical.com>  Thu, 06 Nov 2014 14:17:13 +0000
+
 sync-monitor (0.1+14.10.20140929.1-0ubuntu1) 14.09; urgency=low
 
   [ Ubuntu daily release ]
