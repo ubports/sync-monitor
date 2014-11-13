@@ -17,6 +17,7 @@
  */
 
 #include "notify-message.h"
+#include "sync-i18n.h"
 
 #include <QtCore/QCoreApplication>
 #include <QtCore/QDebug>
@@ -79,12 +80,12 @@ void NotifyMessage::askYesOrNo(const QString &title,
                                         "x-canonical-non-shaped-icon",
                                         "true");
     notify_notification_add_action(m_notification,
-                                   "action_accept", "Yes",
+                                   "action_accept", _("Yes"),
                                    (NotifyActionCallback) NotifyMessage::onQuestionAccepted,
                                    this,
                                    NULL);
     notify_notification_add_action(m_notification,
-                                   "action_reject", "No",
+                                   "action_reject", _("No"),
                                    (NotifyActionCallback) NotifyMessage::onQuestionRejected,
                                    this,
                                    NULL);
