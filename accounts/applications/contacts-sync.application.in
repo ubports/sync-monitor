@@ -2,7 +2,7 @@
 <application id="contacts-sync">
   <_description>Contacts</_description>
   <desktop-entry>sync-monitor-contacts.desktop</desktop-entry>
-  <translations>contacts-sync</translations>
+  <translations>sync-monitor</translations>
 
   <service-types>
     <service-type id="contacts">
