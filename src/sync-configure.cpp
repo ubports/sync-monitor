@@ -162,12 +162,21 @@ bool SyncConfigure::configTarget(const QString &targetName, const QString &servi
     config[""]["maxlogdirs"] = "2";
 
     QString expectedSource;
+    bool isCalendar = false;
     if (serviceName == CONTACTS_SERVICE_NAME) {
         expectedSource = QString("source/addressbook");
     } else if (serviceName == CALENDAR_SERVICE_NAME) {
+        isCalendar = true;
         expectedSource = QString("source/calendar");
     } else {
         expectedSource = QString("source/%1").arg(serviceName);
+    }
+
+    if (isCalendar) {
+        // limit the number of retrieve events to optimize the initial query
+        // one year before
+        QDateTime dt = QDateTime(QDate(QDate::currentDate().year()-1, 1, 1), QTime(0, 0, 0));
+        config[expectedSource]["startDate"] = dt.toString("yyyyMMddThhmmssZ");
     }
 
     bool result = session->saveConfig(targetName, config);
@@ -237,6 +246,7 @@ bool SyncConfigure::configSync(const QString &targetName, const QString &service
     }
 
     config[sourceFullName]["sync"] = syncMode;
+
 
     bool result = session->saveConfig(targetName, config);
     if (!result) {
