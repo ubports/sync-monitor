@@ -116,6 +116,8 @@ void SyncAccount::sync(const QString &serviceName)
             configure(serviceName, m_syncMode);
         } else {
             qWarning() << "Fail to connect with syncevolution";
+            setState(SyncAccount::Idle);
+            Q_EMIT syncFinished(serviceName, false, "", "");
         }
         break;
     default:

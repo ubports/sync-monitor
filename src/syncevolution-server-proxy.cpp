@@ -34,9 +34,6 @@ SyncEvolutionServerProxy::SyncEvolutionServerProxy(QObject *parent)
     m_iface = new QDBusInterface(SYNCEVOLUTION_SERVICE_NAME,
                                  SYNCEVOLUTION_OBJECT_PATH,
                                  SYNCEVOLUTION_IFACE_NAME);
-    if (m_iface->lastError().isValid()) {
-        qWarning() << "Fail to connect with syncevolution service" << m_iface->lastError().message();
-    }
 }
 
 SyncEvolutionServerProxy::~SyncEvolutionServerProxy()

@@ -29,25 +29,22 @@ SyncEvolutionSessionProxy::SyncEvolutionSessionProxy(const QDBusObjectPath &obje
     : QObject(parent)
 {
     m_iface = new QDBusInterface(SYNCEVOLUTION_SERVICE_NAME,
-                             objectPath.path(),
-                             SYNCEVOLUTIOON_SESSION_IFACE_NAME);
-    if (m_iface->lastError().isValid()) {
-        qWarning() << "Fail to create session:" << objectPath.path() << m_iface->lastError().message();
-    } else {
-        m_iface->connection().connect(SYNCEVOLUTION_SERVICE_NAME,
-                                      objectPath.path(),
-                                      SYNCEVOLUTIOON_SESSION_IFACE_NAME,
-                                      "StatusChanged",
-                                      this,
-                                      SLOT(onSessionStatusChanged(QString,uint, QSyncStatusMap)));
+                                 objectPath.path(),
+                                 SYNCEVOLUTIOON_SESSION_IFACE_NAME);
 
-        m_iface->connection().connect(SYNCEVOLUTION_SERVICE_NAME,
-                                      objectPath.path(),
-                                      SYNCEVOLUTIOON_SESSION_IFACE_NAME,
-                                      "ProgressChanged",
-                                      this,
-                                      SLOT(onSessionProgressChanged(int, QSyncProgressMap)));
-    }
+    m_iface->connection().connect(SYNCEVOLUTION_SERVICE_NAME,
+                                  objectPath.path(),
+                                  SYNCEVOLUTIOON_SESSION_IFACE_NAME,
+                                  "StatusChanged",
+                                  this,
+                                  SLOT(onSessionStatusChanged(QString,uint, QSyncStatusMap)));
+
+    m_iface->connection().connect(SYNCEVOLUTION_SERVICE_NAME,
+                                  objectPath.path(),
+                                  SYNCEVOLUTIOON_SESSION_IFACE_NAME,
+                                  "ProgressChanged",
+                                  this,
+                                  SLOT(onSessionProgressChanged(int, QSyncProgressMap)));
 }
 
 QString SyncEvolutionSessionProxy::id() const
