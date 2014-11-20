@@ -174,9 +174,8 @@ bool SyncConfigure::configTarget(const QString &targetName, const QString &servi
 
     if (isCalendar) {
         // limit the number of retrieve events to optimize the initial query
-        // one year before
-        QDateTime dt = QDateTime(QDate(QDate::currentDate().year()-1, 1, 1), QTime(0, 0, 0));
-        config[expectedSource]["startDate"] = dt.toString("yyyyMMddThhmmssZ");
+        // 3 months before
+        config[expectedSource]["syncInterval"] = "90";
     }
 
     bool result = session->saveConfig(targetName, config);
