@@ -14,6 +14,7 @@ pkg_check_modules(ACCOUNTS REQUIRED accounts-qt5>=1.10)
 pkg_check_modules(LIBNOTIFY libnotify)
 
 find_program(INTLTOOL_MERGE_EXECUTABLE intltool-merge)
+find_program(INTLTOOL_EXTRACT_EXECUTABLE intltool-extract)
 
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 set(CMAKE_AUTOMOC ON)
