@@ -1,3 +1,16 @@
+sync-monitor (0.1+15.04.20141121-0ubuntu1) vivid; urgency=low
+
+  [ Ubuntu daily release ]
+  * New rebuild forced
+
+  [ Renato Araujo Oliveira Filho ]
+  * Does not check for last error during the QDBusInterface creation.
+  * Use the new "startDate" filter to limit the number of events
+    retrieved on the first calendar sync.
+  * Add support for i18n. (LP: #1350534)
+
+ -- Ubuntu daily release <ps-jenkins@lists.canonical.com>  Fri, 21 Nov 2014 16:09:30 +0000
+
 sync-monitor (0.1+15.04.20141106.1~rtm-0ubuntu1) 14.09; urgency=low
 
   [ Ubuntu daily release ]
