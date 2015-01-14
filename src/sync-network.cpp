@@ -9,6 +9,9 @@ SyncNetwork::SyncNetwork(QObject *parent)
 {
     refresh();
     connect(m_configManager.data(),
+            SIGNAL(onlineStateChanged(bool)),
+            SLOT(refresh()));
+    connect(m_configManager.data(),
             SIGNAL(configurationAdded(QNetworkConfiguration)),
             SLOT(refresh()));
     connect(m_configManager.data(),
@@ -30,16 +33,19 @@ bool SyncNetwork::isOnline() const
 
 void SyncNetwork::refresh()
 {
-    bool isOnline = m_configManager->isOnline();
-
-    // Check if is connected in a wifi or network
+    // Check if is online
     QList<QNetworkConfiguration> activeConfigs = m_configManager->allConfigurations(QNetworkConfiguration::Active);
-    Q_FOREACH(const QNetworkConfiguration &config, activeConfigs) {
-        if ((config.bearerType() > 0) && (config.bearerType() <= QNetworkConfiguration::BearerWLAN)) {
+    bool isOnline = activeConfigs.size() > 0;
+    if (isOnline) {
+        // Check if the connection is wifi or ethernet
+        QNetworkConfiguration defaultConfig = m_configManager->defaultConfiguration();
+        if ((defaultConfig.bearerType() > 0) &&
+            (defaultConfig.bearerType() <= QNetworkConfiguration::BearerWLAN)) {
             isOnline = true;
         } else {
             // if the connection is not wifi or ethernet it will consider it as offline
             isOnline = false;
+            qDebug() << "Device is online but the current connection is not wifi:" << defaultConfig.bearerTypeName();
         }
     }
 
