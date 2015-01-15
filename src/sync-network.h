@@ -20,6 +20,7 @@
 #define __SYNC_NETWORK_H__
 
 #include <QtCore/QScopedPointer>
+#include <QtCore/QTimer>
 #include <QtNetwork/QNetworkConfigurationManager>
 
 
@@ -38,16 +39,19 @@ public:
     ~SyncNetwork();
 
     NetworkState state() const;
+    void setState(NetworkState newState);
 
 Q_SIGNALS:
     void stateChanged(SyncNetwork::NetworkState state);
 
 private Q_SLOTS:
     void refresh();
+    void idleRefresh();
 
 private:
     QScopedPointer<QNetworkConfigurationManager> m_configManager;
     NetworkState m_state;
+    QTimer m_idleRefresh;
 };
 
 #endif
