@@ -177,7 +177,7 @@ void SyncDaemon::sync(bool runNow)
     m_syncing = true;
     if (runNow) {
         m_timeout->stop();
-        continueSync();
+        continueSync(runNow);
     } else {
         // wait some time for new sync requests
         m_timeout->start();
@@ -189,7 +189,7 @@ void SyncDaemon::continueSync(bool runNow)
     SyncNetwork::NetworkState netState = m_networkStatus->state();
     bool continueSync = (netState == SyncNetwork::NetworkOnline) ||
                         (netState != SyncNetwork::NetworkOffline && runNow);
-    if (continueSync) {
+    if (!continueSync) {
         qDebug() << "Device is offline we will skip the sync.";
         m_offlineQueue->push(m_syncQueue->values());
         m_syncQueue->clear();
