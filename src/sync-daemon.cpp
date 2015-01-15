@@ -52,7 +52,7 @@ SyncDaemon::SyncDaemon()
     m_syncQueue = new SyncQueue();
     m_offlineQueue = new SyncQueue();
     m_networkStatus = new SyncNetwork(this);
-    connect(m_networkStatus, SIGNAL(onlineChanged(bool)), SLOT(onOnlineStatusChanged(bool)));
+    connect(m_networkStatus, SIGNAL(stateChanged(SyncNetwork::NetworkState)), SLOT(onOnlineStatusChanged(SyncNetwork::NetworkState)));
 
     m_timeout = new QTimer(this);
     m_timeout->setInterval(DAEMON_SYNC_TIMEOUT);
@@ -120,10 +120,10 @@ void SyncDaemon::onClientAttached()
      }
 }
 
-void SyncDaemon::onOnlineStatusChanged(bool isOnline)
+void SyncDaemon::onOnlineStatusChanged(SyncNetwork::NetworkState state)
 {
-    Q_EMIT isOnlineChanged(isOnline);
-    if (isOnline) {
+    Q_EMIT isOnlineChanged(state != SyncNetwork::NetworkOffline);
+    if (state == SyncNetwork::NetworkOnline) {
         qDebug() << "Device is online sync pending changes" << m_offlineQueue->count();
         m_syncQueue->push(m_offlineQueue->values());
         m_offlineQueue->clear();
@@ -134,7 +134,7 @@ void SyncDaemon::onOnlineStatusChanged(bool isOnline)
         } else {
             qDebug() << "No change to sync";
         }
-    } else {
+    } else if (state == SyncNetwork::NetworkOffline) {
         qDebug() << "Device is offline cancel active syncs. There is a sync in progress?" << (m_currentAccount ? "Yes" : "No");
         if (m_currentAccount) {
             m_offlineQueue->push(m_currentAccount, m_currentServiceName);
@@ -184,9 +184,12 @@ void SyncDaemon::sync(bool runNow)
     }
 }
 
-void SyncDaemon::continueSync()
+void SyncDaemon::continueSync(bool runNow)
 {
-    if (!m_networkStatus->isOnline()) {
+    SyncNetwork::NetworkState netState = m_networkStatus->state();
+    bool continueSync = (netState == SyncNetwork::NetworkOnline) ||
+                        (netState != SyncNetwork::NetworkOffline && runNow);
+    if (continueSync) {
         qDebug() << "Device is offline we will skip the sync.";
         m_offlineQueue->push(m_syncQueue->values());
         m_syncQueue->clear();
@@ -296,7 +299,7 @@ QStringList SyncDaemon::enabledServices() const
 
 bool SyncDaemon::isOnline() const
 {
-    return m_networkStatus->isOnline();
+    return m_networkStatus->state() != SyncNetwork::NetworkOffline;
 }
 
 void SyncDaemon::addAccount(const AccountId &accountId, bool startSync)

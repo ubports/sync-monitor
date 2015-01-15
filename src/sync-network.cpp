@@ -5,7 +5,7 @@
 SyncNetwork::SyncNetwork(QObject *parent)
     : QObject(parent),
       m_configManager(new QNetworkConfigurationManager(this)),
-      m_isOnline(false)
+      m_state(SyncNetwork::NetworkOffline)
 {
     refresh();
     connect(m_configManager.data(),
@@ -26,9 +26,9 @@ SyncNetwork::~SyncNetwork()
 {
 }
 
-bool SyncNetwork::isOnline() const
+SyncNetwork::NetworkState SyncNetwork::state() const
 {
-    return m_isOnline;
+    return m_state;
 }
 
 void SyncNetwork::refresh()
@@ -36,22 +36,24 @@ void SyncNetwork::refresh()
     // Check if is online
     QList<QNetworkConfiguration> activeConfigs = m_configManager->allConfigurations(QNetworkConfiguration::Active);
     bool isOnline = activeConfigs.size() > 0;
+    SyncNetwork::NetworkState newState = SyncNetwork::NetworkOffline;
     if (isOnline) {
         // Check if the connection is wifi or ethernet
         QNetworkConfiguration defaultConfig = m_configManager->defaultConfiguration();
         if ((defaultConfig.bearerType() > 0) &&
             (defaultConfig.bearerType() <= QNetworkConfiguration::BearerWLAN)) {
-            isOnline = true;
+            newState = SyncNetwork::NetworkOnline;
         } else {
             // if the connection is not wifi or ethernet it will consider it as offline
-            isOnline = false;
+            newState = SyncNetwork::NetworkPartialOnline;
             qDebug() << "Device is online but the current connection is not wifi:" << defaultConfig.bearerTypeName();
         }
     }
 
-    if (m_isOnline != isOnline) {
-        m_isOnline = isOnline;
-        qDebug() << "Network state changed:" << (m_isOnline ? "Online" : "Offline");
-        Q_EMIT onlineChanged(m_isOnline);
+    if (m_state != newState) {
+        m_state = newState;
+        qDebug() << "Network state changed:" << (newState == SyncNetwork::NetworkOffline ? "Offline" :
+                                                 newState == SyncNetwork::NetworkPartialOnline ? "Partial online" : "Online");
+        Q_EMIT stateChanged(m_state);
     }
 }

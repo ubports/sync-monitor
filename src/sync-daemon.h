@@ -26,12 +26,13 @@
 
 #include <Accounts/Manager>
 
+#include "sync-network.h"
+
 class SyncAccount;
 class EdsHelper;
 class ProviderTemplate;
 class SyncQueue;
 class SyncDBus;
-class SyncNetwork;
 
 class SyncDaemon : public QObject
 {
@@ -61,7 +62,7 @@ public Q_SLOTS:
     void cancel(const QString &serviceName = QString());
 
 private Q_SLOTS:
-    void continueSync();
+    void continueSync(bool runNow = false);
     void addAccount(const Accounts::AccountId &accountId, bool startSync=true);
     void removeAccount(const Accounts::AccountId &accountId);
     void removeAccountSource();
@@ -74,7 +75,7 @@ private Q_SLOTS:
     void onDataChanged(const QString &serviceName, const QString &sourceName);
     void onClientAttached();
 
-    void onOnlineStatusChanged(bool isOnline);
+    void onOnlineStatusChanged(SyncNetwork::NetworkState state);
 
 private:
     Accounts::Manager *m_manager;
