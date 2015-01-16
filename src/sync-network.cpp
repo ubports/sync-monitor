@@ -65,8 +65,9 @@ void SyncNetwork::idleRefresh()
     if (isOnline) {
         // Check if the connection is wifi or ethernet
         QNetworkConfiguration defaultConfig = m_configManager->defaultConfiguration();
-        if (defaultConfig.isValid() && (defaultConfig.bearerType() != QNetworkConfiguration::BearerUnknown)) {
-            if (defaultConfig.bearerType() <= QNetworkConfiguration::BearerWLAN) {
+        if (defaultConfig.isValid()) {
+            if ((defaultConfig.bearerType() == QNetworkConfiguration::BearerWLAN) ||
+                (defaultConfig.bearerType() == QNetworkConfiguration::BearerEthernet)) {
                 newState = SyncNetwork::NetworkOnline;
             } else {
                 // if the connection is not wifi or ethernet it will consider it as offline
