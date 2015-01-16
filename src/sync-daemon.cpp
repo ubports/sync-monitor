@@ -197,6 +197,8 @@ void SyncDaemon::continueSync(bool runNow)
         m_syncing = false;
         Q_EMIT done();
         return;
+    } else {
+
     }
     m_syncing = true;
 
@@ -214,6 +216,8 @@ void SyncDaemon::continueSync(bool runNow)
     }
 
     if (m_currentAccount) {
+        // remove sync reqeust from offline queue
+        m_offlineQueue->remove(m_currentAccount, m_currentServiceName);
         m_currentAccount->sync(m_currentServiceName);
     } else {
         syncFinishedImpl();
