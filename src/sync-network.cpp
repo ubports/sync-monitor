@@ -12,19 +12,19 @@ SyncNetwork::SyncNetwork(QObject *parent)
 
     connect(m_configManager.data(),
             SIGNAL(onlineStateChanged(bool)),
-            SLOT(refresh()));
+            SLOT(refresh()), Qt::QueuedConnection);
     connect(m_configManager.data(),
             SIGNAL(configurationAdded(QNetworkConfiguration)),
-            SLOT(refresh()));
+            SLOT(refresh()), Qt::QueuedConnection);
     connect(m_configManager.data(),
             SIGNAL(configurationChanged(QNetworkConfiguration)),
-            SLOT(refresh()));
+            SLOT(refresh()), Qt::QueuedConnection);
     connect(m_configManager.data(),
             SIGNAL(configurationRemoved(QNetworkConfiguration)),
-            SLOT(refresh()));
+            SLOT(refresh()), Qt::QueuedConnection);
     connect(m_configManager.data(),
             SIGNAL(updateCompleted()),
-            SLOT(refresh()));
+            SLOT(refresh()), Qt::QueuedConnection);
 
     m_idleRefresh.setSingleShot(true);
     connect(&m_idleRefresh,
@@ -58,6 +58,7 @@ void SyncNetwork::refresh()
 
 void SyncNetwork::idleRefresh()
 {
+
     // Check if is online
     QList<QNetworkConfiguration> activeConfigs = m_configManager->allConfigurations(QNetworkConfiguration::Active);
     SyncNetwork::NetworkState newState = SyncNetwork::NetworkOffline;
