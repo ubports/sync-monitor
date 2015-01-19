@@ -44,7 +44,8 @@ SyncDaemon::SyncDaemon()
       m_currentAccount(0),
       m_syncing(false),
       m_aboutToQuit(false),
-      m_firstClient(true)
+      m_firstClient(true),
+      m_syncOnMobileData(false)
 {
     m_provider = new ProviderTemplate();
     m_provider->load();
@@ -152,6 +153,8 @@ void SyncDaemon::onOnlineStatusChanged(SyncNetwork::NetworkState state)
 
 void SyncDaemon::syncAll(const QString &serviceName, bool runNow)
 {
+    // if runNow is set we will sync all accounts
+    m_syncOnMobileData = runNow;
     Q_FOREACH(SyncAccount *acc, m_accounts.values()) {
         if (serviceName.isEmpty()) {
             sync(acc, QString(), runNow);
@@ -177,28 +180,24 @@ void SyncDaemon::sync(bool runNow)
     m_syncing = true;
     if (runNow) {
         m_timeout->stop();
-        continueSync(runNow);
+        continueSync();
     } else {
         // wait some time for new sync requests
         m_timeout->start();
     }
 }
 
-void SyncDaemon::continueSync(bool runNow)
+void SyncDaemon::continueSync()
 {
     SyncNetwork::NetworkState netState = m_networkStatus->state();
     bool continueSync = (netState == SyncNetwork::NetworkOnline) ||
-                        (netState != SyncNetwork::NetworkOffline && runNow);
+                        (netState != SyncNetwork::NetworkOffline && m_syncOnMobileData);
     if (!continueSync) {
         qDebug() << "Device is offline we will skip the sync.";
         m_offlineQueue->push(m_syncQueue->values());
         m_syncQueue->clear();
-        m_currentAccount = 0;
-        m_syncing = false;
-        Q_EMIT done();
+        syncFinishedImpl();
         return;
-    } else {
-
     }
     m_syncing = true;
 
@@ -256,6 +255,7 @@ void SyncDaemon::syncFinishedImpl()
     m_currentAccount = 0;
     m_currentServiceName.clear();
     m_syncing = false;
+    m_syncOnMobileData = false;
     Q_EMIT done();
     qDebug() << "All syncs finished";
 }

@@ -62,7 +62,7 @@ public Q_SLOTS:
     void cancel(const QString &serviceName = QString());
 
 private Q_SLOTS:
-    void continueSync(bool runNow = false);
+    void continueSync();
     void addAccount(const Accounts::AccountId &accountId, bool startSync=true);
     void removeAccount(const Accounts::AccountId &accountId);
     void removeAccountSource();
@@ -93,6 +93,7 @@ private:
     bool m_aboutToQuit;
     QElapsedTimer m_syncElapsedTime;
     bool m_firstClient;
+    bool m_syncOnMobileData;
 
     void setupAccounts();
     void setupTriggers();
