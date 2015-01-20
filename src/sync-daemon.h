@@ -62,7 +62,7 @@ public Q_SLOTS:
     void cancel(const QString &serviceName = QString());
 
 private Q_SLOTS:
-    void continueSync();
+    void continueSync(bool syncNow=false);
     void addAccount(const Accounts::AccountId &accountId, bool startSync=true);
     void removeAccount(const Accounts::AccountId &accountId);
     void removeAccountSource();

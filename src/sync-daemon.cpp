@@ -180,18 +180,19 @@ void SyncDaemon::sync(bool runNow)
     m_syncing = true;
     if (runNow) {
         m_timeout->stop();
-        continueSync();
+        continueSync(runNow);
     } else {
         // wait some time for new sync requests
         m_timeout->start();
     }
 }
 
-void SyncDaemon::continueSync()
+void SyncDaemon::continueSync(bool syncNow)
 {
     SyncNetwork::NetworkState netState = m_networkStatus->state();
     bool continueSync = (netState == SyncNetwork::NetworkOnline) ||
-                        (netState != SyncNetwork::NetworkOffline && m_syncOnMobileData);
+                        (netState != SyncNetwork::NetworkOffline &&
+                         (m_syncOnMobileData || syncNow));
     if (!continueSync) {
         qDebug() << "Device is offline we will skip the sync.";
         m_offlineQueue->push(m_syncQueue->values());
