@@ -25,24 +25,46 @@
 
 class SyncAccount;
 
+class SyncJob
+{
+public:
+    SyncJob();
+    SyncJob(SyncAccount *account, const QString &serviceName, bool runOnPayedConnection);
+
+    SyncAccount *account() const;
+    QString serviceName() const;
+    bool runOnPayedConnection() const;
+    bool operator==(const SyncJob &other) const;
+    bool isValid() const;
+
+private:
+    SyncAccount *m_account;
+    QString m_serviceName;
+    bool m_runOnPayedConnection;
+};
+
 class SyncQueue
 {
 public:
-    void push(SyncAccount *account, const QString &serviceName = QString());
-    void push(SyncAccount *account, const QStringList &serviceNames);
-    void push(const QMap<SyncAccount*, QStringList> &values);
-    QString popNext(SyncAccount **account);
-    SyncAccount *popNext();
+    SyncJob popNext();
+
+    void push(const SyncQueue &other);
+    void push(const SyncJob &job);
+    void push(SyncAccount *account, const QString &serviceName, bool syncOnPayedConnection);
+    void push(SyncAccount *account, const QStringList &serviceNames = QStringList(), bool syncOnPayedConnection = false);
+
+    bool contains(const SyncJob &otherJob) const;
+    bool contains(SyncAccount *account, const QString &serviceName) const;
+
     void remove(SyncAccount *account, const QString &serviceName = QString());
 
-    bool contains(SyncAccount *account, const QString &serviceName) const;
     int count() const;
     bool isEmpty() const;
     void clear();
-    QMap<SyncAccount*, QStringList> values() const;
+    QList<SyncJob> jobs() const;
 
 private:
-    QMap<SyncAccount*, QStringList> m_queue;
+    QList<SyncJob> m_jobs;
 };
 
 

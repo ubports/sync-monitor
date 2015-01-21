@@ -21,110 +21,135 @@
 
 int SyncQueue::count() const
 {
-    QList<QStringList > values = m_queue.values();
-    int size = 0;
-    for(int i=0; i < values.size(); i++) {
-        size += values[i].size();
-    }
-    return size;
+    return m_jobs.count();
 }
 
 bool SyncQueue::isEmpty() const
 {
-    return m_queue.isEmpty();
+    return m_jobs.isEmpty();
 }
 
 void SyncQueue::clear()
 {
-    m_queue.clear();;
+    m_jobs.clear();;
 }
 
-QMap<SyncAccount *, QStringList> SyncQueue::values() const
+QList<SyncJob>  SyncQueue::jobs() const
 {
-    return m_queue;
+    return m_jobs;
 }
 
-void SyncQueue::push(SyncAccount *account, const QStringList &serviceNames)
+void SyncQueue::push(SyncAccount *account,
+                     const QStringList &serviceNames,
+                     bool syncOnPayedConnection)
 {
+    QStringList newServices;
     if (serviceNames.isEmpty()) {
-        m_queue.remove(account);
+        newServices = account->availableServices();
     } else {
-        m_queue.insert(account, serviceNames);
+        newServices = serviceNames;
+    }
+
+    Q_FOREACH(const QString &serviceName, newServices) {
+        SyncJob job(account, serviceName, syncOnPayedConnection);
+        push(job);
     }
 }
 
-void SyncQueue::push(SyncAccount *account, const QString &serviceName)
+void SyncQueue::push(SyncAccount *account,
+                     const QString &serviceName,
+                     bool syncOnPayedConnection)
 {
-    QStringList services = m_queue.value(account);
-    if (serviceName.isEmpty()) {
-        // empty serviceName means all services
-        services = account->availableServices();
-    } else if (!services.contains(serviceName)) {
-        services.push_back(serviceName);
+    QStringList services;
+    if (!serviceName.isEmpty()) {
+        services << serviceName;
     }
-    push(account, services);
+    push(account, services, syncOnPayedConnection);
 }
 
-void SyncQueue::push(const QMap<SyncAccount *, QStringList> &values)
+void SyncQueue::push(const SyncQueue &other)
 {
-    if (!values.isEmpty()) {
-        QMap<SyncAccount *, QStringList>::const_iterator i = values.constBegin();
-        while (i != values.constEnd()) {
-            push(i.key(), i.value());
-            i++;
-        }
+    Q_FOREACH(const SyncJob &job, other.jobs()) {
+        push(job);
     }
+}
+
+void SyncQueue::push(const SyncJob &job)
+{
+    if (!contains(job)) {
+        m_jobs << job;
+    }
+}
+
+bool SyncQueue::contains(const SyncJob &otherJob) const
+{
+    return contains(otherJob.account(), otherJob.serviceName());
 }
 
 bool SyncQueue::contains(SyncAccount *account, const QString &serviceName) const
 {
-    if (serviceName.isEmpty()) {
-        return m_queue.contains(account);
-    } else {
-        QStringList services = m_queue.value(account);
-        return services.contains(serviceName);
+    Q_FOREACH(const SyncJob &job, m_jobs) {
+        if ((job.account() == account) &&
+            (serviceName.isEmpty() || (job.serviceName() == serviceName))) {
+            return true;
+        }
     }
+    return false;
 }
 
-QString SyncQueue::popNext(SyncAccount **account)
+SyncJob SyncQueue::popNext()
 {
-    if (m_queue.isEmpty()) {
-        *account = 0;
-        return QString();
+    if (m_jobs.isEmpty()) {
+        return SyncJob();
     }
-
-    *account = m_queue.keys().first();
-    QStringList services = m_queue.value(*account);
-    QString nextService = *(services.begin());
-    if (services.size() == 1) {
-        m_queue.remove(*account);
-    } else {
-        services.removeOne(nextService);
-        m_queue.insert(*account, services);
-    }
-    return nextService;
-}
-
-SyncAccount *SyncQueue::popNext()
-{
-    SyncAccount *acc = m_queue.keys().first();
-    m_queue.remove(acc);
-    return acc;
+    return m_jobs.takeFirst();
 }
 
 void SyncQueue::remove(SyncAccount *account, const QString &serviceName)
 {
-    if (serviceName.isEmpty()) {
-        m_queue.remove(account);
-    } else {
-        QStringList services = m_queue.value(account);
-        if (services.contains(serviceName)) {
-            if (services.size() == 1) {
-                m_queue.remove(account);
-            } else {
-                services.removeOne(serviceName);
-                m_queue.insert(account, services);
-            }
+    QList<SyncJob> newList = m_jobs;
+    for(int i=0; i < m_jobs.count(); i++) {
+        const SyncJob &job =  m_jobs[i];
+        if ((job.account() == account) &&
+            (serviceName.isEmpty() || (job.serviceName() == serviceName))) {
+                newList.removeOne(job);
         }
     }
+
+    m_jobs = newList;
+}
+
+
+SyncJob::SyncJob()
+{
+}
+
+SyncJob::SyncJob(SyncAccount *account, const QString &serviceName, bool runOnPayedConnection)
+    : m_account(account), m_serviceName(serviceName), m_runOnPayedConnection(runOnPayedConnection)
+{
+}
+
+SyncAccount *SyncJob::account() const
+{
+    return m_account;
+}
+
+QString SyncJob::serviceName() const
+{
+    return m_serviceName;
+}
+
+bool SyncJob::runOnPayedConnection() const
+{
+    return m_runOnPayedConnection;
+}
+
+bool SyncJob::operator==(const SyncJob &other) const
+{
+    return (m_account == other.account()) && (m_serviceName == other.serviceName());
+}
+
+bool SyncJob::isValid() const
+{
+    return ((m_account != 0) && !m_serviceName.isEmpty());
 }

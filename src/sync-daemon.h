@@ -26,12 +26,13 @@
 
 #include <Accounts/Manager>
 
+#include "sync-network.h"
+
 class SyncAccount;
 class EdsHelper;
 class ProviderTemplate;
 class SyncQueue;
 class SyncDBus;
-class SyncNetwork;
 
 class SyncDaemon : public QObject
 {
@@ -74,7 +75,7 @@ private Q_SLOTS:
     void onDataChanged(const QString &serviceName, const QString &sourceName);
     void onClientAttached();
 
-    void onOnlineStatusChanged(bool isOnline);
+    void onOnlineStatusChanged(SyncNetwork::NetworkState state);
 
 private:
     Accounts::Manager *m_manager;
