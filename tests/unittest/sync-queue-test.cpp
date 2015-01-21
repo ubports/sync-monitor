@@ -31,6 +31,7 @@ class SyncQueueTest : public QObject
     Q_OBJECT
 
 private Q_SLOTS:
+
     void testRegisterNewAccount()
     {
         QStringList expectedServices;
@@ -156,33 +157,28 @@ private Q_SLOTS:
              .WillRepeatedly(::testing::Return(expectedServices));
 
         queue.push(&account);
-        queue.push(&account2);
-
-        SyncAccountMock *nextAccount;
-        QString serviceName;
+        queue.push(&account2,"", false);
 
         // account with contacts
-        serviceName = queue.popNext(reinterpret_cast<SyncAccount**>(&nextAccount));
-        QCOMPARE(serviceName, expectedServices.first());
-        QVERIFY(nextAccount == &account);
+        SyncJob job = queue.popNext();
+        QCOMPARE(job.serviceName(), expectedServices.first());
+        QVERIFY(job.account() == &account);
 
         // account with calendar
-        serviceName = queue.popNext(reinterpret_cast<SyncAccount**>(&nextAccount));
-        QCOMPARE(serviceName, expectedServices[1]);
-        QVERIFY(nextAccount == &account);
+        job = queue.popNext();
+        QCOMPARE(job.serviceName(), expectedServices[1]);
+        QVERIFY(job.account() == &account);
 
         // account2 with contacts
-        serviceName = queue.popNext(reinterpret_cast<SyncAccount**>(&nextAccount));
-        QCOMPARE(serviceName, expectedServices.first());
-        QVERIFY(nextAccount == &account2);
+        job = queue.popNext();
+        QCOMPARE(job.serviceName(), expectedServices.first());
+        QVERIFY(job.account() == &account2);
 
         // acount2 with calendar
-        serviceName = queue.popNext(reinterpret_cast<SyncAccount**>(&nextAccount));
-        QCOMPARE(serviceName, expectedServices[1]);
-        QVERIFY(nextAccount == &account2);
+        job = queue.popNext();
+        QCOMPARE(job.serviceName(), expectedServices[1]);
+        QVERIFY(job.account() == &account2);
     }
-
-
 };
 
 int main(int argc, char *argv[])

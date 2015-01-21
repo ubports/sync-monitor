@@ -44,8 +44,7 @@ SyncDaemon::SyncDaemon()
       m_currentAccount(0),
       m_syncing(false),
       m_aboutToQuit(false),
-      m_firstClient(true),
-      m_syncOnMobileData(false)
+      m_firstClient(true)
 {
     m_provider = new ProviderTemplate();
     m_provider->load();
@@ -126,7 +125,7 @@ void SyncDaemon::onOnlineStatusChanged(SyncNetwork::NetworkState state)
     Q_EMIT isOnlineChanged(state != SyncNetwork::NetworkOffline);
     if (state == SyncNetwork::NetworkOnline) {
         qDebug() << "Device is online sync pending changes" << m_offlineQueue->count();
-        m_syncQueue->push(m_offlineQueue->values());
+        m_syncQueue->push(*m_offlineQueue);
         m_offlineQueue->clear();
         if (!m_syncing && !m_syncQueue->isEmpty()) {
             qDebug() << "Will sync in" << DAEMON_SYNC_TIMEOUT / 1000 << "secs;";
@@ -138,7 +137,7 @@ void SyncDaemon::onOnlineStatusChanged(SyncNetwork::NetworkState state)
     } else if (state == SyncNetwork::NetworkOffline) {
         qDebug() << "Device is offline cancel active syncs. There is a sync in progress?" << (m_currentAccount ? "Yes" : "No");
         if (m_currentAccount) {
-            m_offlineQueue->push(m_currentAccount, m_currentServiceName);
+            m_offlineQueue->push(m_currentAccount, m_currentServiceName, false);
             m_currentAccount->cancel(m_currentServiceName);
             qDebug() << "Current account pushed to late sync with sevice" << m_currentServiceName;
         }
@@ -154,7 +153,6 @@ void SyncDaemon::onOnlineStatusChanged(SyncNetwork::NetworkState state)
 void SyncDaemon::syncAll(const QString &serviceName, bool runNow)
 {
     // if runNow is set we will sync all accounts
-    m_syncOnMobileData = runNow;
     Q_FOREACH(SyncAccount *acc, m_accounts.values()) {
         if (serviceName.isEmpty()) {
             sync(acc, QString(), runNow);
@@ -175,27 +173,16 @@ void SyncDaemon::cancel(const QString &serviceName)
     }
 }
 
-void SyncDaemon::sync(bool runNow)
+void SyncDaemon::continueSync()
 {
-    m_syncing = true;
-    if (runNow) {
-        m_timeout->stop();
-        continueSync(runNow);
-    } else {
-        // wait some time for new sync requests
-        m_timeout->start();
-    }
-}
-
-void SyncDaemon::continueSync(bool syncNow)
-{
+    SyncJob job = m_syncQueue->popNext();
     SyncNetwork::NetworkState netState = m_networkStatus->state();
     bool continueSync = (netState == SyncNetwork::NetworkOnline) ||
-                        (netState != SyncNetwork::NetworkOffline &&
-                         (m_syncOnMobileData || syncNow));
+                        (netState != SyncNetwork::NetworkOffline && job.runOnPayedConnection());
     if (!continueSync) {
         qDebug() << "Device is offline we will skip the sync.";
-        m_offlineQueue->push(m_syncQueue->values());
+        m_offlineQueue->push(*m_syncQueue);
+        m_offlineQueue->push(job);
         m_syncQueue->clear();
         syncFinishedImpl();
         return;
@@ -209,8 +196,9 @@ void SyncDaemon::continueSync(bool syncNow)
     m_eds->freezeNotify();
 
     // sync the next service on the queue
-    if (!m_aboutToQuit && !m_syncQueue->isEmpty()) {
-        m_currentServiceName = m_syncQueue->popNext(&m_currentAccount);
+    if (!m_aboutToQuit && job.isValid()) {
+        m_currentServiceName = job.serviceName();
+        m_currentAccount = job.account();
     } else {
         m_currentAccount = 0;
     }
@@ -256,7 +244,6 @@ void SyncDaemon::syncFinishedImpl()
     m_currentAccount = 0;
     m_currentServiceName.clear();
     m_syncing = false;
-    m_syncOnMobileData = false;
     Q_EMIT done();
     qDebug() << "All syncs finished";
 }
@@ -333,6 +320,18 @@ void SyncDaemon::addAccount(const AccountId &accountId, bool startSync)
     }
 }
 
+void SyncDaemon::sync(bool runNow)
+{
+    m_syncing = true;
+    if (runNow) {
+        m_timeout->stop();
+        continueSync();
+    } else {
+        // wait some time for new sync requests
+        m_timeout->start();
+    }
+}
+
 void SyncDaemon::sync(SyncAccount *syncAcc, const QString &serviceName, bool runNow)
 {
     qDebug() << "syn requested for account:" << syncAcc->displayName() << serviceName;
@@ -342,10 +341,11 @@ void SyncDaemon::sync(SyncAccount *syncAcc, const QString &serviceName, bool run
         ((m_currentAccount == syncAcc) && (serviceName.isEmpty() || (serviceName == m_currentServiceName))) ) {
         qDebug() << "Account aready in the queue, ignore request;";
     } else {
-        qDebug() << "Pushed into queue with immediately sync?" << runNow;
-        m_syncQueue->push(syncAcc, serviceName);
+        qDebug() << "Pushed into queue with immediately sync?" << runNow << "Sync is running" << m_syncing;
+        m_syncQueue->push(syncAcc, serviceName, runNow);
         // if not syncing start a full sync
         if (!m_syncing) {
+            qDebug() << "Request sync";
             sync(runNow);
             Q_EMIT syncAboutToStart();
             return;
@@ -470,7 +470,7 @@ void SyncDaemon::onAccountSyncFinished(const QString &serviceName, const bool fi
     // only re-sync if sync mode != "slow", to avoid sync loops
     if ((mode != "slow") && !errorMessage.isEmpty() && whiteListStatus.contains(status)) {
         // white list error retry the sync
-        m_syncQueue->push(acc, serviceName);
+        m_syncQueue->push(acc, serviceName, false);
     } else if (!errorMessage.isEmpty()) {
         NotifyMessage *notify = new NotifyMessage(true, this);
         notify->show(_("Synchronization"),
@@ -518,14 +518,16 @@ void SyncDaemon::quit()
 
     // cancel all sync operation
     while(m_syncQueue->count()) {
-        SyncAccount *acc = m_syncQueue->popNext();
+        SyncJob job = m_syncQueue->popNext();
+        SyncAccount *acc = job.account();
         acc->cancel();
         acc->wait();
         delete acc;
     }
 
     while(m_offlineQueue->count()) {
-        SyncAccount *acc = m_syncQueue->popNext();
+        SyncJob job = m_offlineQueue->popNext();
+        SyncAccount *acc = job.account();
         acc->cancel();
         acc->wait();
         delete acc;
