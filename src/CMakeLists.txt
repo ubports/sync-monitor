@@ -39,7 +39,7 @@ target_link_libraries(${SYNQ_LIB}
     syncevolution-qt
 )
 
-qt5_use_modules(${SYNQ_LIB} Core DBus Organizer Contacts Network)
+qt5_use_modules(${SYNQ_LIB} Core Widgets DBus Organizer Contacts Network)
 
 set(SYNQ_BIN_SRC
     main.cpp

@@ -29,6 +29,7 @@
 
 #include <QtCore/QDebug>
 #include <QtCore/QTimer>
+#include <QDesktopServices>
 
 using namespace Accounts;
 
@@ -406,6 +407,28 @@ void SyncDaemon::destroyAccount()
     QObject *acc = sender->property("ACCOUNT").value<QObject*>();
     Q_ASSERT(acc);
     acc->deleteLater();
+}
+
+void SyncDaemon::authenticateAccount(const AccountId &accountId, const QString &serviceName)
+{
+    NotifyMessage *notify = new NotifyMessage(true, this);
+    notify->setProperty("ACCOUNT", QVariant::fromValue<AccountId>(accountId));
+    notify->setProperty("SERVICE", QVariant::fromValue<QString>(serviceName));
+    connect(notify, SIGNAL(questionAccepted()), SLOT(runAuthentication()));
+    notify->askYesOrNo(_("Synchronization"),
+                       QString(_("Your access key is not valid anymore. Do you want to re-authenticate it?.")),
+                       SYNC_MONITOR_ICON_PATH);
+
+}
+
+void SyncDaemon::runAuthentication()
+{
+    QObject *sender = QObject::sender();
+    AccountId accountId = sender->property("ACCOUNT").value<AccountId>();
+    QString serviceName = sender->property("SERVICE").value<QString>();
+
+    QString appCommand = QString("sync-monitor-helper:///authenticate?id=%1&service=%2").arg(accountId).arg(serviceName);
+    QDesktopServices::openUrl(QUrl(appCommand));
 }
 
 void SyncDaemon::onAccountSyncStarted(const QString &serviceName, bool firstSync)

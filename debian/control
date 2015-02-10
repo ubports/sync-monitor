@@ -64,3 +64,17 @@ Description: Ubuntu online account sync monitor plugin - QML bindings
  .
  This package contains the QML plugin providing the features from the sync
  monitor to applications.
+
+Package: sync-monitor-helper
+Architecture: all
+Multi-Arch: foreign
+Pre-Depends: ${misc:Pre-Depends},
+Depends: ${misc:Depends},
+         sync-monitor (>= ${binary:Version}),
+Description: Ubuntu online account sync monitor plugin - helper to re-authenticate
+ the online accounts.
+ .
+ With this package you can keep track of Ubuntu online accounts and sync 
+ with the cloud.
+ .
+ This package contains the ubuntu online accounts service files.
