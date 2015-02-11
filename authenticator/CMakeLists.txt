@@ -19,12 +19,12 @@ set(SYNC_MONITOR_HELPER_INSTALL_PATH
     ${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_LIBDIR}/sync-monitor/
 )
 
-install(FILES "syncmonitor.url-dispatcher"
+install(FILES "syncmonitorhelper.url-dispatcher"
     DESTINATION ${CMAKE_INSTALL_DATADIR}/url-dispatcher/urls
 )
 
-configure_file(syncmonitor.desktop.in syncmonitor.desktop)
-install(FILES "${CMAKE_CURRENT_BINARY_DIR}/syncmonitor.desktop"
+configure_file(syncmonitorhelper.desktop.in syncmonitorhelper.desktop)
+install(FILES "${CMAKE_CURRENT_BINARY_DIR}/syncmonitorhelper.desktop"
         DESTINATION ${CMAKE_INSTALL_DATADIR}/applications
 )
 

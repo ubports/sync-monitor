@@ -34,9 +34,6 @@ class SyncAccount : public QObject
 {
     Q_OBJECT
 public:
-    static const QString GoogleCalendarService;
-    static const QString GoogleContactService;
-
     enum AccountState {
         Configuring = 0,
         Syncing,
@@ -62,6 +59,8 @@ public:
     virtual QStringList availableServices() const;
     QStringList enabledServices() const;
     uint lastError() const;
+    void setLastError(uint errorCode);
+    QString serviceId(const QString &serviceName) const;
 
     static QString statusDescription(const QString &status);
 

@@ -31,6 +31,8 @@
 #include <QtCore/QTimer>
 #include <QDesktopServices>
 
+#include <url-dispatcher.h>
+
 using namespace Accounts;
 
 
@@ -409,15 +411,15 @@ void SyncDaemon::destroyAccount()
     acc->deleteLater();
 }
 
-void SyncDaemon::authenticateAccount(const AccountId &accountId, const QString &serviceName)
+void SyncDaemon::authenticateAccount(const SyncAccount *account, const QString &serviceName)
 {
     NotifyMessage *notify = new NotifyMessage(true, this);
-    notify->setProperty("ACCOUNT", QVariant::fromValue<AccountId>(accountId));
-    notify->setProperty("SERVICE", QVariant::fromValue<QString>(serviceName));
+    notify->setProperty("ACCOUNT", QVariant::fromValue<AccountId>(account->id()));
+    notify->setProperty("SERVICE", QVariant::fromValue<QString>(account->serviceId(serviceName)));
     connect(notify, SIGNAL(questionAccepted()), SLOT(runAuthentication()));
     notify->askYesOrNo(_("Synchronization"),
                        QString(_("Your access key is not valid anymore. Do you want to re-authenticate it?.")),
-                       SYNC_MONITOR_ICON_PATH);
+                       account->iconName(serviceName));
 
 }
 
@@ -427,8 +429,9 @@ void SyncDaemon::runAuthentication()
     AccountId accountId = sender->property("ACCOUNT").value<AccountId>();
     QString serviceName = sender->property("SERVICE").value<QString>();
 
-    QString appCommand = QString("sync-monitor-helper:///authenticate?id=%1&service=%2").arg(accountId).arg(serviceName);
-    QDesktopServices::openUrl(QUrl(appCommand));
+    QString appCommand = QString("syncmonitorhelper:///authenticate?id=%1&service=%2").arg(accountId).arg(serviceName);
+    qDebug() << "Run" << appCommand;
+    url_dispatch_send(appCommand.toUtf8().constData(), NULL, NULL);
 }
 
 void SyncDaemon::onAccountSyncStarted(const QString &serviceName, bool firstSync)
@@ -478,6 +481,7 @@ void SyncDaemon::onAccountSyncFinished(const QString &serviceName, const bool fi
                 .arg(QDateTime::currentDateTime().toString(Qt::SystemLocaleShortDate));
 
 
+    // populate white list erros
     if (whiteListStatus.isEmpty()) {
         // "error code from SyncEvolution access denied (remote, status 403): could not obtain OAuth2 token:
         // this can happen if the network goes off during the sync, or syc started before the network stabilished
@@ -491,9 +495,11 @@ void SyncDaemon::onAccountSyncFinished(const QString &serviceName, const bool fi
     }
 
     // only re-sync if sync mode != "slow", to avoid sync loops
-    if ((mode != "slow") && !errorMessage.isEmpty() && whiteListStatus.contains(status)) {
+    if ((acc->lastError() == 0) && !errorMessage.isEmpty() && whiteListStatus.contains(status)) {
         // white list error retry the sync
         m_syncQueue->push(acc, serviceName, false);
+    } else if (status.endsWith("403")){
+        authenticateAccount(acc, serviceName);
     } else if (!errorMessage.isEmpty()) {
         NotifyMessage *notify = new NotifyMessage(true, this);
         notify->show(_("Synchronization"),
@@ -504,6 +510,7 @@ void SyncDaemon::onAccountSyncFinished(const QString &serviceName, const bool fi
                      acc->iconName(serviceName));
     }
 
+    acc->setLastError(status.toUInt());
     // sync next account
     continueSync();
 }

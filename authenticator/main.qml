@@ -15,9 +15,20 @@ MainView {
             return "contact-group"
         }
     }
+    width: units.gu(40)
+    height: units.gu(71)
+    useDeprecatedToolbar: false
 
     Page {
-        title: i18n.tr("Re-authenticate accounts")
+        title: i18n.tr("Accounts")
+
+        head.backAction: Action {
+            visible: mainPage.allowToQuit
+            iconName: "back"
+            text: i18n.tr("Quit")
+            onTriggered: Qt.quit()
+        }
+
         AccountServiceModel {
             id: accountServiceModel
             accountId: ONLINE_ACCOUNT.accountId
@@ -32,29 +43,34 @@ MainView {
                 id: delegate
 
                 property bool hasToken: false
+                property bool running: false
 
                 text: displayName
                 subText: i18n.tr("Click to authenticate")
                 iconName: getProviderIcon(providerName)
                 height: delegate.hasToken ? 0 : units.gu(8)
-                iconFrame: false
 
                 AccountService {
                     id: accountService
 
                     objectHandle: accountServiceHandle
                     onAuthenticated: {
+                        delegate.running = false
                         console.log("Recevied new token.")
                         delegate.hasToken = true
                         Qt.quit()
                     }
                     onAuthenticationError: {
+                        delegate.running = false
                         delegate.hasToken = false
                         console.log("Authentication failed, code " + error.code)
                     }
                 }
-
-                onClicked: accountService.authenticate()
+                onClicked: {
+                    if (!delegate.running) {
+                        delegate.running = true
+                        accountService.authenticate(null)
+                    }
             }
         }
     }

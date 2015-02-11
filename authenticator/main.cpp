@@ -25,7 +25,7 @@ QVariantMap parseAccountArg(QStringList args)
 {
     //syncmonitor:///authenticate?id=%1&service=%2
     Q_FOREACH(const QString &arg, args) {
-        if (arg.startsWith("syncmonitor:///")) {
+        if (arg.startsWith("syncmonitorhelper:///")) {
             QUrl url = QUrl::fromPercentEncoding(arg.toUtf8());
             QString methodName = url.path().right(url.path().length() -1);
             if (methodName != "authenticate") {
@@ -63,7 +63,7 @@ int main(int argc, char **argv)
     QGuiApplication *app = new QGuiApplication(argc, argv);
     QVariantMap accountInfo = parseAccountArg(app->arguments());
     if (accountInfo.isEmpty()) {
-        qWarning() << "Usage: sync-monitor-helper syncmonitor:///authenticate?id=<accountId>&service=<serviceName";
+        qWarning() << "Usage: sync-monitor-helper syncmonitorhelper:///authenticate?id=<accountId>&service=<serviceName";
         delete app;
         return -1;
     }
@@ -77,7 +77,7 @@ int main(int argc, char **argv)
     view->setSource(QUrl("qrc:/main.qml"));
 
     qDebug() << accountInfo;
-    view->showMaximized();
+    view->show();
     app->exec();
     delete view;
     delete app;

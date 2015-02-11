@@ -36,10 +36,11 @@ add_library(${SYNQ_LIB} STATIC
 target_link_libraries(${SYNQ_LIB}
     ${ACCOUNTS_LIBRARIES}
     ${LIBNOTIFY_LIBRARIES}
+    ${URLDISPATCHER_LIBRARIES}
     syncevolution-qt
 )
 
-qt5_use_modules(${SYNQ_LIB} Core Widgets DBus Organizer Contacts Network)
+qt5_use_modules(${SYNQ_LIB} Core DBus Organizer Contacts Network)
 
 set(SYNQ_BIN_SRC
     main.cpp
@@ -60,6 +61,7 @@ include_directories(
     ${CMAKE_BINARY_DIR}
     ${ACCOUNTS_INCLUDE_DIRS}
     ${LIBNOTIFY_INCLUDE_DIRS}
+    ${URLDISPATCHER_INCLUDE_DIRS}
     ${syncevolution-qt_SOURCE_DIR}
 )
 

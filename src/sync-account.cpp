@@ -33,7 +33,8 @@ SyncAccount::SyncAccount(Account *account,
       m_currentSession(0),
       m_account(account),
       m_state(SyncAccount::Idle),
-      m_settings(settings)
+      m_settings(settings),
+      m_lastError(0)
 {
     setup();
 }
@@ -350,6 +351,22 @@ QStringList SyncAccount::enabledServices() const
 uint SyncAccount::lastError() const
 {
     return m_lastError;
+}
+
+void SyncAccount::setLastError(uint errorCode)
+{
+    m_lastError = errorCode;
+}
+
+QString SyncAccount::serviceId(const QString &serviceName) const
+{
+    Q_FOREACH(Service service, m_account->services()) {
+        qDebug() << service.serviceType() << service.name();
+        if (service.serviceType() == serviceName) {
+            return service.name();
+        }
+    }
+    return QString();
 }
 
 void SyncAccount::onAccountEnabledChanged(const QString &serviceName, bool enabled)
