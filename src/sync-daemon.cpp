@@ -29,7 +29,6 @@
 
 #include <QtCore/QDebug>
 #include <QtCore/QTimer>
-#include <QDesktopServices>
 
 #include <url-dispatcher.h>
 
