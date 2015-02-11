@@ -1,0 +1,3 @@
+usr/share/url-dispatcher/urls/syncmonitor.url-dispatcher
+usr/share/applications/syncmonitor.desktop
+usr/lib/*/sync-monitor/sync-monitor-helper
