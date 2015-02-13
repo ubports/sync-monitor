@@ -71,6 +71,7 @@ MainView {
                         delegate.running = true
                         accountService.authenticate(null)
                     }
+                }
             }
         }
     }
