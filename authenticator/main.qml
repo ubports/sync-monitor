@@ -23,7 +23,6 @@ MainView {
         title: i18n.tr("Accounts")
 
         head.backAction: Action {
-            visible: mainPage.allowToQuit
             iconName: "back"
             text: i18n.tr("Quit")
             onTriggered: Qt.quit()

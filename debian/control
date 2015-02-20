@@ -67,7 +67,7 @@ Description: Ubuntu online account sync monitor plugin - QML bindings
  monitor to applications.
 
 Package: sync-monitor-helper
-Architecture: all
+Architecture: any
 Multi-Arch: foreign
 Pre-Depends: ${misc:Pre-Depends},
 Depends: ${misc:Depends},
