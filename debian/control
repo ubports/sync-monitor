@@ -32,6 +32,7 @@ Depends: ${misc:Depends},
          address-book-service,
          syncevolution-dbus (>= 1.4),
          syncevolution-provider-uoa (>= 1.4),
+         sync-monitor-helper (>= ${binary:Version}),
          qtcontact5-galera,
          qtorganizer5-eds,
 Description: Ubuntu online account sync monitor plugin
@@ -70,8 +71,7 @@ Package: sync-monitor-helper
 Architecture: any
 Multi-Arch: foreign
 Pre-Depends: ${misc:Pre-Depends},
-Depends: ${misc:Depends},
-         sync-monitor (>= ${binary:Version}),
+Depends: ${misc:Depends}
 Description: Ubuntu online account sync monitor plugin - helper to re-authenticate
  the online accounts.
  .
