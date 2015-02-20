@@ -157,14 +157,17 @@ MainView {
                         right: parent.right
                     }
 
-                    text: i18n.tr("Fail to authenticate your account while sync contacts, please click in the button to re-authenticate it.")
+                    text: i18n.tr("Fail to authenticate your account while syncing contacts, please click in the button to re-authenticate it.")
                     wrapMode: Text.WordWrap
                     horizontalAlignment: Text.AlignHCenter
                     fontSize: "large"
                 }
 
                 Button {
-                    anchors.horizontalCenter: lblTitle.horizontalCenter
+                    anchors {
+                        left: parent.left
+                        right: parent.right
+                    }
                     text: accountPage.account.displayName
                     iconName: accountPage.getProviderIcon(accountPage.account.providerName)
                     onClicked: {
