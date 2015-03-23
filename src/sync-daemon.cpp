@@ -457,6 +457,7 @@ void SyncDaemon::onAccountSyncFinished(const QString &serviceName, const bool fi
     // error on that list will trigger a new sync
     static QStringList whiteListStatus;
 
+    uint errorCode = status.toUInt();
     SyncAccount *acc = qobject_cast<SyncAccount*>(QObject::sender());
     QString errorMessage = SyncAccount::statusDescription(status);
 
@@ -499,6 +500,7 @@ void SyncDaemon::onAccountSyncFinished(const QString &serviceName, const bool fi
         m_syncQueue->push(acc, serviceName, false);
     } else if (status.endsWith("403")){
         authenticateAccount(acc, serviceName);
+        errorCode = 0;
     } else if (!errorMessage.isEmpty()) {
         NotifyMessage *notify = new NotifyMessage(true, this);
         notify->show(_("Synchronization"),
@@ -509,7 +511,7 @@ void SyncDaemon::onAccountSyncFinished(const QString &serviceName, const bool fi
                      acc->iconName(serviceName));
     }
 
-    acc->setLastError(status.toUInt());
+    acc->setLastError(errorCode);
     // sync next account
     continueSync();
 }

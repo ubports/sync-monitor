@@ -157,7 +157,7 @@ MainView {
                         right: parent.right
                     }
 
-                    text: i18n.tr("Fail to authenticate your account while syncing contacts, please click in the button to re-authenticate it.")
+                    text: i18n.tr("Your account failed to authenticate while syncing. Please click below to re-authenticate.")
                     wrapMode: Text.WordWrap
                     horizontalAlignment: Text.AlignHCenter
                     fontSize: "large"
@@ -187,5 +187,10 @@ MainView {
                 visible: accountPage.loginInProcess
             }
         }
+    }
+
+    Component.onCompleted: {
+        i18n.domain = GETTEXT_PACKAGE
+        i18n.bindtextdomain(GETTEXT_PACKAGE, GETTEXT_LOCALEDIR)
     }
 }

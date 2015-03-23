@@ -1,7 +1,13 @@
+project(sync-monitor-helper)
+
 set(SYNC_MONITOR_HELPER_BIN sync-monitor-helper)
 
 QT5_ADD_RESOURCES(SYNC_MONITOR_HELPER_RC
     sync-monitor-helper.qrc
+)
+
+include_directories(
+    ${CMAKE_BINARY_DIR}
 )
 
 add_executable(${SYNC_MONITOR_HELPER_BIN}

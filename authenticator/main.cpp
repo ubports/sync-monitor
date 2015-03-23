@@ -14,6 +14,8 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include "config.h"
+
 #include <QUrlQuery>
 #include <QGuiApplication>
 #include <QQuickView>
@@ -74,6 +76,9 @@ int main(int argc, char **argv)
     view->setResizeMode(QQuickView::SizeRootObjectToView);
     view->setTitle("Sync Monitor");
     view->rootContext()->setContextProperty("ONLINE_ACCOUNT", accountInfo);
+    view->rootContext()->setContextProperty("GETTEXT_PACKAGE", GETTEXT_PACKAGE);
+    view->rootContext()->setContextProperty("GETTEXT_LOCALEDIR", GETTEXT_LOCALEDIR);
+    view->rootContext()->setContextProperty("GETTEXT_PACKAGE", GETTEXT_PACKAGE);
     view->setSource(QUrl("qrc:/main.qml"));
 
     qDebug() << accountInfo;
