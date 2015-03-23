@@ -4,4 +4,4 @@ Comment=Ask for online account authentication if the token expires
 Exec=@SYNC_MONITOR_HELPER_INSTALL_PATH@@SYNC_MONITOR_HELPER_BIN@ %u
 Terminal=false
 Type=Application
-NoDisplay=true
+Version=1.0
