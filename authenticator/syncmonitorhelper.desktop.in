@@ -1,12 +1,7 @@
 [Desktop Entry]
-Encoding=UTF-8
-Version=1.0
+Name=Sync Monitor
+Comment=Ask for online account authentication if the token expires
+Exec=@SYNC_MONITOR_HELPER_INSTALL_PATH@@SYNC_MONITOR_HELPER_BIN@ %u
 Terminal=false
 Type=Application
-Name=Sync Monitor
-GenericName=Sync Monitor
-Exec=@SYNC_MONITOR_HELPER_INSTALL_PATH@@SYNC_MONITOR_HELPER_BIN@ %u
-X-Ubuntu-Touch=true
-X-Ubuntu-StageHint=SideStage
-X-Ubuntu-Single-Instance=true
-X-Ubuntu-Splash-Show-Header=true
+NoDisplay=true
