@@ -8,6 +8,7 @@ Build-Depends: cmake,
                google-mock,
                libaccounts-qt5-dev,
                libnotify-dev,
+               liburl-dispatcher1-dev,
                pkg-config,
                qt5-default,
                qtbase5-dev,
@@ -31,6 +32,7 @@ Depends: ${misc:Depends},
          address-book-service,
          syncevolution-dbus (>= 1.4),
          syncevolution-provider-uoa (>= 1.4),
+         sync-monitor-helper (>= ${binary:Version}),
          qtcontact5-galera,
          qtorganizer5-eds,
 Description: Ubuntu online account sync monitor plugin
@@ -64,3 +66,16 @@ Description: Ubuntu online account sync monitor plugin - QML bindings
  .
  This package contains the QML plugin providing the features from the sync
  monitor to applications.
+
+Package: sync-monitor-helper
+Architecture: any
+Multi-Arch: foreign
+Pre-Depends: ${misc:Pre-Depends},
+Depends: ${misc:Depends}
+Description: Ubuntu online account sync monitor plugin - helper to re-authenticate
+ the online accounts.
+ .
+ With this package you can keep track of Ubuntu online accounts and sync 
+ with the cloud.
+ .
+ This package contains the ubuntu online accounts service files.

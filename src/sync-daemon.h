@@ -67,6 +67,9 @@ private Q_SLOTS:
     void removeAccount(const Accounts::AccountId &accountId);
     void removeAccountSource();
     void destroyAccount();
+    void authenticateAccount(const SyncAccount *account,
+                             const QString &serviceName);
+    void runAuthentication();
 
     void onAccountSyncStarted(const QString &serviceName, bool firstSync);
     void onAccountSyncFinished(const QString &serviceName, bool firstSync, const QString &status, const QString &syncMode);

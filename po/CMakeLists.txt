@@ -15,6 +15,10 @@ file(GLOB_RECURSE I18N_SRCS RELATIVE ${CMAKE_SOURCE_DIR}
 file(GLOB_RECURSE I18N_XMLS RELATIVE ${CMAKE_CURRENT_BINARY_DIR}
     ${CMAKE_SOURCE_DIR}/accounts/applications/*.in
 )
+file(GLOB_RECURSE I18N_QMLS RELATIVE ${CMAKE_SOURCE_DIR}
+    ${sync-monitor-helper_SOURCE_DIR}/*.qml
+)
+
 string(REPLACE "${CMAKE_SOURCE_DIR}/" "" RELATIVE_BUILD_DIR ${CMAKE_CURRENT_BINARY_DIR})
 foreach(XML_FILE ${I18N_XMLS})
     get_filename_component(XML_BASE_NAME ${XML_FILE} NAME)
@@ -39,9 +43,12 @@ if(XGETTEXT_EXECUTABLE)
         COMMAND ${XGETTEXT_EXECUTABLE} -o ${POT_FILE}
                 --c++ --qt --add-comments=TRANSLATORS
                 --keyword=_ --keyword=N_
+                --keyword=tr --keyword=tr:1,2
+                --keyword=dtr:2 --keyword=dtr:2,3
                 --package-name=${DOMAIN}
                 --copyright-holder='Canonical Ltd.'
-                -D ${CMAKE_SOURCE_DIR} -s
-                -p ${CMAKE_CURRENT_SOURCE_DIR} ${I18N_SRCS}
+                -D ${CMAKE_SOURCE_DIR} ${I18N_QMLS}
+                -D ${CMAKE_SOURCE_DIR} ${I18N_SRCS}
+                -s -p ${CMAKE_CURRENT_SOURCE_DIR} ${I18N_SRCS}
     )
 endif()

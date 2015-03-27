@@ -11,6 +11,7 @@ find_package(Qt5Network REQUIRED)
 add_definitions(-DQT_NO_KEYWORDS)
 
 pkg_check_modules(ACCOUNTS REQUIRED accounts-qt5>=1.10)
+pkg_check_modules(URLDISPATCHER REQUIRED url-dispatcher-1)
 pkg_check_modules(LIBNOTIFY libnotify)
 
 find_program(INTLTOOL_MERGE_EXECUTABLE intltool-merge)
@@ -28,6 +29,7 @@ add_custom_target(uninstall "${CMAKE_COMMAND}"
 enable_testing()
 add_subdirectory(3rd_party)
 add_subdirectory(src)
+add_subdirectory(authenticator)
 add_subdirectory(accounts)
 add_subdirectory(templates)
 add_subdirectory(tests)
