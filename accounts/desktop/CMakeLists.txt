@@ -5,7 +5,7 @@ set(DESKTOP_FILES
 
 set(DESKTOP_OUTPUT_FILES
      ${CMAKE_CURRENT_BINARY_DIR}/sync-monitor-calendar.desktop
-     ${CMAKE_CURRENT_BINARY_DIR}/sync-monitor-contacts.desktop
+     #${CMAKE_CURRENT_BINARY_DIR}/sync-monitor-contacts.desktop
 )
 
 

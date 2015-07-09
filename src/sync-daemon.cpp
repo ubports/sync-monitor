@@ -93,7 +93,7 @@ void SyncDaemon::setupAccounts()
 
 void SyncDaemon::setupTriggers()
 {
-    m_eds = new EdsHelper(this);
+    m_eds = new EdsHelper(this, "");
     connect(m_eds, &EdsHelper::dataChanged,
             this, &SyncDaemon::onDataChanged);
 }

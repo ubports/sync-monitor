@@ -1,3 +1,10 @@
+sync-monitor (0.2-0ubuntu1) UNRELEASED; urgency=medium
+
+  * Remove contacts sync.
+    Contact sync will be handled by buteo
+
+ -- Renato Araujo Oliveira Filho <renato.filho@canonical.com>  Thu, 09 Jul 2015 17:55:24 -0300
+
 sync-monitor (0.1+15.04.20150327-0ubuntu1) vivid; urgency=medium
 
   [ CI Train Bot ]
