@@ -323,8 +323,23 @@ void EdsHelper::removeContactsSource(const QString &sourceName)
         qWarning() << "Request to remove contact source with a null contact engine";
         return;
     }
-    QContactId sourceId = QContactId::fromString(QString("qtcontacts:galera::%1").arg(sourceName));
-    if (!m_contactEngine->removeContact(sourceId)) {
+
+    // check source Id
+    QContactId sourceId;
+    QContactDetailFilter filter;
+    filter.setDetailType(QContactDetail::TypeType, QContactType::FieldType);
+    filter.setValue(QContactType::TypeGroup);
+
+    // check if the source already exists
+    QList<QContact> sources = m_contactEngine->contacts(filter);
+    Q_FOREACH(const QContact &contact, sources) {
+        if (contact.detail<QContactDisplayLabel>().label() == sourceName) {
+            sourceId = contact.id();
+            break;
+        }
+    }
+
+    if (sourceId.isNull() || !m_contactEngine->removeContact(sourceId)) {
         qWarning() << "Fail to remove contact source:" << sourceName;
     }
 }
