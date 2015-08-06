@@ -41,6 +41,7 @@ public:
     bool isValid() const;
     void sync(QStringMap services);
     QArrayOfStringMap reports(uint start, uint maxCount);
+    QArrayOfDatabases getDatabases(const QString &configName);
 
 Q_SIGNALS:
     void statusChanged(const QString &status);

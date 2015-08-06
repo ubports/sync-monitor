@@ -23,6 +23,7 @@
 #include <QtCore/QSettings>
 
 #include <Accounts/Account>
+#include "dbustypes.h"
 
 class SyncEvolutionSessionProxy;
 
@@ -60,7 +61,7 @@ private:
     void configureService(const QString &serviceName, const QString &syncMode);
     void removeService(const QString &serviceName);
     bool configTarget(const QString &targetName, const QString &serviceName);
-    bool configSync(const QString &targetName, const QString &serviceName, const QString &syncMode);
+    bool configSync(const QString &targetName, const QString &serviceName, const QString &syncMode, const SyncDatabase &db);
     bool changeSyncMode(const QString &targetName, const QString &serviceName, const QString &syncMode);
 };
 

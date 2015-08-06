@@ -37,7 +37,9 @@ class EdsHelperMock : public EdsHelper
 public:
     EdsHelperMock(QObject *parent = 0)
         : EdsHelper(parent, "memory", "memory")
-    {}
+    {
+        setEnabled(true);
+    }
 
 
     QtOrganizer::QOrganizerManager *organizerEngine()

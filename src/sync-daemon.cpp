@@ -30,6 +30,8 @@
 #include <QtCore/QDebug>
 #include <QtCore/QTimer>
 
+#include <url-dispatcher.h>
+
 using namespace Accounts;
 
 
@@ -41,9 +43,10 @@ SyncDaemon::SyncDaemon()
       m_manager(0),
       m_eds(0),
       m_dbusAddaptor(0),
+      m_currentAccount(0),
       m_syncing(false),
       m_aboutToQuit(false),
-      m_currentAccount(0)
+      m_firstClient(true)
 {
     m_provider = new ProviderTemplate();
     m_provider->load();
@@ -51,7 +54,7 @@ SyncDaemon::SyncDaemon()
     m_syncQueue = new SyncQueue();
     m_offlineQueue = new SyncQueue();
     m_networkStatus = new SyncNetwork(this);
-    connect(m_networkStatus, SIGNAL(onlineChanged(bool)), SLOT(onOnlineStatusChanged(bool)));
+    connect(m_networkStatus, SIGNAL(stateChanged(SyncNetwork::NetworkState)), SLOT(onOnlineStatusChanged(SyncNetwork::NetworkState)));
 
     m_timeout = new QTimer(this);
     m_timeout->setInterval(DAEMON_SYNC_TIMEOUT);
@@ -109,28 +112,49 @@ void SyncDaemon::onDataChanged(const QString &serviceName, const QString &source
     }
 }
 
-void SyncDaemon::onOnlineStatusChanged(bool isOnline)
+void SyncDaemon::onClientAttached()
 {
-    Q_EMIT isOnlineChanged(isOnline);
-    if (isOnline) {
+    if (m_firstClient) {
+        m_firstClient = false;
+        // accept eds changes
+        qDebug() << "First client connected, will auto-sync on next EDS change";
+        m_eds->setEnabled(true);
+     }
+}
+
+void SyncDaemon::onOnlineStatusChanged(SyncNetwork::NetworkState state)
+{
+    Q_EMIT isOnlineChanged(state != SyncNetwork::NetworkOffline);
+    if (state == SyncNetwork::NetworkOnline) {
         qDebug() << "Device is online sync pending changes" << m_offlineQueue->count();
-        m_syncQueue->push(m_offlineQueue->values());
+        m_syncQueue->push(*m_offlineQueue);
         m_offlineQueue->clear();
         if (!m_syncing && !m_syncQueue->isEmpty()) {
-            sync(true);
+            qDebug() << "Will sync in" << DAEMON_SYNC_TIMEOUT / 1000 << "secs;";
+            m_syncing = true;
+            m_timeout->start();
         } else {
             qDebug() << "No change to sync";
         }
-    } else {
-        qDebug() << "Device is offline cancel active syncs";
-        cancel();
+    } else if (state == SyncNetwork::NetworkOffline) {
+        qDebug() << "Device is offline cancel active syncs. There is a sync in progress?" << (m_currentAccount ? "Yes" : "No");
+        if (m_currentAccount) {
+            m_offlineQueue->push(m_currentAccount, m_currentServiceName, false);
+            m_currentAccount->cancel(m_currentServiceName);
+            qDebug() << "Current account pushed to late sync with sevice" << m_currentServiceName;
+        }
+        if (m_timeout->isActive()) {
+            m_timeout->stop();
+        }
+        continueSync();
     }
-    // make accounts availabel or not based on online status
+    // make accounts available or not based on online status
     Q_EMIT accountsChanged();
 }
 
 void SyncDaemon::syncAll(const QString &serviceName, bool runNow)
 {
+    // if runNow is set we will sync all accounts
     Q_FOREACH(SyncAccount *acc, m_accounts.values()) {
         if (serviceName.isEmpty()) {
             sync(acc, QString(), runNow);
@@ -151,29 +175,21 @@ void SyncDaemon::cancel(const QString &serviceName)
     }
 }
 
-void SyncDaemon::sync(bool runNow)
-{
-    m_syncing = true;
-    if (runNow) {
-        m_timeout->stop();
-        continueSync();
-    } else {
-        // wait some time for new sync requests
-        m_timeout->start();
-    }
-}
-
 void SyncDaemon::continueSync()
 {
-    if (!m_networkStatus->isOnline()) {
+    SyncJob job = m_syncQueue->popNext();
+    SyncNetwork::NetworkState netState = m_networkStatus->state();
+    bool continueSync = (netState == SyncNetwork::NetworkOnline) ||
+                        (netState != SyncNetwork::NetworkOffline && job.runOnPayedConnection());
+    if (!continueSync) {
         qDebug() << "Device is offline we will skip the sync.";
-        m_offlineQueue->push(m_syncQueue->values());
+        m_offlineQueue->push(*m_syncQueue);
+        m_offlineQueue->push(job);
         m_syncQueue->clear();
-        m_currentAccount = 0;
-        m_syncing = false;
-        Q_EMIT done();
+        syncFinishedImpl();
         return;
     }
+    m_syncing = true;
 
     // flush any change in EDS
     m_eds->flush();
@@ -182,21 +198,21 @@ void SyncDaemon::continueSync()
     m_eds->freezeNotify();
 
     // sync the next service on the queue
-    if (!m_aboutToQuit && !m_syncQueue->isEmpty()) {
-        m_currentServiceName = m_syncQueue->popNext(&m_currentAccount);
+    if (!m_aboutToQuit && job.isValid()) {
+        m_currentServiceName = job.serviceName();
+        m_currentAccount = job.account();
     } else {
         m_currentAccount = 0;
     }
 
     if (m_currentAccount) {
+        // remove sync reqeust from offline queue
+        m_offlineQueue->remove(m_currentAccount, m_currentServiceName);
         m_currentAccount->sync(m_currentServiceName);
     } else {
-        m_currentAccount = 0;
-        m_currentServiceName.clear();
-        m_syncing = false;
+        syncFinishedImpl();
         // The sync has done, unblock notifications
         m_eds->unfreezeNotify();
-        Q_EMIT done();
     }
 }
 
@@ -213,15 +229,25 @@ bool SyncDaemon::registerService()
         }
 
         m_dbusAddaptor = new SyncDBus(connection, this);
-        if (!connection.registerObject(SYNCMONITOR_OBJECT_PATH, this))
-        {
+        if (!connection.registerObject(SYNCMONITOR_OBJECT_PATH, this)) {
             qWarning() << "Could not register object!" << SYNCMONITOR_OBJECT_PATH;
             delete m_dbusAddaptor;
             m_dbusAddaptor = 0;
             return false;
         }
+        connect(m_dbusAddaptor, SIGNAL(clientAttached(int)), SLOT(onClientAttached()));
     }
     return true;
+}
+
+void SyncDaemon::syncFinishedImpl()
+{
+    m_timeout->stop();
+    m_currentAccount = 0;
+    m_currentServiceName.clear();
+    m_syncing = false;
+    Q_EMIT done();
+    qDebug() << "All syncs finished";
 }
 
 void SyncDaemon::run()
@@ -267,7 +293,7 @@ QStringList SyncDaemon::enabledServices() const
 
 bool SyncDaemon::isOnline() const
 {
-    return m_networkStatus->isOnline();
+    return m_networkStatus->state() != SyncNetwork::NetworkOffline;
 }
 
 void SyncDaemon::addAccount(const AccountId &accountId, bool startSync)
@@ -283,10 +309,8 @@ void SyncDaemon::addAccount(const AccountId &accountId, bool startSync)
         m_accounts.insert(accountId, syncAcc);
         connect(syncAcc, SIGNAL(syncStarted(QString, bool)),
                          SLOT(onAccountSyncStarted(QString, bool)));
-        connect(syncAcc, SIGNAL(syncFinished(QString, bool, QString)),
-                         SLOT(onAccountSyncFinished(QString, bool, QString)));
-        connect(syncAcc, SIGNAL(syncError(QString, int)),
-                         SLOT(onAccountSyncError(QString, int)));
+        connect(syncAcc, SIGNAL(syncFinished(QString, bool, QString, QString)),
+                         SLOT(onAccountSyncFinished(QString, bool, QString, QString)));
         connect(syncAcc, SIGNAL(enableChanged(QString, bool)),
                          SLOT(onAccountEnableChanged(QString, bool)));
         connect(syncAcc, SIGNAL(configured(QString)),
@@ -298,19 +322,32 @@ void SyncDaemon::addAccount(const AccountId &accountId, bool startSync)
     }
 }
 
+void SyncDaemon::sync(bool runNow)
+{
+    m_syncing = true;
+    if (runNow) {
+        m_timeout->stop();
+        continueSync();
+    } else {
+        // wait some time for new sync requests
+        m_timeout->start();
+    }
+}
+
 void SyncDaemon::sync(SyncAccount *syncAcc, const QString &serviceName, bool runNow)
 {
     qDebug() << "syn requested for account:" << syncAcc->displayName() << serviceName;
 
     // check if the service is already in the sync queue or is the current operation
     if (m_syncQueue->contains(syncAcc, serviceName) ||
-        (m_currentAccount == syncAcc) && (serviceName.isEmpty() || (serviceName == m_currentServiceName))) {
-        qDebug() << "Account aready in the queue";
+        ((m_currentAccount == syncAcc) && (serviceName.isEmpty() || (serviceName == m_currentServiceName))) ) {
+        qDebug() << "Account aready in the queue, ignore request;";
     } else {
-        qDebug() << "Pushed into queue";
-        m_syncQueue->push(syncAcc, serviceName);
+        qDebug() << "Pushed into queue with immediately sync?" << runNow << "Sync is running" << m_syncing;
+        m_syncQueue->push(syncAcc, serviceName, runNow);
         // if not syncing start a full sync
         if (!m_syncing) {
+            qDebug() << "Request sync";
             sync(runNow);
             Q_EMIT syncAboutToStart();
             return;
@@ -327,10 +364,12 @@ void SyncDaemon::sync(SyncAccount *syncAcc, const QString &serviceName, bool run
 void SyncDaemon::cancel(SyncAccount *syncAcc, const QString &serviceName)
 {
     m_syncQueue->remove(syncAcc, serviceName);
-    syncAcc->cancel(serviceName);
+    syncAcc->cancel();
     if (m_currentAccount == syncAcc) {
         qDebug() << "Current sync canceled";
         m_currentAccount = 0;
+    } else if (m_syncQueue->isEmpty()) {
+        syncFinishedImpl();
     }
     Q_EMIT syncError(syncAcc, serviceName, "canceled");
 }
@@ -372,6 +411,29 @@ void SyncDaemon::destroyAccount()
     acc->deleteLater();
 }
 
+void SyncDaemon::authenticateAccount(const SyncAccount *account, const QString &serviceName)
+{
+    NotifyMessage *notify = new NotifyMessage(true, this);
+    notify->setProperty("ACCOUNT", QVariant::fromValue<AccountId>(account->id()));
+    notify->setProperty("SERVICE", QVariant::fromValue<QString>(account->serviceId(serviceName)));
+    connect(notify, SIGNAL(questionAccepted()), SLOT(runAuthentication()));
+    notify->askYesOrNo(_("Synchronization"),
+                       QString(_("Your access key is not valid anymore. Do you want to re-authenticate it?.")),
+                       account->iconName(serviceName));
+
+}
+
+void SyncDaemon::runAuthentication()
+{
+    QObject *sender = QObject::sender();
+    AccountId accountId = sender->property("ACCOUNT").value<AccountId>();
+    QString serviceName = sender->property("SERVICE").value<QString>();
+
+    QString appCommand = QString("syncmonitorhelper:///authenticate?id=%1&service=%2").arg(accountId).arg(serviceName);
+    qDebug() << "Run" << appCommand;
+    url_dispatch_send(appCommand.toUtf8().constData(), NULL, NULL);
+}
+
 void SyncDaemon::onAccountSyncStarted(const QString &serviceName, bool firstSync)
 {
     SyncAccount *acc = qobject_cast<SyncAccount*>(QObject::sender());
@@ -391,8 +453,12 @@ void SyncDaemon::onAccountSyncStarted(const QString &serviceName, bool firstSync
     Q_EMIT syncStarted(acc, serviceName);
 }
 
-void SyncDaemon::onAccountSyncFinished(const QString &serviceName, const bool firstSync, const QString &status)
+void SyncDaemon::onAccountSyncFinished(const QString &serviceName, const bool firstSync, const QString &status, const QString &mode)
 {
+    // error on that list will trigger a new sync
+    static QStringList whiteListStatus;
+
+    uint errorCode = status.toUInt();
     SyncAccount *acc = qobject_cast<SyncAccount*>(QObject::sender());
     QString errorMessage = SyncAccount::statusDescription(status);
 
@@ -403,6 +469,39 @@ void SyncDaemon::onAccountSyncFinished(const QString &serviceName, const bool fi
                          .arg(acc->displayName())
                          .arg(serviceName),
                      acc->iconName(serviceName));
+    }
+
+    Q_EMIT syncFinished(acc, serviceName);
+
+    qDebug() << QString("[%6] Sync done: %1 (%2) Status: %3 Error: %4 Duration: %5s")
+                .arg(acc->displayName())
+                .arg(serviceName)
+                .arg(status)
+                .arg(errorMessage.isEmpty() ? "None" : errorMessage)
+                .arg((m_syncElapsedTime.elapsed() < 1000 ? 1  : m_syncElapsedTime.elapsed() / 1000))
+                .arg(QDateTime::currentDateTime().toString(Qt::SystemLocaleShortDate));
+
+
+    // populate white list erros
+    if (whiteListStatus.isEmpty()) {
+        // "error code from SyncEvolution access denied (remote, status 403): could not obtain OAuth2 token:
+        // this can happen if the network goes off during the sync, or syc started before the network stabilished
+        whiteListStatus << QStringLiteral("10403");
+        whiteListStatus << QStringLiteral("403");
+
+        // error code from SyncEvolution fatal error (local, status 10500): no sources active, check configuration"
+        // this is a bug on SyncEvolution sometimes it fail to read the correct address book
+        // FIXME: we should fix that on SyncEvolution
+        whiteListStatus << QStringLiteral("10500");
+    }
+
+    // only re-sync if sync mode != "slow", to avoid sync loops
+    if ((acc->lastError() == 0) && !errorMessage.isEmpty() && whiteListStatus.contains(status)) {
+        // white list error retry the sync
+        m_syncQueue->push(acc, serviceName, false);
+    } else if (status.endsWith("403")){
+        authenticateAccount(acc, serviceName);
+        errorCode = 0;
     } else if (!errorMessage.isEmpty()) {
         NotifyMessage *notify = new NotifyMessage(true, this);
         notify->show(_("Synchronization"),
@@ -413,33 +512,7 @@ void SyncDaemon::onAccountSyncFinished(const QString &serviceName, const bool fi
                      acc->iconName(serviceName));
     }
 
-    qDebug() << QString("[%6] Sync done: %1 (%2) Status: %3 Error: %4 Duration: %5s")
-                .arg(acc->displayName())
-                .arg(serviceName)
-                .arg(status)
-                .arg(errorMessage.isEmpty() ? "None" : errorMessage)
-                .arg((m_syncElapsedTime.elapsed() < 1000 ? 1  : m_syncElapsedTime.elapsed() / 1000))
-                .arg(QDateTime::currentDateTime().toString(Qt::SystemLocaleShortDate));
-
-    Q_EMIT syncFinished(acc, serviceName);
-
-    // sync next account
-    continueSync();
-}
-
-void SyncDaemon::onAccountSyncError(const QString &serviceName, int errorCode)
-{
-    SyncAccount *acc = qobject_cast<SyncAccount*>(QObject::sender());
-
-    NotifyMessage *notify = new NotifyMessage(true, this);
-    notify->show(_("Synchronization"),
-                 QString(_("Sync error account: %1, %2, %3"))
-                     .arg(acc->displayName())
-                     .arg(serviceName)
-                     .arg(errorCode),
-                 acc->iconName(serviceName));
-
-    Q_EMIT syncError(acc, serviceName, QString(errorCode));
+    acc->setLastError(errorCode);
     // sync next account
     continueSync();
 }
@@ -477,14 +550,16 @@ void SyncDaemon::quit()
 
     // cancel all sync operation
     while(m_syncQueue->count()) {
-        SyncAccount *acc = m_syncQueue->popNext();
+        SyncJob job = m_syncQueue->popNext();
+        SyncAccount *acc = job.account();
         acc->cancel();
         acc->wait();
         delete acc;
     }
 
     while(m_offlineQueue->count()) {
-        SyncAccount *acc = m_syncQueue->popNext();
+        SyncJob job = m_offlineQueue->popNext();
+        SyncAccount *acc = job.account();
         acc->cancel();
         acc->wait();
         delete acc;

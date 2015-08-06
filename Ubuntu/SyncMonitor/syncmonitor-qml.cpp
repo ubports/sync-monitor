@@ -55,6 +55,7 @@ SyncMonitorQml::SyncMonitorQml(QObject *parent)
 SyncMonitorQml::~SyncMonitorQml()
 {
     if (m_iface) {
+        m_iface->call("detach");
         delete m_iface;
         m_iface = 0;
     }
@@ -111,6 +112,7 @@ void SyncMonitorQml::componentComplete()
 
     connect(m_iface, SIGNAL(stateChanged()), SIGNAL(stateChanged()));
     connect(m_iface, SIGNAL(enabledServicesChanged()), SIGNAL(enabledServicesChanged()));
+    m_iface->call("attach");
     Q_EMIT stateChanged();
     Q_EMIT enabledServicesChanged();
 }

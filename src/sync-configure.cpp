@@ -19,6 +19,7 @@
 #include "sync-configure.h"
 #include "syncevolution-server-proxy.h"
 #include "syncevolution-session-proxy.h"
+#include "dbustypes.h"
 
 #include "config.h"
 
@@ -110,8 +111,13 @@ void SyncConfigure::configureService(const QString &serviceName, const QString &
     }
 
     if (isConfigured && !configs.contains(targetSuffix)) {
-        qDebug() << "\tCreate sync config:" << targetSuffix;
-        isConfigured = configSync(targetSuffix, serviceName, syncMode);
+        SyncEvolutionSessionProxy *session = m_sessions.value(serviceName, 0);
+        if (session) {
+            qDebug() << "\tCreate sync config:" << targetSuffix;
+            Q_FOREACH(const SyncDatabase &db, session->getDatabases(targetConfigName)) {
+                isConfigured = configSync(targetSuffix, serviceName, syncMode, db);
+            }
+        }
     } else if (isConfigured) {
         isConfigured = changeSyncMode(targetSuffix, serviceName, syncMode);
     }
@@ -162,9 +168,11 @@ bool SyncConfigure::configTarget(const QString &targetName, const QString &servi
     config[""]["maxlogdirs"] = "2";
 
     QString expectedSource;
+    bool isCalendar = false;
     if (serviceName == CONTACTS_SERVICE_NAME) {
         expectedSource = QString("source/addressbook");
     } else if (serviceName == CALENDAR_SERVICE_NAME) {
+        isCalendar = true;
         expectedSource = QString("source/calendar");
     }
 
@@ -174,6 +182,12 @@ bool SyncConfigure::configTarget(const QString &targetName, const QString &servi
         if ((key != expectedSource) && key.startsWith("source/")) {
             config.remove(key);
         }
+    }
+
+    if (isCalendar) {
+        // limit the number of retrieve events to optimize the initial query
+        // 3 months before
+        config[expectedSource]["syncInterval"] = "90";
     }
 
     bool result = session->saveConfig(targetName, config);
@@ -204,8 +218,9 @@ bool SyncConfigure::changeSyncMode(const QString &targetName, const QString &ser
     return result;
 }
 
-bool SyncConfigure::configSync(const QString &targetName, const QString &serviceName, const QString &syncMode)
+bool SyncConfigure::configSync(const QString &targetName, const QString &serviceName, const QString &syncMode,  const SyncDatabase &db)
 {
+    qDebug() << "configSync" << targetName << serviceName << syncMode << db.name << db.source;
     AccountId accountId = m_account->id();
     SyncEvolutionSessionProxy *session = m_sessions.value(serviceName, 0);
 
@@ -222,7 +237,6 @@ bool SyncConfigure::configSync(const QString &targetName, const QString &service
     config[""]["dumpData"] = "0";
     config[""]["printChanges"] = "0";
     config[""]["maxlogdirs"] = "2";
-
 
     QString expectedSource;
     if (serviceName == CONTACTS_SERVICE_NAME) {
@@ -242,7 +256,7 @@ bool SyncConfigure::configSync(const QString &targetName, const QString &service
     }
 
     // database
-    newConfig["database"] = m_account->displayName();
+    newConfig["database"] = db.name;
     if (!clientBackend.isNull()) {
         newConfig["backend"] = clientBackend;
     }
@@ -255,6 +269,7 @@ bool SyncConfigure::configSync(const QString &targetName, const QString &service
     // insert new source
     QString sourceName = QString("source/%1_uoa_%2").arg(serviceName).arg(accountId);
     config.insert(sourceName, newConfig);
+
 
     bool result = session->saveConfig(targetName, config);
     if (!result) {

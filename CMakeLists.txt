@@ -11,9 +11,11 @@ find_package(Qt5Network REQUIRED)
 add_definitions(-DQT_NO_KEYWORDS)
 
 pkg_check_modules(ACCOUNTS REQUIRED accounts-qt5>=1.10)
+pkg_check_modules(URLDISPATCHER REQUIRED url-dispatcher-1)
 pkg_check_modules(LIBNOTIFY libnotify)
 
 find_program(INTLTOOL_MERGE_EXECUTABLE intltool-merge)
+find_program(INTLTOOL_EXTRACT_EXECUTABLE intltool-extract)
 
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 set(CMAKE_AUTOMOC ON)
@@ -27,12 +29,12 @@ add_custom_target(uninstall "${CMAKE_COMMAND}"
 enable_testing()
 add_subdirectory(3rd_party)
 add_subdirectory(src)
-add_subdirectory(upstart)
+add_subdirectory(authenticator)
 add_subdirectory(accounts)
 add_subdirectory(templates)
-add_subdirectory(data)
 add_subdirectory(tests)
 add_subdirectory(po)
 add_subdirectory(Ubuntu)
+add_subdirectory(upstart)
 
 configure_file(config.h.in ${CMAKE_CURRENT_BINARY_DIR}/config.h)

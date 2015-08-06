@@ -14,7 +14,7 @@
 
 #include "config.h"
 
-#define CHANGE_TIMEOUT      1000
+#define CHANGE_TIMEOUT      3000
 
 using namespace QtOrganizer;
 using namespace QtContacts;
@@ -28,39 +28,10 @@ EdsHelper::EdsHelper(QObject *parent,
     qRegisterMetaType<QList<QOrganizerItemId> >("QList<QOrganizerItemId>");
     qRegisterMetaType<QList<QContactId> >("QList<QContactId>");
 
-    m_timeoutTimer.setSingleShot(true);
-
     m_contactEngine = new QContactManager(contactManager, QMap<QString, QString>());
-    connect(m_contactEngine,
-            SIGNAL(contactsAdded(QList<QContactId>)),
-            SLOT(contactChangedFilter(QList<QContactId>)),
-            Qt::QueuedConnection);
-    connect(m_contactEngine,
-            SIGNAL(contactsChanged(QList<QContactId>)),
-            SLOT(contactChangedFilter(QList<QContactId>)),
-            Qt::QueuedConnection);
-    connect(m_contactEngine,
-            SIGNAL(contactsRemoved(QList<QContactId>)),
-            SLOT(contactChanged()),
-            Qt::QueuedConnection);
-    connect(m_contactEngine,
-            SIGNAL(dataChanged()),
-            SLOT(contactDataChanged()),
-            Qt::QueuedConnection);
-
     m_organizerEngine = new QOrganizerManager(organizerManager, QMap<QString, QString>());
-    connect(m_organizerEngine,
-            SIGNAL(itemsAdded(QList<QOrganizerItemId>)),
-            SLOT(calendarChanged(QList<QOrganizerItemId>)), Qt::QueuedConnection);
-    connect(m_organizerEngine,
-            SIGNAL(itemsRemoved(QList<QOrganizerItemId>)),
-            SLOT(calendarChanged(QList<QOrganizerItemId>)), Qt::QueuedConnection);
-    connect(m_organizerEngine,
-            SIGNAL(itemsChanged(QList<QOrganizerItemId>)),
-            SLOT(calendarChanged(QList<QOrganizerItemId>)), Qt::QueuedConnection);
-    connect(m_organizerEngine,
-            SIGNAL(collectionsModified(QList<QPair<QOrganizerCollectionId,QOrganizerManager::Operation> >)),
-            SLOT(calendarCollectionsChanged()));
+
+    m_timeoutTimer.setSingleShot(true);
 }
 
 EdsHelper::~EdsHelper()
@@ -99,7 +70,10 @@ void EdsHelper::freezeNotify()
 
 void EdsHelper::unfreezeNotify()
 {
+    m_pendingContacts.clear();
+    m_pendingCalendars.clear();
     m_freezed = false;
+    m_timeoutTimer.start(CHANGE_TIMEOUT);
 }
 
 void EdsHelper::flush()
@@ -112,6 +86,44 @@ void EdsHelper::flush()
         Q_EMIT dataChanged(CALENDAR_SERVICE_NAME, calendar);
     }
     m_pendingCalendars.clear();
+}
+
+void EdsHelper::setEnabled(bool enabled)
+{
+    if (enabled) {
+        connect(m_contactEngine,
+                SIGNAL(contactsAdded(QList<QContactId>)),
+                SLOT(contactChangedFilter(QList<QContactId>)),
+                Qt::QueuedConnection);
+        connect(m_contactEngine,
+                SIGNAL(contactsChanged(QList<QContactId>)),
+                SLOT(contactChangedFilter(QList<QContactId>)),
+                Qt::QueuedConnection);
+        connect(m_contactEngine,
+                SIGNAL(contactsRemoved(QList<QContactId>)),
+                SLOT(contactChanged()),
+                Qt::QueuedConnection);
+        connect(m_contactEngine,
+                SIGNAL(dataChanged()),
+                SLOT(contactDataChanged()),
+                Qt::QueuedConnection);
+
+        connect(m_organizerEngine,
+                SIGNAL(itemsAdded(QList<QOrganizerItemId>)),
+                SLOT(calendarChanged(QList<QOrganizerItemId>)), Qt::QueuedConnection);
+        connect(m_organizerEngine,
+                SIGNAL(itemsRemoved(QList<QOrganizerItemId>)),
+                SLOT(calendarChanged(QList<QOrganizerItemId>)), Qt::QueuedConnection);
+        connect(m_organizerEngine,
+                SIGNAL(itemsChanged(QList<QOrganizerItemId>)),
+                SLOT(calendarChanged(QList<QOrganizerItemId>)), Qt::QueuedConnection);
+        connect(m_organizerEngine,
+                SIGNAL(collectionsModified(QList<QPair<QOrganizerCollectionId,QOrganizerManager::Operation> >)),
+                SLOT(calendarCollectionsChanged()));
+    } else {
+        m_contactEngine->disconnect(this);
+        m_organizerEngine->disconnect(this);
+    }
 }
 
 void EdsHelper::contactChangedFilter(const QList<QContactId>& contactIds)
@@ -150,7 +162,7 @@ void EdsHelper::contactFetchStateChanged(QContactAbstractRequest::State newState
         }
 
         Q_FOREACH(const QString &source, sources) {
-            Q_EMIT dataChanged(CONTACTS_SERVICE_NAME, source);
+            contactChanged(source);
         }
     }
 
@@ -167,10 +179,12 @@ QString EdsHelper::getCollectionIdFromItemId(const QOrganizerItemId &itemId) con
     return itemId.toString().split("/").first();
 }
 
-void EdsHelper::contactChanged()
+void EdsHelper::contactChanged(const QString& sourceName)
 {
     if (!m_timeoutTimer.isActive()) {
-        Q_EMIT dataChanged(CONTACTS_SERVICE_NAME, "");
+        Q_EMIT dataChanged(CONTACTS_SERVICE_NAME, sourceName);
+    } else {
+        qDebug() << "Ignore contact changed:" << sourceName;
     }
 }
 

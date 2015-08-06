@@ -20,29 +20,38 @@
 #define __SYNC_NETWORK_H__
 
 #include <QtCore/QScopedPointer>
+#include <QtCore/QTimer>
 #include <QtNetwork/QNetworkConfigurationManager>
 
 
 class SyncNetwork : public QObject
 {
     Q_OBJECT
-    Q_PROPERTY(bool online READ isOnline NOTIFY onlineChanged)
+    Q_PROPERTY(NetworkState state READ state NOTIFY stateChanged)
 
 public:
+    enum NetworkState {
+        NetworkOffline = 0,
+        NetworkPartialOnline,
+        NetworkOnline
+    };
     SyncNetwork(QObject *parent=0);
     ~SyncNetwork();
 
-    bool isOnline() const;
+    NetworkState state() const;
+    void setState(NetworkState newState);
 
 Q_SIGNALS:
-    void onlineChanged(bool isOnline);
+    void stateChanged(SyncNetwork::NetworkState state);
 
 private Q_SLOTS:
     void refresh();
+    void idleRefresh();
 
 private:
     QScopedPointer<QNetworkConfigurationManager> m_configManager;
-    bool m_isOnline;
+    NetworkState m_state;
+    QTimer m_idleRefresh;
 };
 
 #endif

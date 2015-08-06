@@ -1,3 +1,49 @@
+sync-monitor (0.1+15.04.20150327-0ubuntu1) vivid; urgency=medium
+
+  [ CI Train Bot ]
+  * New rebuild forced.
+
+  [ Renato Araujo Oliveira Filho ]
+  * Created sync-monitor-helper to re-authenticate accounts. (LP:
+    #1420934)
+
+ -- CI Train Bot <ci-train-bot@canonical.com>  Fri, 27 Mar 2015 11:13:09 +0000
+
+sync-monitor (0.1+15.04.20150121-0ubuntu1) vivid; urgency=low
+
+  [ Renato Araujo Oliveira Filho ]
+  * Fixed device online detection. Check for default connection type
+    instead of check all active connections.
+
+ -- Ubuntu daily release <ps-jenkins@lists.canonical.com>  Wed, 21 Jan 2015 13:40:34 +0000
+
+sync-monitor (0.1+15.04.20141121-0ubuntu1) vivid; urgency=low
+
+  [ Ubuntu daily release ]
+  * New rebuild forced
+
+  [ Renato Araujo Oliveira Filho ]
+  * Does not check for last error during the QDBusInterface creation.
+  * Use the new "startDate" filter to limit the number of events
+    retrieved on the first calendar sync.
+  * Add support for i18n. (LP: #1350534)
+
+ -- Ubuntu daily release <ps-jenkins@lists.canonical.com>  Fri, 21 Nov 2014 16:09:30 +0000
+
+sync-monitor (0.1+15.04.20141106.1~rtm-0ubuntu1) 14.09; urgency=low
+
+  [ Ubuntu daily release ]
+  * New rebuild forced
+
+  [ Renato Araujo Oliveira Filho ]
+  * Check for network connection before sync. Append sync request to run
+    later if no network. (LP: #1380094)
+  * Do not start sync monitor with upstart. The sync monitor will be
+    started by the dbus service only when requested by apps. (LP:
+    #1384707)
+
+ -- Ubuntu daily release <ps-jenkins@lists.canonical.com>  Thu, 06 Nov 2014 14:17:13 +0000
+
 sync-monitor (0.1+14.10.20140929.1-0ubuntu1) 14.09; urgency=low
 
   [ Ubuntu daily release ]

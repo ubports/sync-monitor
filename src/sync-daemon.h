@@ -26,12 +26,13 @@
 
 #include <Accounts/Manager>
 
+#include "sync-network.h"
+
 class SyncAccount;
 class EdsHelper;
 class ProviderTemplate;
 class SyncQueue;
 class SyncDBus;
-class SyncNetwork;
 
 class SyncDaemon : public QObject
 {
@@ -66,15 +67,18 @@ private Q_SLOTS:
     void removeAccount(const Accounts::AccountId &accountId);
     void removeAccountSource();
     void destroyAccount();
+    void authenticateAccount(const SyncAccount *account,
+                             const QString &serviceName);
+    void runAuthentication();
 
     void onAccountSyncStarted(const QString &serviceName, bool firstSync);
-    void onAccountSyncFinished(const QString &serviceName, bool firstSync, const QString &status);
-    void onAccountSyncError(const QString &serviceName, int errorCode);
+    void onAccountSyncFinished(const QString &serviceName, bool firstSync, const QString &status, const QString &syncMode);
     void onAccountEnableChanged(const QString &serviceName, bool enabled);
     void onAccountConfigured(const QString &serviceName);
     void onDataChanged(const QString &serviceName, const QString &sourceName);
+    void onClientAttached();
 
-    void onOnlineStatusChanged(bool isOnline);
+    void onOnlineStatusChanged(SyncNetwork::NetworkState state);
 
 private:
     Accounts::Manager *m_manager;
@@ -91,6 +95,7 @@ private:
     bool m_syncing;
     bool m_aboutToQuit;
     QElapsedTimer m_syncElapsedTime;
+    bool m_firstClient;
 
     void setupAccounts();
     void setupTriggers();
@@ -99,6 +104,7 @@ private:
     void setup();
     void sync(bool runNow);
     bool registerService();
+    void syncFinishedImpl();
 };
 
 #endif

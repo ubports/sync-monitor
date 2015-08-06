@@ -47,13 +47,14 @@ public:
     void freezeNotify();
     void unfreezeNotify();
     void flush();
+    void setEnabled(bool enabled);
 
 Q_SIGNALS:
     void dataChanged(const QString &serviceName, const QString &sourceName);
 
 private Q_SLOTS:
     void contactChangedFilter(const QList<QContactId>& contactIds);
-    void contactChanged();
+    void contactChanged(const QString &sourceName = QString());
     void contactDataChanged();
     void calendarChanged(const QList<QOrganizerItemId> &itemIds);
     void contactFetchStateChanged(QContactAbstractRequest::State newState);
