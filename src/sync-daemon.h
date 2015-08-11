@@ -71,10 +71,9 @@ private Q_SLOTS:
                              const QString &serviceName);
     void runAuthentication();
 
-    void onAccountSyncStarted(const QString &serviceName, bool firstSync);
-    void onAccountSyncFinished(const QString &serviceName, bool firstSync, const QString &status, const QString &syncMode);
+    void onAccountSyncStarted(const QString &serviceName, const QString &source, bool firstSync);
+    void onAccountSyncFinished(const QString &serviceName, const QString &source, bool firstSync, const QString &status, const QString &syncMode);
     void onAccountEnableChanged(const QString &serviceName, bool enabled);
-    void onAccountConfigured(const QString &serviceName);
     void onDataChanged(const QString &serviceName, const QString &sourceName);
     void onClientAttached();
 

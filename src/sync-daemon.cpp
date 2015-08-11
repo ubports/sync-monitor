@@ -307,14 +307,12 @@ void SyncDaemon::addAccount(const AccountId &accountId, bool startSync)
                                                m_provider->settings(acc->providerName()),
                                                this);
         m_accounts.insert(accountId, syncAcc);
-        connect(syncAcc, SIGNAL(syncStarted(QString, bool)),
-                         SLOT(onAccountSyncStarted(QString, bool)));
-        connect(syncAcc, SIGNAL(syncFinished(QString, bool, QString, QString)),
-                         SLOT(onAccountSyncFinished(QString, bool, QString, QString)));
+        connect(syncAcc, SIGNAL(syncStarted(QString,QString,bool)),
+                         SLOT(onAccountSyncStarted(QString, QString, bool)));
+        connect(syncAcc, SIGNAL(syncFinished(QString, QString, bool, QString, QString)),
+                         SLOT(onAccountSyncFinished(QString, QString, bool, QString, QString)));
         connect(syncAcc, SIGNAL(enableChanged(QString, bool)),
                          SLOT(onAccountEnableChanged(QString, bool)));
-        connect(syncAcc, SIGNAL(configured(QString)),
-                         SLOT(onAccountConfigured(QString)), Qt::DirectConnection);
         if (startSync) {
             sync(syncAcc, QString(), true);
         }
@@ -434,7 +432,9 @@ void SyncDaemon::runAuthentication()
     url_dispatch_send(appCommand.toUtf8().constData(), NULL, NULL);
 }
 
-void SyncDaemon::onAccountSyncStarted(const QString &serviceName, bool firstSync)
+void SyncDaemon::onAccountSyncStarted(const QString &serviceName,
+                                      const QString &sourceName,
+                                      bool firstSync)
 {
     SyncAccount *acc = qobject_cast<SyncAccount*>(QObject::sender());
     if (firstSync) {
@@ -453,7 +453,11 @@ void SyncDaemon::onAccountSyncStarted(const QString &serviceName, bool firstSync
     Q_EMIT syncStarted(acc, serviceName);
 }
 
-void SyncDaemon::onAccountSyncFinished(const QString &serviceName, const bool firstSync, const QString &status, const QString &mode)
+void SyncDaemon::onAccountSyncFinished(const QString &serviceName,
+                                       const QString &sourceName,
+                                       const bool firstSync,
+                                       const QString &status,
+                                       const QString &mode)
 {
     // error on that list will trigger a new sync
     static QStringList whiteListStatus;
@@ -526,12 +530,6 @@ void SyncDaemon::onAccountEnableChanged(const QString &serviceName, bool enabled
         cancel(acc, serviceName);
     }
     Q_EMIT accountsChanged();
-}
-
-void SyncDaemon::onAccountConfigured(const QString &serviceName)
-{
-    SyncAccount *acc = qobject_cast<SyncAccount*>(QObject::sender());
-    m_eds->createSource(serviceName, acc->displayName());
 }
 
 void SyncDaemon::quit()

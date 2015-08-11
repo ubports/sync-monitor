@@ -76,7 +76,7 @@ SyncEvolutionSessionProxy* SyncEvolutionServerProxy::openSession(const QString &
         return 0;
     }
 
-    return new SyncEvolutionSessionProxy(reply.value(), this);
+    return new SyncEvolutionSessionProxy(sessionName, reply.value(), this);
 }
 
 QStringList SyncEvolutionServerProxy::configs(bool templates) const

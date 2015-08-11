@@ -1,4 +1,4 @@
-#include "eds-helper.h"
+﻿#include "eds-helper.h"
 
 #include <QtCore/QDebug>
 
@@ -40,17 +40,29 @@ EdsHelper::~EdsHelper()
     delete m_organizerEngine;
 }
 
-void EdsHelper::createSource(const QString &serviceName, const QString &sourceName)
+QString EdsHelper::createSource(const QString &serviceName, const QString &sourceName)
 {
     if (serviceName == CONTACTS_SERVICE_NAME) {
-        createContactsSource(sourceName);
+        return createContactsSource(sourceName);
     } else if (serviceName == CALENDAR_SERVICE_NAME) {
-        createOrganizerSource(sourceName);
+        return createOrganizerSource(sourceName);
     } else {
         qWarning() << "Service not supported:" << serviceName;
     }
+    return QString();
 }
 
+QStringList EdsHelper::sources(const QString &serviceName) const
+{
+    if (serviceName == CONTACTS_SERVICE_NAME) {
+        return contactsSources();
+    } else if (serviceName == CALENDAR_SERVICE_NAME) {
+        return organizerSources();
+    } else {
+        qWarning() << "Service not supported:" << serviceName;
+    }
+    return QStringList();
+}
 
 void EdsHelper::removeSource(const QString &serviceName, const QString &sourceName)
 {
@@ -229,7 +241,7 @@ void EdsHelper::calendarChanged(const QList<QOrganizerItemId> &itemIds)
     }
 }
 
-void EdsHelper::createContactsSource(const QString &sourceName)
+QString EdsHelper::createContactsSource(const QString &sourceName)
 {
     // filter all contact groups/addressbook
     QContactDetailFilter filter;
@@ -240,7 +252,7 @@ void EdsHelper::createContactsSource(const QString &sourceName)
     QList<QContact> sources = m_contactEngine->contacts(filter);
     Q_FOREACH(const QContact &contact, sources) {
         if (contact.detail<QContactDisplayLabel>().label() == sourceName) {
-            return;
+            return contact.id().toString();
         }
     }
 
@@ -262,7 +274,38 @@ void EdsHelper::createContactsSource(const QString &sourceName)
 
     if (!m_contactEngine->saveContact(&contact)) {
         qWarning() << "Fail to create contact source:" << sourceName;
+        return QString();
+    } else {
+        return contact.id().toString();
     }
+}
+
+QStringList EdsHelper::organizerSources() const
+{
+    QStringList ids;
+
+    QList<QOrganizerCollection> collections = m_organizerEngine->collections();
+    Q_FOREACH(const QOrganizerCollection &collection, collections) {
+        ids << collection.id().toString();
+    }
+
+    return ids;
+}
+
+QStringList EdsHelper::contactsSources() const
+{
+    QStringList ids;
+    QContactDetailFilter filter;
+    filter.setDetailType(QContactDetail::TypeType, QContactType::FieldType);
+    filter.setValue(QContactType::TypeGroup);
+
+    // check if the source already exists
+    QList<QContact> sources = m_contactEngine->contacts(filter);
+    Q_FOREACH(const QContact &contact, sources) {
+        ids << contact.id().toString();
+    }
+
+    return ids;
 }
 
 void EdsHelper::removeOrganizerSource(const QString &sourceName)
@@ -293,12 +336,12 @@ void EdsHelper::removeContactsSource(const QString &sourceName)
     }
 }
 
-void EdsHelper::createOrganizerSource(const QString &sourceName)
+QString EdsHelper::createOrganizerSource(const QString &sourceName)
 {
     QList<QOrganizerCollection> result = m_organizerEngine->collections();
     Q_FOREACH(const QOrganizerCollection &collection, result) {
         if (collection.metaData(QOrganizerCollection::KeyName).toString() == sourceName) {
-            return;
+            return collection.id().toString();
         }
     }
 
@@ -306,5 +349,8 @@ void EdsHelper::createOrganizerSource(const QString &sourceName)
     collection.setMetaData(QOrganizerCollection::KeyName, sourceName);
     if (!m_organizerEngine->saveCollection(&collection)) {
         qWarning() << "Fail to create collection" << sourceName;
+        return QString();
+    } else {
+        return collection.id().toString();
     }
 }

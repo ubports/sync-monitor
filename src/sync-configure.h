@@ -23,7 +23,9 @@
 #include <QtCore/QSettings>
 
 #include <Accounts/Account>
+
 #include "dbustypes.h"
+
 
 class SyncEvolutionSessionProxy;
 
@@ -36,33 +38,40 @@ public:
                   QObject *parent = 0);
     ~SyncConfigure();
 
-    void configure(const QString &serviceName, const QString &syncMode);
-    void configureAll(const QString &syncMode);
-    QString serviceName() const;
+    Accounts::AccountId accountId() const;
+    void configure();
+
+
+    static QString accountSessionName(Accounts::Account *account);
+    static void dumpMap(const QStringMultiMap &map);
+    static void dumpMap(const QStringMap &map);
 
 Q_SIGNALS:
-    void done();
-    void error();
+    void done(const QStringList &services);
+    void error(const QStringList &services);
+    void databaseReady();
 
-public Q_SLOTS:
-    void onSessionStatusChanged(const QString &newStatus);
-    void onSessionError(uint error);
+private Q_SLOTS:
+    void onPeerSessionStatusChanged(const QString &status, uint errorNuber, QSyncStatusMap source);
 
 private:
     Accounts::Account *m_account;
-    QMap<QString, SyncEvolutionSessionProxy*> m_sessions;
+    QMap<SyncEvolutionSessionProxy*, QStringList> m_peers;
     QSettings *m_settings;
-    QStringList m_services;
-    QString m_originalServiceName;
-    QString m_syncMode;
 
-    void continueConfigure();
-    void configureServices(const QString &syncMode);
-    void configureService(const QString &serviceName, const QString &syncMode);
-    void removeService(const QString &serviceName);
-    bool configTarget(const QString &targetName, const QString &serviceName);
-    bool configSync(const QString &targetName, const QString &serviceName, const QString &syncMode, const SyncDatabase &db);
-    bool changeSyncMode(const QString &targetName, const QString &serviceName, const QString &syncMode);
+    void configurePeer(const QStringList &services);
+    void continuePeerConfig(SyncEvolutionSessionProxy *session, const QStringList &services);
+    void checkSyncConfig(SyncEvolutionSessionProxy *session,
+                         const QString &peerName,
+                         const QString &serviceName,
+                         const QString &localDbId);
+    bool createSyncConfig(SyncEvolutionSessionProxy *session, const QString &configName, const QString &peerName, const QString &serviceName, const QString &localDbId);
+    QArrayOfDatabases listDatabase(SyncEvolutionSessionProxy *session, const QString &peerName, const QString &serviceName);
+    QString registerDatabase(SyncEvolutionSessionProxy *session, const QString &localDatabaseName, const QString &localDatabaseId);
+
+    static QString formatSourceName(const QString &name);
+    static bool updateConfig(QStringMultiMap &config, const QString &source, const QString &key, const QString &value);
+
 };
 
 #endif

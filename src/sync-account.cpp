@@ -26,10 +26,13 @@
 
 using namespace Accounts;
 
+
+
 SyncAccount::SyncAccount(Account *account,
                          QSettings *settings,
                          QObject *parent)
     : QObject(parent),
+      m_config(0),
       m_currentSession(0),
       m_account(account),
       m_state(SyncAccount::Idle),
@@ -64,21 +67,6 @@ void SyncAccount::setupServices()
     }
 }
 
-QString SyncAccount::sessionName(const QString &serviceName) const
-{
-    return QString("%1-%2-%3")
-            .arg(m_account->providerName())
-            .arg(serviceName)
-            .arg(m_account->id());
-}
-
-QString SyncAccount::sourceName(const QString &serviceName) const
-{
-    return QString("%1_uoa_%2")
-            .arg(serviceName)
-            .arg(m_account->id());
-}
-
 void SyncAccount::dumpReport(const QStringMap &report) const
 {
     Q_FOREACH(const QString &key, report.keys()) {
@@ -111,69 +99,87 @@ void SyncAccount::sync(const QString &serviceName)
     switch(m_state) {
     case SyncAccount::Idle:
         qDebug() << "Sync requested service:" << m_account->displayName() << serviceName;
-        if (prepareSession(serviceName)) {
-            m_syncMode = syncMode(serviceName, &m_firstSync);
-            releaseSession();
-            configure(serviceName, m_syncMode);
+        if (serviceName.isEmpty()) {
+            m_servicesToSync  = m_settings->childGroups();
         } else {
-            qWarning() << "Fail to connect with syncevolution";
-            setState(SyncAccount::Idle);
-            Q_EMIT syncFinished(serviceName, false, "", "");
+            m_servicesToSync << serviceName;
         }
+        configure();
         break;
     default:
+        qWarning() << "Sync request with account in an invalid state" << m_state;
         break;
     }
 }
 
-bool SyncAccount::prepareSession(const QString &serviceName)
+bool SyncAccount::prepareSession(const QString &session)
 {
-    m_syncServiceName = serviceName;
-    QString sessionName = this->sessionName(serviceName);
+    QString sessionName(session);
+    if (session == QString::null) {
+        sessionName = SyncConfigure::accountSessionName(m_account);
+    }
+
     SyncEvolutionServerProxy *proxy = SyncEvolutionServerProxy::instance();
-    SyncEvolutionSessionProxy *session = proxy->openSession(sessionName,
+    SyncEvolutionSessionProxy *sessionProxy = proxy->openSession(sessionName,
                                                             QStringList());
-    if (session) {
-        attachSession(session);
+    if (sessionProxy) {
+        attachSession(sessionProxy);
         return true;
     } else {
+        qWarning() << "Fail to open session" << sessionName;
         return false;
     }
 }
 
-bool SyncAccount::syncService(const QString &serviceName)
+QStringList SyncAccount::sources(const QString &serviceName) const
 {
-    bool enabledService = m_availabeServices.value(serviceName, false);
-    if (!enabledService) {
-        qDebug() << "Service" << serviceName << "disabled. Skip sync.";
-        setState(SyncAccount::Idle);
-        Q_EMIT syncFinished(serviceName, false, "", "");
-        return true;
+    if (!m_currentSession) {
+        return QStringList();
     }
 
-    if (prepareSession(serviceName)) {
-        Q_ASSERT(m_currentSession);
-        QStringMap syncFlags;
-        syncFlags.insert(sourceName(serviceName), m_syncMode);
-        m_currentSession->sync(syncFlags);
-        return true;
-    } else {
+    QStringList sources;
+    QStringMultiMap config = m_currentSession->getConfig("@default", false);
+    QString sourcePrefix = QString("source/%1_").arg(serviceName);
+    Q_FOREACH(const QString &key, config.keys()) {
+        if (key.startsWith(sourcePrefix)) {
+            sources << key.split("/").last();
+        }
+    }
+
+    return sources;
+}
+
+void SyncAccount::continueSync()
+{
+    setState(SyncAccount::AboutToSync);
+
+    QStringMap syncFlags;
+    if (!prepareSession()) {
         setState(SyncAccount::Invalid);
-        return false;
+        return;
     }
-}
 
-void SyncAccount::continueSync(const QString &serviceName)
-{
-    QStringList services;
-    if (serviceName.isEmpty()) {
-        services  = m_settings->childGroups();
+    Q_FOREACH(const QString &service, m_servicesToSync) {
+        bool enabledService = m_availabeServices.value(service, false);
+        if (!enabledService) {
+            qDebug() << "Service" << service << "disabled. Skip sync.";
+            Q_EMIT syncFinished(service, "", false, "", "");
+        } else {
+            qDebug() << "Will prepare to sync" << service;
+            Q_FOREACH(const QString &source, sources(service)) {
+                bool firstSync = false;
+                QString mode = syncMode(service, source, &firstSync);
+                syncFlags.insert("google-144@"+source, mode);
+                qDebug() << "Source sync" << source << mode;
+                m_sourcesOnSync << source;
+            }
+        }
+    }
+
+    if (!syncFlags.isEmpty()) {
+        m_currentSession->sync(QString::null, syncFlags);
     } else {
-        services << serviceName;
-    }
-
-    Q_FOREACH(const QString &service, services) {
-        syncService(service);
+        setState(SyncAccount::Idle);
     }
 }
 
@@ -197,13 +203,18 @@ QStringMap SyncAccount::lastReport(const QString &serviceName) const
     }
 
     QArrayOfStringMap reports = m_currentSession->reports(index, pageSize);
+//    qDebug() << "REPORT====================================================";
+//    Q_FOREACH(const QStringMap &map, reports) {
+//        SyncConfigure::dumpMap(map);
+//    }
+//    qDebug() << "==========================================================";
     if (reports.isEmpty()) {
         return QStringMap();
     } else if (serviceName.isEmpty()) {
         return reports.value(0);
     }
 
-    QString sessionName = this->sessionName(serviceName);
+    QString sessionName = SyncConfigure::accountSessionName(m_account);
     index += pageSize;
     while (reports.size() != pageSize) {
         Q_FOREACH(const QStringMap &report, reports) {
@@ -224,13 +235,20 @@ QStringMap SyncAccount::lastReport(const QString &serviceName) const
     return QStringMap();
 }
 
-QString SyncAccount::syncMode(const QString &serviceName, bool *firstSync) const
+QString SyncAccount::syncMode(const QString &serviceName,
+                              const QString &sourceName,
+                              bool *firstSync) const
 {
     QString lastSyncMode = "two-way";
-    QString lastStatus = lastSyncStatus(serviceName, &lastSyncMode);
+    QString lastStatus = lastSyncStatus(serviceName, sourceName);
     *firstSync = lastStatus.isEmpty();
+    qDebug() << "Service" << serviceName
+             << "source" << sourceName
+             << "Last status" << lastStatus
+             << "Is first sync" << *firstSync;
+
     if (*firstSync) {
-        return "slow";
+        return "refresh-from-remote";
     }
     switch(lastStatus.toInt())
     {
@@ -282,14 +300,13 @@ QString SyncAccount::syncMode(const QString &serviceName, bool *firstSync) const
     }
 }
 
-QString SyncAccount::lastSyncStatus(const QString &serviceName, QString *lastSyncMode) const
+QString SyncAccount::lastSyncStatus(const QString &serviceName,
+                                    const QString &sourceName) const
 {
-    QString sourceName = this->sourceName(serviceName).replace("_", "__");
     QStringMap lastReport = this->lastReport(serviceName);
     QString lastStatus;
     if (!lastReport.isEmpty()) {
         lastStatus = lastReport.value("status", "");
-        *lastSyncMode = lastReport.value(QString("source-%1-mode").arg(sourceName), "slow");
     } else {
         QString statusMessage = statusDescription(lastStatus);
         qDebug() << QString("Last report start date: %1, Status: %2 Message: %3")
@@ -356,6 +373,7 @@ uint SyncAccount::lastError() const
 
 void SyncAccount::removeConfig()
 {
+    //TODO
     QString configPath;
     Q_FOREACH(const QString &service, m_availabeServices.keys()) {
         configPath = QString("%1/%2-%3-%4")
@@ -415,51 +433,51 @@ void SyncAccount::onAccountEnabledChanged(const QString &serviceName, bool enabl
     }
 }
 
-void SyncAccount::onSessionStatusChanged(const QString &newStatus)
+void SyncAccount::onSessionStatusChanged(const QString &status, quint32 error, const QSyncStatusMap &sources)
 {
-    if (newStatus == "running") {
-        switch (m_state) {
-        case SyncAccount::Idle:
-            setState(SyncAccount::Syncing);
-            Q_EMIT syncStarted(m_syncServiceName, m_firstSync);
-            break;
-        case SyncAccount::Syncing:
-            break;
-        default:
-            qWarning() << "State changed to" << newStatus << "during" << state();
-            break;
-        }
-    } else if (newStatus == "done") {
-        QString lastSyncMode;
-        QString lastStatus = lastSyncStatus(m_syncServiceName, &lastSyncMode);
-        QStringMap lastReport = this->lastReport(m_syncServiceName);
-        qDebug() << "Sync Report";
-        dumpReport(lastReport);
-        releaseSession();
-        switch (m_state) {
-        case SyncAccount::Syncing:
-        {
-            QString currentServiceName = m_syncServiceName;
-            bool firstSync = m_firstSync;
-            QString currentSyncMode = m_syncMode;
+    qDebug() << "onSessionStatusChanged" << status << error << "Sources" << sources.size();
 
-            m_syncMode.clear();
-            m_syncServiceName.clear();
-            m_firstSync = false;
-            setState(SyncAccount::Idle);
+    for(QSyncStatusMap::const_iterator i = sources.begin();
+        i != sources.end();
+        i++) {
+        QString newStatus = i.value().status;
+        QString sourceName = i.key();
+        QString serviceName = sourceName.split("_").first();
+        QString syncMode = i.value().mode;
 
-            Q_EMIT syncFinished(currentServiceName, firstSync, lastStatus, currentSyncMode);
-            break;
-        }
-        default:
-            qWarning() << "State changed to" << newStatus << "during" << state();
-            break;
-        }
+        qDebug() << "\t" << sourceName
+                 << "Error:" << i.value().error
+                 << "Status" << i.value().status
+                 << "Mode" << i.value().mode;
 
-    } else if (newStatus == "running;waiting") {
-        // ignore
-    } else {
-        qWarning() << "Status changed invalid;" << newStatus;
+        if (newStatus == "running") {
+            //TODO: check m_firstSync
+            Q_EMIT syncStarted(serviceName, sourceName, m_firstSync);
+
+            switch (m_state) {
+            case SyncAccount::Idle:
+                setState(SyncAccount::Syncing);
+                break;
+            case SyncAccount::Syncing:
+                break;
+            default:
+                qWarning() << "State changed to" << newStatus << "during" << state();
+                break;
+            }
+        } else if (newStatus == "done") {
+            //TODO: check m_firstSync
+            Q_EMIT syncFinished(serviceName, sourceName, m_firstSync, "", syncMode);
+            m_sourcesOnSync.removeOne(sourceName);
+            if (m_sourcesOnSync.isEmpty()) {
+                qDebug() << "Sync finished";
+                setState(SyncAccount::Idle);
+            }
+        } else if ((newStatus == "running;waiting") ||
+                   (newStatus == "idle")) {
+            // ignore
+        } else {
+            qWarning() << "Status changed invalid;" << newStatus;
+        }
     }
 }
 
@@ -468,51 +486,47 @@ void SyncAccount::onSessionProgressChanged(int progress)
     qDebug() << "Progress" << progress;
 }
 
-void SyncAccount::onSessionError(uint error)
-{
-    qWarning() << "Session error" << error;
-    setState(SyncAccount::Idle);
-}
-
 // configure syncevolution with the necessary information for sync
-void SyncAccount::configure(const QString &serviceName, const QString &syncMode)
+void SyncAccount::configure()
 {
-    qDebug() << "Configure account for service:"
-             << m_account->displayName() << serviceName << syncMode;
+    qDebug() << "Configure account:" << m_account->displayName() << m_servicesToSync;
+
+    if (m_config) {
+        qWarning() << "Account already configured" << m_account->displayName();
+        continueSync();
+        return;
+    }
 
     setState(SyncAccount::Configuring);
-    SyncConfigure *configure = new SyncConfigure(m_account, m_settings, this);
-    m_pendingConfigs << configure;
-
-    connect(configure, &SyncConfigure::done,
+    m_config = new SyncConfigure(m_account,
+                                 m_settings,
+                                 this);
+    connect(m_config, &SyncConfigure::done,
             this, &SyncAccount::onAccountConfigured);
-    connect(configure, &SyncConfigure::error,
+    connect(m_config, &SyncConfigure::error,
             this, &SyncAccount::onAccountConfigureError);
 
-    configure->configure(serviceName, syncMode);
+    m_config->configure();
 }
 
-void SyncAccount::onAccountConfigured()
+void SyncAccount::onAccountConfigured(const QStringList &services)
 {
-    SyncConfigure *configure = qobject_cast<SyncConfigure*>(QObject::sender());
-    m_pendingConfigs.removeOne(configure);
-    QString serviceName = configure->serviceName();
-    configure->deleteLater();
+    m_config->deleteLater();
+    m_config = 0;
 
-    Q_EMIT configured(serviceName);
+    Q_EMIT configured(services);
 
-    setState(SyncAccount::Idle);
-    continueSync(serviceName);
+    continueSync();
 }
 
-void SyncAccount::onAccountConfigureError()
+void SyncAccount::onAccountConfigureError(const QStringList &services)
 {
-    SyncConfigure *configure = qobject_cast<SyncConfigure*>(QObject::sender());
-    m_pendingConfigs.removeOne(configure);
-    configure->deleteLater();
+    m_config->deleteLater();
+    m_config = 0;
+
     // TODO: notify error
     setState(SyncAccount::Invalid);
-    qWarning() << "Fail to configure account" << m_account->id() << m_account->displayName();
+    qWarning() << "Fail to configure account" << m_account->displayName() << services;
 }
 
 void SyncAccount::setState(SyncAccount::AccountState state)
@@ -528,14 +542,11 @@ void SyncAccount::attachSession(SyncEvolutionSessionProxy *session)
     Q_ASSERT(m_currentSession == 0);
     m_currentSession = session;
     m_sessionConnections << connect(m_currentSession,
-                                    SIGNAL(statusChanged(QString)),
-                                    SLOT(onSessionStatusChanged(QString)));
+                                    SIGNAL(statusChanged(QString,uint,QSyncStatusMap)),
+                                    SLOT(onSessionStatusChanged(QString, quint32, QSyncStatusMap)));
     m_sessionConnections << connect(m_currentSession,
                                     SIGNAL(progressChanged(int)),
                                     SLOT(onSessionProgressChanged(int)));
-    m_sessionConnections << connect(m_currentSession,
-                                    SIGNAL(error(uint)),
-                                    SLOT(onSessionError(uint)));
 }
 
 void SyncAccount::releaseSession()

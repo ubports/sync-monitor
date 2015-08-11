@@ -22,6 +22,7 @@
 #define PROVIDER_TEMPLATE_PATH          "@CMAKE_INSTALL_FULL_DATADIR@/sync-monitor/templates"
 #define CONTACTS_SERVICE_NAME           "contacts"
 #define CALENDAR_SERVICE_NAME           "calendar"
+#define GLOBAL_CONFIG_GROUP             "global"
 
 #define GETTEXT_LOCALEDIR               "@CMAKE_INSTALL_FULL_LOCALEDIR@"
 #define GETTEXT_PACKAGE                 "sync-monitor"

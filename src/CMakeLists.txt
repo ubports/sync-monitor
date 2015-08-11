@@ -1,4 +1,5 @@
 project(synq-src)
+add_definitions(-std=c++11)
 
 set(SYNQ_BIN sync-monitor)
 set(SYNQ_LIB synq-lib)
