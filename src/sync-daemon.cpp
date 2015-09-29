@@ -93,7 +93,7 @@ void SyncDaemon::setupAccounts()
 
 void SyncDaemon::setupTriggers()
 {
-    m_eds = new EdsHelper(this);
+    m_eds = new EdsHelper(this, "");
     connect(m_eds, &EdsHelper::dataChanged,
             this, &SyncDaemon::onDataChanged);
 }
@@ -379,27 +379,9 @@ void SyncDaemon::removeAccount(const AccountId &accountId)
     SyncAccount *syncAcc = m_accounts.take(accountId);
     if (syncAcc) {
         cancel(syncAcc);
-
-        NotifyMessage *notify = new NotifyMessage(true, this);
-        notify->setProperty("ACCOUNT", QVariant::fromValue<QObject*>(qobject_cast<QObject*>(syncAcc)));
-        connect(notify, SIGNAL(questionRejected()), SLOT(removeAccountSource()));
-        connect(notify, SIGNAL(messageClosed()), SLOT(destroyAccount()));
-        notify->askYesOrNo(_("Synchronization"),
-                           QString(_("Account %1 removed. Do you want to keep the account data?"))
-                                .arg(syncAcc->displayName()),
-                           SYNC_MONITOR_ICON_PATH);
-
+        m_eds->removeSource("", syncAcc->displayName());
     }
     Q_EMIT accountsChanged();
-}
-
-void SyncDaemon::removeAccountSource()
-{
-    QObject *sender = QObject::sender();
-    QObject *accObj = sender->property("ACCOUNT").value<QObject*>();
-    SyncAccount *acc = qobject_cast<SyncAccount*>(accObj);
-    Q_ASSERT(acc);
-    m_eds->removeSource("", acc->displayName());
 }
 
 void SyncDaemon::destroyAccount()

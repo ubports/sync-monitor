@@ -28,8 +28,16 @@ EdsHelper::EdsHelper(QObject *parent,
     qRegisterMetaType<QList<QOrganizerItemId> >("QList<QOrganizerItemId>");
     qRegisterMetaType<QList<QContactId> >("QList<QContactId>");
 
-    m_contactEngine = new QContactManager(contactManager, QMap<QString, QString>());
-    m_organizerEngine = new QOrganizerManager(organizerManager, QMap<QString, QString>());
+    if (!contactManager.isEmpty()) {
+        m_contactEngine = new QContactManager(contactManager, QMap<QString, QString>());
+    } else {
+        m_contactEngine = 0;
+    }
+    if (!organizerManager.isEmpty()) {
+        m_organizerEngine = new QOrganizerManager(organizerManager, QMap<QString, QString>());
+    } else {
+        m_organizerEngine = 0;
+    }
 
     m_timeoutTimer.setSingleShot(true);
 }
@@ -91,43 +99,53 @@ void EdsHelper::flush()
 void EdsHelper::setEnabled(bool enabled)
 {
     if (enabled) {
-        connect(m_contactEngine,
-                SIGNAL(contactsAdded(QList<QContactId>)),
-                SLOT(contactChangedFilter(QList<QContactId>)),
-                Qt::QueuedConnection);
-        connect(m_contactEngine,
-                SIGNAL(contactsChanged(QList<QContactId>)),
-                SLOT(contactChangedFilter(QList<QContactId>)),
-                Qt::QueuedConnection);
-        connect(m_contactEngine,
-                SIGNAL(contactsRemoved(QList<QContactId>)),
-                SLOT(contactChanged()),
-                Qt::QueuedConnection);
-        connect(m_contactEngine,
-                SIGNAL(dataChanged()),
-                SLOT(contactDataChanged()),
-                Qt::QueuedConnection);
+        if (m_contactEngine) {
+            connect(m_contactEngine,
+                    SIGNAL(contactsAdded(QList<QContactId>)),
+                    SLOT(contactChangedFilter(QList<QContactId>)),
+                    Qt::QueuedConnection);
+            connect(m_contactEngine,
+                    SIGNAL(contactsChanged(QList<QContactId>)),
+                    SLOT(contactChangedFilter(QList<QContactId>)),
+                    Qt::QueuedConnection);
+            connect(m_contactEngine,
+                    SIGNAL(contactsRemoved(QList<QContactId>)),
+                    SLOT(contactChanged()),
+                    Qt::QueuedConnection);
+            connect(m_contactEngine,
+                    SIGNAL(dataChanged()),
+                    SLOT(contactDataChanged()),
+                    Qt::QueuedConnection);
+        }
 
-        connect(m_organizerEngine,
-                SIGNAL(itemsAdded(QList<QOrganizerItemId>)),
-                SLOT(calendarChanged(QList<QOrganizerItemId>)), Qt::QueuedConnection);
-        connect(m_organizerEngine,
-                SIGNAL(itemsRemoved(QList<QOrganizerItemId>)),
-                SLOT(calendarChanged(QList<QOrganizerItemId>)), Qt::QueuedConnection);
-        connect(m_organizerEngine,
-                SIGNAL(itemsChanged(QList<QOrganizerItemId>)),
-                SLOT(calendarChanged(QList<QOrganizerItemId>)), Qt::QueuedConnection);
-        connect(m_organizerEngine,
-                SIGNAL(collectionsModified(QList<QPair<QOrganizerCollectionId,QOrganizerManager::Operation> >)),
-                SLOT(calendarCollectionsChanged()));
+        if (m_organizerEngine) {
+            connect(m_organizerEngine,
+                    SIGNAL(itemsAdded(QList<QOrganizerItemId>)),
+                    SLOT(calendarChanged(QList<QOrganizerItemId>)), Qt::QueuedConnection);
+            connect(m_organizerEngine,
+                    SIGNAL(itemsRemoved(QList<QOrganizerItemId>)),
+                    SLOT(calendarChanged(QList<QOrganizerItemId>)), Qt::QueuedConnection);
+            connect(m_organizerEngine,
+                    SIGNAL(itemsChanged(QList<QOrganizerItemId>)),
+                    SLOT(calendarChanged(QList<QOrganizerItemId>)), Qt::QueuedConnection);
+            connect(m_organizerEngine,
+                    SIGNAL(collectionsModified(QList<QPair<QOrganizerCollectionId,QOrganizerManager::Operation> >)),
+                    SLOT(calendarCollectionsChanged()));
+        }
     } else {
-        m_contactEngine->disconnect(this);
-        m_organizerEngine->disconnect(this);
+        if (m_contactEngine) {
+            m_contactEngine->disconnect(this);
+        }
+        if (m_organizerEngine) {
+            m_organizerEngine->disconnect(this);
+        }
     }
 }
 
 void EdsHelper::contactChangedFilter(const QList<QContactId>& contactIds)
 {
+    Q_ASSERT(m_contactEngine);
+
     if (m_freezed) {
         m_pendingContacts += contactIds.toSet();
     } else {
@@ -146,6 +164,8 @@ void EdsHelper::contactChangedFilter(const QList<QContactId>& contactIds)
 
 void EdsHelper::contactFetchStateChanged(QContactAbstractRequest::State newState)
 {
+    Q_ASSERT(m_contactEngine);
+
     if ((newState == QContactAbstractRequest::ActiveState) ||
         (newState == QContactAbstractRequest::InactiveState)) {
         return;
@@ -199,6 +219,8 @@ void EdsHelper::contactDataChanged()
 
 void EdsHelper::calendarChanged(const QList<QOrganizerItemId> &itemIds)
 {
+    Q_ASSERT(m_organizerEngine);
+
     QSet<QString> uniqueColletions;
 
     // eds item ids cotains the collection id we can use that instead of query for the full item
@@ -231,6 +253,11 @@ void EdsHelper::calendarChanged(const QList<QOrganizerItemId> &itemIds)
 
 void EdsHelper::createContactsSource(const QString &sourceName)
 {
+    if (!m_contactEngine) {
+        qWarning() << "Request to create contact source with null engine";
+        return;
+    }
+
     // filter all contact groups/addressbook
     QContactDetailFilter filter;
     filter.setDetailType(QContactDetail::TypeType, QContactType::FieldType);
@@ -267,6 +294,11 @@ void EdsHelper::createContactsSource(const QString &sourceName)
 
 void EdsHelper::removeOrganizerSource(const QString &sourceName)
 {
+    if (!m_organizerEngine) {
+        qWarning() << "Request to remove organizer source with a null organize engine";
+        return;
+    }
+
     QOrganizerCollectionId collectionId;
     QList<QOrganizerCollection> result = m_organizerEngine->collections();
     Q_FOREACH(const QOrganizerCollection &collection, result) {
@@ -287,14 +319,38 @@ void EdsHelper::removeOrganizerSource(const QString &sourceName)
 
 void EdsHelper::removeContactsSource(const QString &sourceName)
 {
-    QContactId sourceId = QContactId::fromString(QString("qtcontacts:galera::%1").arg(sourceName));
-    if (!m_contactEngine->removeContact(sourceId)) {
+    if (!m_contactEngine) {
+        qWarning() << "Request to remove contact source with a null contact engine";
+        return;
+    }
+
+    // check source Id
+    QContactId sourceId;
+    QContactDetailFilter filter;
+    filter.setDetailType(QContactDetail::TypeType, QContactType::FieldType);
+    filter.setValue(QContactType::TypeGroup);
+
+    // check if the source already exists
+    QList<QContact> sources = m_contactEngine->contacts(filter);
+    Q_FOREACH(const QContact &contact, sources) {
+        if (contact.detail<QContactDisplayLabel>().label() == sourceName) {
+            sourceId = contact.id();
+            break;
+        }
+    }
+
+    if (sourceId.isNull() || !m_contactEngine->removeContact(sourceId)) {
         qWarning() << "Fail to remove contact source:" << sourceName;
     }
 }
 
 void EdsHelper::createOrganizerSource(const QString &sourceName)
 {
+    if (!m_organizerEngine) {
+        qWarning() << "Request to create an organizer source with a null organize engine";
+        return;
+    }
+
     QList<QOrganizerCollection> result = m_organizerEngine->collections();
     Q_FOREACH(const QOrganizerCollection &collection, result) {
         if (collection.metaData(QOrganizerCollection::KeyName).toString() == sourceName) {
