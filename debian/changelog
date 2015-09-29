@@ -1,3 +1,10 @@
+sync-monitor (0.2+15.10.20150929-0ubuntu1) wily; urgency=medium
+
+  [ Renato Araujo Oliveira Filho ]
+  * Do not sync contacts. Contacts sync will be handled by buteo.
+
+ -- CI Train Bot <ci-train-bot@canonical.com>  Tue, 29 Sep 2015 19:17:59 +0000
+
 sync-monitor (0.1+15.04.20150327-0ubuntu2~gcc5.1) wily; urgency=medium
 
   * No-change test rebuild for g++5 ABI transition
