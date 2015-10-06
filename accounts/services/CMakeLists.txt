@@ -1,9 +1,11 @@
 set(SERVICE_FILES
      google-caldav.service
+     google-carddav.service
 )
 
 set(SERVICE_OUTPUT_FILES
      ${CMAKE_CURRENT_BINARY_DIR}/google-caldav.service
+     ${CMAKE_CURRENT_BINARY_DIR}/google-carddav.service
 )
 
 TRANSLATE_XML(SERVICE_FILES)
