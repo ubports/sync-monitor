@@ -44,6 +44,10 @@ public:
     SyncAccount(Accounts::Account *account,
                 QSettings *settings,
                 QObject *parent=0);
+    SyncAccount(Accounts::Account *account,
+                const QString &service,
+                QSettings *settings,
+                QObject *parent);
     virtual ~SyncAccount();
 
     virtual void setup();

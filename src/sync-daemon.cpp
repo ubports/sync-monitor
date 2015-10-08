@@ -164,6 +164,28 @@ void SyncDaemon::syncAll(const QString &serviceName, bool runNow)
     }
 }
 
+/*
+ * This is a helper function used on contact migration it only works for contacts sync
+ */
+void SyncDaemon::syncAccount(quint32 accountId, const QString &service)
+{
+    Account *account = m_manager->account(accountId);
+    if (account) {
+        // fake a settings object
+        QSettings *contactSettings = new QSettings;
+        contactSettings->setValue("contacts/template", "WebDAV");
+        contactSettings->setValue("contacts/syncURL", "https://www.googleapis.com/.well-known/carddav");
+        contactSettings->setValue("contacts/uoa-service", "google-carddav");
+        contactSettings->setValue("contacts/sync-backend", "evolution-contacts");
+        contactSettings->setValue("contacts/sync-uri", "addressbook");
+
+        SyncAccount *acc = new SyncAccount(account, service, contactSettings, this);
+        connect(acc, SIGNAL(syncFinished(QString,bool,QString,QString)), acc, SLOT(deleteLater()));
+        contactSettings->setParent(acc);
+        sync(acc, service, true);
+    }
+}
+
 void SyncDaemon::cancel(const QString &serviceName)
 {
     Q_FOREACH(SyncAccount *acc, m_accounts.values()) {

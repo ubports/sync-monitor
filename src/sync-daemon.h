@@ -59,6 +59,7 @@ Q_SIGNALS:
 public Q_SLOTS:
     void quit();
     void syncAll(const QString &serviceName = QString(), bool runNow=false);
+    void syncAccount(quint32 accountId, const QString &service);
     void cancel(const QString &serviceName = QString());
 
 private Q_SLOTS:

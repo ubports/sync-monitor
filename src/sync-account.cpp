@@ -39,6 +39,20 @@ SyncAccount::SyncAccount(Account *account,
     setup();
 }
 
+SyncAccount::SyncAccount(Account *account,
+                         const QString &service,
+                         QSettings *settings,
+                         QObject *parent)
+    : QObject(parent),
+      m_currentSession(0),
+      m_account(account),
+      m_state(SyncAccount::Idle),
+      m_settings(settings),
+      m_lastError(0)
+{
+    m_availabeServices.insert(service, true);
+}
+
 SyncAccount::~SyncAccount()
 {
     cancel();
