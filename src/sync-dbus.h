@@ -60,7 +60,7 @@ class SyncDBus : public QDBusAbstractAdaptor
 "    <method name=\"sync\">\n"
 "      <arg direction=\"in\" type=\"as\"/>\n"
 "    </method>\n"
-"    <method name=\"syncAcount\">\n"
+"    <method name=\"syncAccount\">\n"
 "      <arg direction=\"in\" type=\"u\"/>\n"
 "      <arg direction=\"in\" type=\"s\"/>\n"
 "    </method>\n"
@@ -89,7 +89,7 @@ Q_SIGNALS:
 
 public Q_SLOTS:
     void sync(QStringList service);
-    void syncAcount(quint32 accountId, const QString &service);
+    void syncAccount(quint32 accountId, const QString &service);
     void cancel(QStringList services);
     QString state() const;
     QStringList enabledServices() const;
