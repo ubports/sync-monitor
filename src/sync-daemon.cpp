@@ -180,7 +180,12 @@ void SyncDaemon::syncAccount(quint32 accountId, const QString &service)
         contactSettings->setValue("contacts/sync-uri", "addressbook");
 
         SyncAccount *acc = new SyncAccount(account, service, contactSettings, this);
-        connect(acc, SIGNAL(syncFinished(QString,bool,QString,QString)), acc, SLOT(deleteLater()));
+        connect(acc, SIGNAL(syncStarted(QString, bool)),
+                     SLOT(onAccountSyncStarted(QString, bool)));
+        connect(acc, SIGNAL(syncFinished(QString, bool, QString, QString)),
+                     SLOT(onAccountSyncFinished(QString, bool, QString, QString)));
+        connect(acc, SIGNAL(syncFinished(QString,bool,QString,QString)),
+                acc, SLOT(deleteLater()));
         contactSettings->setParent(acc);
         sync(acc, service, true);
     }
