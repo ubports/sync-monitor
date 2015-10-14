@@ -140,12 +140,13 @@ void SyncDaemon::onOnlineStatusChanged(SyncNetwork::NetworkState state)
         qDebug() << "Device is offline cancel active syncs. There is a sync in progress?" << (m_currentAccount ? "Yes" : "No");
         if (m_currentAccount) {
             if (m_currentAccount->retrySync()) {
-                qDebug() << "Do not try re-sync the account";
+                qDebug() << "Push sync to later sync";
                 m_offlineQueue->push(m_currentAccount, m_currentServiceName, false);
+            } else {
+                 qDebug() << "Do not try re-sync the account";
             }
             m_currentAccount->cancel(m_currentServiceName);
-            qDebug() << "Current account pushed to late sync with sevice" << m_currentServiceName;
-        }
+       }
         if (m_timeout->isActive()) {
             m_timeout->stop();
         }
@@ -173,6 +174,7 @@ void SyncDaemon::syncAll(const QString &serviceName, bool runNow)
 void SyncDaemon::syncAccount(quint32 accountId, const QString &service)
 {
     Account *account = m_manager->account(accountId);
+
     if (account) {
         // fake a settings object
         QSettings *contactSettings = new QSettings;
@@ -183,19 +185,26 @@ void SyncDaemon::syncAccount(quint32 accountId, const QString &service)
         contactSettings->setValue("contacts/sync-uri", "addressbook");
 
         SyncAccount *acc = new SyncAccount(account, service, contactSettings, this);
-        acc->setRetrySync(false);
-        connect(acc, SIGNAL(syncStarted(QString, bool)),
-                     SLOT(onAccountSyncStarted(QString, bool)));
-        connect(acc, SIGNAL(syncFinished(QString, bool, QString, QString)),
-                     SLOT(onAccountSyncFinished(QString, bool, QString, QString)));
-        connect(acc, SIGNAL(syncError(QString,QString)),
-                     SLOT(onAccountSyncError(QString,QString)));
-        connect(acc, SIGNAL(syncError(QString,QString)),
-                acc, SLOT(deleteLater()), Qt::QueuedConnection);
-        connect(acc, SIGNAL(syncFinished(QString,bool,QString,QString)),
-                acc, SLOT(deleteLater()), Qt::QueuedConnection);
-        contactSettings->setParent(acc);
-        sync(acc, service, true);
+        if (!isOnline()) {
+            qWarning() << "Network is off ignore sync request";
+            Q_EMIT syncError(acc, service, "20017");
+            account->deleteLater();
+        } else {
+            acc->setRetrySync(false);
+            qDebug() << "ACCOUNT TO SYNC" << (void*) acc;
+            connect(acc, SIGNAL(syncStarted(QString, bool)),
+                         SLOT(onAccountSyncStarted(QString, bool)));
+            connect(acc, SIGNAL(syncFinished(QString, bool, QString, QString)),
+                         SLOT(onAccountSyncFinished(QString, bool, QString, QString)));
+            connect(acc, SIGNAL(syncError(QString,QString)),
+                         SLOT(onAccountSyncError(QString,QString)));
+            connect(acc, SIGNAL(syncError(QString,QString)),
+                    acc, SLOT(deleteLater()), Qt::QueuedConnection);
+            connect(acc, SIGNAL(syncFinished(QString,bool,QString,QString)),
+                    acc, SLOT(deleteLater()), Qt::QueuedConnection);
+            contactSettings->setParent(acc);
+            sync(acc, service, true);
+        }
     }
 }
 
@@ -218,8 +227,14 @@ void SyncDaemon::continueSync()
                         (netState != SyncNetwork::NetworkOffline && job.runOnPayedConnection());
     if (!continueSync) {
         qDebug() << "Device is offline we will skip the sync.";
-        m_offlineQueue->push(*m_syncQueue);
-        m_offlineQueue->push(job);
+
+        Q_FOREACH(const SyncJob &j, m_syncQueue->jobs()) {
+            if (j.account() && j.account()->retrySync()) {
+                qDebug() << "Push account to later sync3";
+                m_offlineQueue->push(j);
+            }
+        }
+
         m_syncQueue->clear();
         syncFinishedImpl();
         return;

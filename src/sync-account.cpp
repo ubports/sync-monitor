@@ -35,7 +35,7 @@ SyncAccount::SyncAccount(Account *account,
       m_state(SyncAccount::Idle),
       m_settings(settings),
       m_lastError(0),
-      m_retrySync(false)
+      m_retrySync(true)
 {
     setup();
 }
@@ -50,7 +50,7 @@ SyncAccount::SyncAccount(Account *account,
       m_state(SyncAccount::Idle),
       m_settings(settings),
       m_lastError(0),
-      m_retrySync(false)
+      m_retrySync(true)
 {
     m_availabeServices.insert(service, true);
 }
