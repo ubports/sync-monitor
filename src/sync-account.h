@@ -65,6 +65,8 @@ public:
     uint lastError() const;
     void setLastError(uint errorCode);
     QString serviceId(const QString &serviceName) const;
+    bool retrySync() const;
+    void setRetrySync(bool retry);
 
     static QString statusDescription(const QString &status);
 
@@ -95,6 +97,7 @@ private:
     QList<QMetaObject::Connection> m_sessionConnections;
     QList<SyncConfigure*> m_pendingConfigs;
     uint m_lastError;
+    bool m_retrySync;
 
     // current sync information
     QString m_syncMode;

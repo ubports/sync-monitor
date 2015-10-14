@@ -139,7 +139,10 @@ void SyncDaemon::onOnlineStatusChanged(SyncNetwork::NetworkState state)
     } else if (state == SyncNetwork::NetworkOffline) {
         qDebug() << "Device is offline cancel active syncs. There is a sync in progress?" << (m_currentAccount ? "Yes" : "No");
         if (m_currentAccount) {
-            m_offlineQueue->push(m_currentAccount, m_currentServiceName, false);
+            if (m_currentAccount->retrySync()) {
+                qDebug() << "Do not try re-sync the account";
+                m_offlineQueue->push(m_currentAccount, m_currentServiceName, false);
+            }
             m_currentAccount->cancel(m_currentServiceName);
             qDebug() << "Current account pushed to late sync with sevice" << m_currentServiceName;
         }
@@ -180,6 +183,7 @@ void SyncDaemon::syncAccount(quint32 accountId, const QString &service)
         contactSettings->setValue("contacts/sync-uri", "addressbook");
 
         SyncAccount *acc = new SyncAccount(account, service, contactSettings, this);
+        acc->setRetrySync(false);
         connect(acc, SIGNAL(syncStarted(QString, bool)),
                      SLOT(onAccountSyncStarted(QString, bool)));
         connect(acc, SIGNAL(syncFinished(QString, bool, QString, QString)),
@@ -187,7 +191,7 @@ void SyncDaemon::syncAccount(quint32 accountId, const QString &service)
         connect(acc, SIGNAL(syncError(QString,QString)),
                      SLOT(onAccountSyncError(QString,QString)));
         connect(acc, SIGNAL(syncError(QString,QString)),
-                     SLOT(deleteLater()), Qt::QueuedConnection);
+                acc, SLOT(deleteLater()), Qt::QueuedConnection);
         connect(acc, SIGNAL(syncFinished(QString,bool,QString,QString)),
                 acc, SLOT(deleteLater()), Qt::QueuedConnection);
         contactSettings->setParent(acc);
@@ -470,6 +474,7 @@ void SyncDaemon::onAccountSyncStarted(const QString &serviceName, bool firstSync
 void SyncDaemon::onAccountSyncError(const QString &serviceName, const QString &error)
 {
     Q_EMIT syncError(qobject_cast<SyncAccount*>(QObject::sender()), serviceName, error);
+    onAccountSyncFinished(serviceName, false, error, "fast");
 }
 
 void SyncDaemon::onAccountSyncFinished(const QString &serviceName, const bool firstSync, const QString &status, const QString &mode)

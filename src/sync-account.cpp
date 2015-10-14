@@ -34,7 +34,8 @@ SyncAccount::SyncAccount(Account *account,
       m_account(account),
       m_state(SyncAccount::Idle),
       m_settings(settings),
-      m_lastError(0)
+      m_lastError(0),
+      m_retrySync(false)
 {
     setup();
 }
@@ -48,7 +49,8 @@ SyncAccount::SyncAccount(Account *account,
       m_account(account),
       m_state(SyncAccount::Idle),
       m_settings(settings),
-      m_lastError(0)
+      m_lastError(0),
+      m_retrySync(false)
 {
     m_availabeServices.insert(service, true);
 }
@@ -391,6 +393,16 @@ QString SyncAccount::serviceId(const QString &serviceName) const
     return QString();
 }
 
+bool SyncAccount::retrySync() const
+{
+    return m_retrySync;
+}
+
+void SyncAccount::setRetrySync(bool retry)
+{
+    m_retrySync = retry;
+}
+
 void SyncAccount::onAccountEnabledChanged(const QString &serviceName, bool enabled)
 {
     // empty service name means that the hole account has been enabled/disabled
@@ -588,7 +600,7 @@ QString SyncAccount::statusDescription(const QString &status)
     case 20007:
         return _("Server sent bad content");
     case 20017:
-        return _("Connection lost");
+        return _("Sync canceled");
     case 20020:
         return _("Connection timeout");
     case 20021:
