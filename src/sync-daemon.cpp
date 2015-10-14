@@ -184,8 +184,12 @@ void SyncDaemon::syncAccount(quint32 accountId, const QString &service)
                      SLOT(onAccountSyncStarted(QString, bool)));
         connect(acc, SIGNAL(syncFinished(QString, bool, QString, QString)),
                      SLOT(onAccountSyncFinished(QString, bool, QString, QString)));
+        connect(acc, SIGNAL(syncError(QString,QString)),
+                     SLOT(onAccountSyncError(QString,QString)));
+        connect(acc, SIGNAL(syncError(QString,QString)),
+                     SLOT(deleteLater()), Qt::QueuedConnection);
         connect(acc, SIGNAL(syncFinished(QString,bool,QString,QString)),
-                acc, SLOT(deleteLater()));
+                acc, SLOT(deleteLater()), Qt::QueuedConnection);
         contactSettings->setParent(acc);
         sync(acc, service, true);
     }
@@ -342,6 +346,8 @@ void SyncDaemon::addAccount(const AccountId &accountId, bool startSync)
                          SLOT(onAccountEnableChanged(QString, bool)));
         connect(syncAcc, SIGNAL(configured(QString)),
                          SLOT(onAccountConfigured(QString)), Qt::DirectConnection);
+        connect(syncAcc, SIGNAL(syncError(QString,QString)),
+                         SLOT(onAccountSyncError(QString, QString)));
         if (startSync) {
             sync(syncAcc, QString(), true);
         }
@@ -459,6 +465,11 @@ void SyncDaemon::onAccountSyncStarted(const QString &serviceName, bool firstSync
                 .arg(serviceName)
                 .arg(QDateTime::currentDateTime().toString(Qt::SystemLocaleShortDate));
     Q_EMIT syncStarted(acc, serviceName);
+}
+
+void SyncDaemon::onAccountSyncError(const QString &serviceName, const QString &error)
+{
+    Q_EMIT syncError(qobject_cast<SyncAccount*>(QObject::sender()), serviceName, error);
 }
 
 void SyncDaemon::onAccountSyncFinished(const QString &serviceName, const bool firstSync, const QString &status, const QString &mode)

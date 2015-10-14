@@ -116,7 +116,15 @@ void SyncAccount::cancel(const QString &serviceName)
     if (m_currentSession) {
         m_currentSession->destroy();
         m_currentSession = 0;
+
+        if (m_state == SyncAccount::Syncing) {
+            qDebug() << "Session cancelled firing syncError";
+            Q_EMIT syncError(serviceName, "canceled");
+        } else {
+            qDebug() << "Cancelled with no sync state";
+        }
         setState(SyncAccount::Idle);
+
     }
 }
 
@@ -579,6 +587,8 @@ QString SyncAccount::statusDescription(const QString &status)
     case 20006:
     case 20007:
         return _("Server sent bad content");
+    case 20017:
+        return _("Connection lost");
     case 20020:
         return _("Connection timeout");
     case 20021:

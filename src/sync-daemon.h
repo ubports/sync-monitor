@@ -73,6 +73,7 @@ private Q_SLOTS:
 
     void onAccountSyncStarted(const QString &serviceName, bool firstSync);
     void onAccountSyncFinished(const QString &serviceName, bool firstSync, const QString &status, const QString &syncMode);
+    void onAccountSyncError(const QString &serviceName, const QString &error);
     void onAccountEnableChanged(const QString &serviceName, bool enabled);
     void onAccountConfigured(const QString &serviceName);
     void onDataChanged(const QString &serviceName, const QString &sourceName);
