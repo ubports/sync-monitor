@@ -146,7 +146,7 @@ void SyncDaemon::onOnlineStatusChanged(SyncNetwork::NetworkState state)
                  qDebug() << "Do not try re-sync the account";
             }
             m_currentAccount->cancel(m_currentServiceName);
-       }
+        }
         if (m_timeout->isActive()) {
             m_timeout->stop();
         }
