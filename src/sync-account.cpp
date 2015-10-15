@@ -120,7 +120,6 @@ void SyncAccount::cancel(const QString &serviceName)
         m_currentSession = 0;
 
         if (m_state == SyncAccount::Syncing) {
-            qDebug() << "Session cancelled firing syncError";
             Q_EMIT syncError(serviceName, "canceled");
         } else {
             qDebug() << "Cancelled with no sync state";

@@ -191,7 +191,6 @@ void SyncDaemon::syncAccount(quint32 accountId, const QString &service)
             account->deleteLater();
         } else {
             acc->setRetrySync(false);
-            qDebug() << "ACCOUNT TO SYNC" << (void*) acc;
             connect(acc, SIGNAL(syncStarted(QString, bool)),
                          SLOT(onAccountSyncStarted(QString, bool)));
             connect(acc, SIGNAL(syncFinished(QString, bool, QString, QString)),
