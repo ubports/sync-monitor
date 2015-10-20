@@ -44,6 +44,10 @@ public:
     SyncAccount(Accounts::Account *account,
                 QSettings *settings,
                 QObject *parent=0);
+    SyncAccount(Accounts::Account *account,
+                const QString &service,
+                QSettings *settings,
+                QObject *parent);
     virtual ~SyncAccount();
 
     virtual void setup();
@@ -61,6 +65,8 @@ public:
     uint lastError() const;
     void setLastError(uint errorCode);
     QString serviceId(const QString &serviceName) const;
+    bool retrySync() const;
+    void setRetrySync(bool retry);
 
     static QString statusDescription(const QString &status);
 
@@ -68,6 +74,7 @@ Q_SIGNALS:
     void stateChanged(AccountState newState);
     void syncStarted(const QString &serviceName, bool firstSync);
     void syncFinished(const QString &serviceName, bool firstSync, const QString &status, const QString &mode);
+    void syncError(const QString &serviceName, const QString &syncError);
     void enableChanged(const QString &serviceName, bool enable);
     void configured(const QString &serviceName);
 
@@ -90,6 +97,7 @@ private:
     QList<QMetaObject::Connection> m_sessionConnections;
     QList<SyncConfigure*> m_pendingConfigs;
     uint m_lastError;
+    bool m_retrySync;
 
     // current sync information
     QString m_syncMode;

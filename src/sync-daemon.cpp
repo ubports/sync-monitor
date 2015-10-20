@@ -139,9 +139,13 @@ void SyncDaemon::onOnlineStatusChanged(SyncNetwork::NetworkState state)
     } else if (state == SyncNetwork::NetworkOffline) {
         qDebug() << "Device is offline cancel active syncs. There is a sync in progress?" << (m_currentAccount ? "Yes" : "No");
         if (m_currentAccount) {
-            m_offlineQueue->push(m_currentAccount, m_currentServiceName, false);
+            if (m_currentAccount->retrySync()) {
+                qDebug() << "Push sync to later sync";
+                m_offlineQueue->push(m_currentAccount, m_currentServiceName, false);
+            } else {
+                 qDebug() << "Do not try re-sync the account";
+            }
             m_currentAccount->cancel(m_currentServiceName);
-            qDebug() << "Current account pushed to late sync with sevice" << m_currentServiceName;
         }
         if (m_timeout->isActive()) {
             m_timeout->stop();
@@ -160,6 +164,45 @@ void SyncDaemon::syncAll(const QString &serviceName, bool runNow)
             sync(acc, QString(), runNow);
         } else if (acc->availableServices().contains(serviceName)) {
             sync(acc, serviceName, runNow);
+        }
+    }
+}
+
+/*
+ * This is a helper function used on contact migration it only works for contacts sync
+ */
+void SyncDaemon::syncAccount(quint32 accountId, const QString &service)
+{
+    Account *account = m_manager->account(accountId);
+
+    if (account) {
+        // fake a settings object
+        QSettings *contactSettings = new QSettings;
+        contactSettings->setValue("contacts/template", "WebDAV");
+        contactSettings->setValue("contacts/syncURL", "https://www.googleapis.com/.well-known/carddav");
+        contactSettings->setValue("contacts/uoa-service", "google-carddav");
+        contactSettings->setValue("contacts/sync-backend", "evolution-contacts");
+        contactSettings->setValue("contacts/sync-uri", "addressbook");
+
+        SyncAccount *acc = new SyncAccount(account, service, contactSettings, this);
+        if (!isOnline()) {
+            qWarning() << "Network is off ignore sync request";
+            Q_EMIT syncError(acc, service, "20017");
+            account->deleteLater();
+        } else {
+            acc->setRetrySync(false);
+            connect(acc, SIGNAL(syncStarted(QString, bool)),
+                         SLOT(onAccountSyncStarted(QString, bool)));
+            connect(acc, SIGNAL(syncFinished(QString, bool, QString, QString)),
+                         SLOT(onAccountSyncFinished(QString, bool, QString, QString)));
+            connect(acc, SIGNAL(syncError(QString,QString)),
+                         SLOT(onAccountSyncError(QString,QString)));
+            connect(acc, SIGNAL(syncError(QString,QString)),
+                    acc, SLOT(deleteLater()), Qt::QueuedConnection);
+            connect(acc, SIGNAL(syncFinished(QString,bool,QString,QString)),
+                    acc, SLOT(deleteLater()), Qt::QueuedConnection);
+            contactSettings->setParent(acc);
+            sync(acc, service, true);
         }
     }
 }
@@ -183,8 +226,14 @@ void SyncDaemon::continueSync()
                         (netState != SyncNetwork::NetworkOffline && job.runOnPayedConnection());
     if (!continueSync) {
         qDebug() << "Device is offline we will skip the sync.";
-        m_offlineQueue->push(*m_syncQueue);
-        m_offlineQueue->push(job);
+
+        Q_FOREACH(const SyncJob &j, m_syncQueue->jobs()) {
+            if (j.account() && j.account()->retrySync()) {
+                qDebug() << "Push account to later sync3";
+                m_offlineQueue->push(j);
+            }
+        }
+
         m_syncQueue->clear();
         syncFinishedImpl();
         return;
@@ -315,6 +364,8 @@ void SyncDaemon::addAccount(const AccountId &accountId, bool startSync)
                          SLOT(onAccountEnableChanged(QString, bool)));
         connect(syncAcc, SIGNAL(configured(QString)),
                          SLOT(onAccountConfigured(QString)), Qt::DirectConnection);
+        connect(syncAcc, SIGNAL(syncError(QString,QString)),
+                         SLOT(onAccountSyncError(QString, QString)));
         if (startSync) {
             sync(syncAcc, QString(), true);
         }
@@ -432,6 +483,12 @@ void SyncDaemon::onAccountSyncStarted(const QString &serviceName, bool firstSync
                 .arg(serviceName)
                 .arg(QDateTime::currentDateTime().toString(Qt::SystemLocaleShortDate));
     Q_EMIT syncStarted(acc, serviceName);
+}
+
+void SyncDaemon::onAccountSyncError(const QString &serviceName, const QString &error)
+{
+    Q_EMIT syncError(qobject_cast<SyncAccount*>(QObject::sender()), serviceName, error);
+    onAccountSyncFinished(serviceName, false, error, "fast");
 }
 
 void SyncDaemon::onAccountSyncFinished(const QString &serviceName, const bool firstSync, const QString &status, const QString &mode)
