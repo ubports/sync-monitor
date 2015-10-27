@@ -348,10 +348,10 @@ bool SyncDaemon::isOnline() const
 void SyncDaemon::addAccount(const AccountId &accountId, bool startSync)
 {
     Account *acc = m_manager->account(accountId);
-    qDebug() << "Found account:" << acc->displayName();
     if (!acc) {
         qWarning() << "Fail to retrieve accounts:" << m_manager->lastError().message();
     } else if (m_provider->contains(acc->providerName())) {
+        qDebug() << "Found account:" << acc->displayName();
         SyncAccount *syncAcc = new SyncAccount(acc,
                                                m_provider->settings(acc->providerName()),
                                                this);
