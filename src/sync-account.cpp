@@ -169,7 +169,7 @@ void SyncAccount::continueSync()
             Q_FOREACH(const QString &source, sources(service)) {
                 bool firstSync = false;
                 QString mode = syncMode(service, source, &firstSync);
-                syncFlags.insert("google-144@"+source, mode);
+                syncFlags.insert(source, mode);
                 qDebug() << "Source sync" << source << mode;
                 m_sourcesOnSync << source;
             }
@@ -177,7 +177,8 @@ void SyncAccount::continueSync()
     }
 
     if (!syncFlags.isEmpty()) {
-        m_currentSession->sync(QString::null, syncFlags);
+        qDebug() << "Will sync with flags" << syncFlags;
+        m_currentSession->sync("none", syncFlags);
     } else {
         setState(SyncAccount::Idle);
     }
