@@ -52,6 +52,7 @@ Q_SIGNALS:
 
 private Q_SLOTS:
     void fetchRemoteCalendarsSessionDone(const QArrayOfDatabases &databases);
+    void fetchRemoteCalendarsProcessDone(int exitCode, QProcess::ExitStatus exitStatus);
 
 private:
     Accounts::Account *m_account;
@@ -61,6 +62,7 @@ private:
 
     void fetchRemoteCalendars();
     void fetchRemoteCalendarsFromSession(SyncEvolutionSessionProxy *session);
+    void fetchRemoteCalendarsFromCommand();
     void configurePeer(const QStringList &services);
     void continuePeerConfig(SyncEvolutionSessionProxy *session, const QStringList &services);
     void checkSyncConfig(SyncEvolutionSessionProxy *session,

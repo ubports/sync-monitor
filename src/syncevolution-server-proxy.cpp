@@ -40,9 +40,16 @@ SyncEvolutionServerProxy::~SyncEvolutionServerProxy()
 {
     if (m_iface) {
         m_iface->call("Detach");
-        m_iface->deleteLater();
+        delete m_iface;
         m_iface = 0;
     }
+}
+
+void SyncEvolutionServerProxy::killServer()
+{
+    QProcess p;
+    p.execute("pkill syncevo-dbus-server");
+    p.waitForFinished();
 }
 
 SyncEvolutionServerProxy *SyncEvolutionServerProxy::instance()
@@ -83,4 +90,25 @@ QStringList SyncEvolutionServerProxy::configs(bool templates) const
 {
     QDBusReply<QStringList> reply = m_iface->call("GetConfigs", templates);
     return reply.value();
+}
+
+void SyncEvolutionServerProxy::getDatabases(const QString &sourceName)
+{
+    QDBusPendingCall pcall =  m_iface->asyncCall("GetDatabases", sourceName);
+    QDBusPendingCallWatcher *watcher = new QDBusPendingCallWatcher(pcall, this);
+
+    QObject::connect(watcher, SIGNAL(finished(QDBusPendingCallWatcher*)),
+                     this, SLOT(getDatabasesFinished(QDBusPendingCallWatcher*)));
+}
+
+void SyncEvolutionServerProxy::getDatabasesFinished(QDBusPendingCallWatcher *call)
+{
+    QDBusPendingReply<QArrayOfDatabases> reply = *call;
+    if (reply.isError()) {
+        qWarning() << "Fail to fetch databases" << reply.error().message();
+        Q_EMIT databasesReceived(QArrayOfDatabases());
+    } else {
+         Q_EMIT databasesReceived(reply.value());
+    }
+    call->deleteLater();
 }

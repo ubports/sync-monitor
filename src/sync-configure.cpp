@@ -58,6 +58,9 @@ void SyncConfigure::configure()
 
 void SyncConfigure::fetchRemoteCalendars()
 {
+    fetchRemoteCalendarsFromCommand();
+    return;
+
     SyncEvolutionServerProxy *proxy = SyncEvolutionServerProxy::instance();
 
     QString peerName("gcal_tmp");
@@ -93,6 +96,67 @@ void SyncConfigure::fetchRemoteCalendarsFromSession(SyncEvolutionSessionProxy *s
     } else {
         session->destroy();
         fetchRemoteCalendarsSessionDone(QArrayOfDatabases());
+    }
+}
+
+void SyncConfigure::fetchRemoteCalendarsFromCommand()
+{
+    // syncevolution --print-databases backend=caldav
+    QStringList args;
+    args << "--print-databases"
+         << "backend=caldav"
+         << QString("username=uoa:%1,google-caldav").arg(m_account->id())
+         << "syncURL=https://apidata.googleusercontent.com/caldav/v2";
+    QProcess *syncEvo = new QProcess;
+    syncEvo->setProcessChannelMode(QProcess::MergedChannels);
+    syncEvo->start("syncevolution", args);
+    connect(syncEvo, SIGNAL(finished(int,QProcess::ExitStatus)),
+            SLOT(fetchRemoteCalendarsProcessDone(int,QProcess::ExitStatus)));
+    qDebug() << "Fetching remote calendars (wait...)";
+}
+
+void SyncConfigure::fetchRemoteCalendarsProcessDone(int exitCode, QProcess::ExitStatus exitStatus)
+{
+    QProcess *syncEvo = qobject_cast<QProcess*>(QObject::sender());
+    QArrayOfDatabases databases;
+
+    if (exitStatus == QProcess::NormalExit) {
+        QString output = syncEvo->readAll();
+        QStringList lines = output.split("\n");
+        while (lines.count() > 0) {
+            if (lines.first().startsWith("caldav:")) {
+                lines.takeFirst();
+                break;
+            }
+            lines.takeFirst();
+        }
+
+        while (lines.count() > 0) {
+            QString line = lines.takeFirst();
+            if (line.isEmpty()) {
+                continue;
+            }
+
+            SyncDatabase db;
+            QStringList fields = line.split("(");
+            if (fields.count() == 2) {
+                db.name = fields.first().trimmed();
+                db.source = fields.at(1).split(")").first();
+                db.flag =fields.at(1).trimmed().endsWith("<default>");
+            } else {
+                qWarning() << "Fail to parse db output" << line;
+            }
+
+            qDebug() << "DB" << db.name << "source" << db.source << "flag" << db.flag;
+            databases << db;
+        }
+    }
+
+    if (!databases.isEmpty()) {
+        m_remoteDatabasesByService.insert(CALENDAR_SERVICE_NAME, databases);
+        configurePeer(QStringList() << CALENDAR_SERVICE_NAME);
+    } else {
+        error(QStringList() << CALENDAR_SERVICE_NAME);
     }
 }
 
@@ -239,11 +303,15 @@ void SyncConfigure::continuePeerConfig(SyncEvolutionSessionProxy *session, const
         } else {
             qDebug() << "Peer created" << peerName;
         }
-    } else {
-        qDebug() << "Sources config did not change.";
     }
 
     session->destroy();
+
+    if (!changed) {
+        qDebug() << "Sources config did not change. No confign needed";
+        Q_EMIT done(services);
+        return;
+    }
 
     // local session
     session = proxy->openSession("", QStringList() << "all-configs");
@@ -288,6 +356,7 @@ void SyncConfigure::continuePeerConfig(SyncEvolutionSessionProxy *session, const
     }
 
     session->destroy();
+    SyncEvolutionServerProxy::destroy();
     Q_EMIT done(services);
 }
 

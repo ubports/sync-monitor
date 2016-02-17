@@ -192,13 +192,14 @@ void SyncEvolutionSessionProxy::getDatabases(const QString &sourceName)
 void SyncEvolutionSessionProxy::getDatabasesFinished(QDBusPendingCallWatcher *call)
 {
     QDBusPendingReply<QArrayOfDatabases> reply = *call;
+    call->deleteLater();
+
     if (reply.isError()) {
         qWarning() << "Fail to fetch databases" << reply.error().message();
         Q_EMIT databasesReceived(QArrayOfDatabases());
     } else {
          Q_EMIT databasesReceived(reply.value());
     }
-    call->deleteLater();
 }
 
 void SyncEvolutionSessionProxy::execute(const QStringList &args)
