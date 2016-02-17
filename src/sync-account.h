@@ -68,8 +68,11 @@ public:
 
 Q_SIGNALS:
     void stateChanged(AccountState newState);
-    void syncStarted(const QString &serviceName, const QString &sourceName, bool firstSync);
-    void syncFinished(const QString &serviceName, const QString &sourceName, bool firstSync, const QString &status, const QString &mode);
+    void syncSourceStarted(const QString &serviceName, const QString &sourceName, bool firstSync);
+    void syncSourceFinished(const QString &serviceName, const QString &sourceName, bool firstSync, const QString &status, const QString &mode);
+
+    void syncStarted();
+    void syncFinished(const QString &serviceName, QMap<QString, QString> sourcesStatus);
     void enableChanged(const QString &serviceName, bool enable);
     void configured(const QStringList &services);
 
@@ -88,6 +91,7 @@ private:
     SyncConfigure *m_config;
     QStringList m_servicesToSync;
     QStringList m_sourcesOnSync;
+    QMap<QString, QString> m_currentSyncResults;
 
     QMap<QString, bool> m_availabeServices;
     AccountState m_state;

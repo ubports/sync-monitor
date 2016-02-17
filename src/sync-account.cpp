@@ -86,6 +86,8 @@ void SyncAccount::setup()
 
 void SyncAccount::cancel(const QString &serviceName)
 {
+    Q_UNUSED(serviceName);
+
     //TODO: cancel the only the seviceName sync
     if (m_currentSession) {
         m_currentSession->destroy();
@@ -163,7 +165,7 @@ void SyncAccount::continueSync()
         bool enabledService = m_availabeServices.value(service, false);
         if (!enabledService) {
             qDebug() << "Service" << service << "disabled. Skip sync.";
-            Q_EMIT syncFinished(service, "", false, "", "");
+            Q_EMIT syncFinished(service,  QMap<QString, QString>());
         } else {
             qDebug() << "Will prepare to sync" << service;
             Q_FOREACH(const QString &source, sources(service)) {
@@ -171,7 +173,6 @@ void SyncAccount::continueSync()
                 QString mode = syncMode(service, source, &firstSync);
                 syncFlags.insert(source, mode);
                 qDebug() << "Source sync" << source << mode;
-                m_sourcesOnSync << source;
             }
         }
     }
@@ -438,13 +439,33 @@ void SyncAccount::onSessionStatusChanged(const QString &status, quint32 error, c
 {
     qDebug() << "onSessionStatusChanged" << status << error << "Sources" << sources.size();
 
+    if (status != "done") {
+        switch (m_state) {
+        case SyncAccount::AboutToSync:
+            setState(SyncAccount::Syncing);
+            Q_EMIT syncStarted();
+            break;
+        case SyncAccount::Syncing:
+            break;
+        default:
+            qWarning() << "State changed to" << status << "during" << state();
+            break;
+        }
+    }
+
+    QString serviceName;
+
     for(QSyncStatusMap::const_iterator i = sources.begin();
         i != sources.end();
         i++) {
         QString newStatus = i.value().status;
         QString sourceName = i.key();
-        QString serviceName = sourceName.split("_").first();
-        QString syncMode = i.value().mode;
+        serviceName = sourceName.split("_").first();
+
+        if (newStatus == "idle") {
+            // skip idle sources
+            continue;
+        }
 
         qDebug() << "\t" << sourceName
                  << "Error:" << i.value().error
@@ -452,33 +473,40 @@ void SyncAccount::onSessionStatusChanged(const QString &status, quint32 error, c
                  << "Mode" << i.value().mode;
 
         if (newStatus == "running") {
+            if (m_sourcesOnSync.contains(sourceName)) {
+                // source already notified as running
+                continue;
+            }
+            m_sourcesOnSync << sourceName;
             //TODO: check m_firstSync
-            Q_EMIT syncStarted(serviceName, sourceName, m_firstSync);
+            Q_EMIT syncSourceStarted(serviceName, sourceName, m_firstSync);
 
-            switch (m_state) {
-            case SyncAccount::Idle:
-                setState(SyncAccount::Syncing);
-                break;
-            case SyncAccount::Syncing:
-                break;
-            default:
-                qWarning() << "State changed to" << newStatus << "during" << state();
-                break;
-            }
+
         } else if (newStatus == "done") {
-            //TODO: check m_firstSync
-            Q_EMIT syncFinished(serviceName, sourceName, m_firstSync, "", syncMode);
-            m_sourcesOnSync.removeOne(sourceName);
-            if (m_sourcesOnSync.isEmpty()) {
-                qDebug() << "Sync finished";
-                setState(SyncAccount::Idle);
+            if (!m_sourcesOnSync.contains(sourceName)) {
+                continue;
             }
-        } else if ((newStatus == "running;waiting") ||
-                   (newStatus == "idle")) {
+
+            m_sourcesOnSync.removeOne(sourceName);
+            m_currentSyncResults.insert(sourceName, newStatus);
+
+            Q_EMIT syncSourceFinished(serviceName, sourceName, m_firstSync, newStatus, "");
+        } else if ((status == "running;waiting") ||
+                   (status == "idle")) {
             // ignore
         } else {
             qWarning() << "Status changed invalid;" << newStatus;
         }
+    }
+
+    if (m_sourcesOnSync.isEmpty() && (status == "done")) {
+        m_servicesToSync.clear();
+        setState(SyncAccount::Idle);
+        releaseSession();
+
+        Q_EMIT syncFinished(serviceName, m_currentSyncResults);
+        m_currentSyncResults.clear();
+        qDebug() << "Sync finished++++++++++++++++++++++++++++";
     }
 }
 
@@ -558,7 +586,6 @@ void SyncAccount::releaseSession()
         }
         m_sessionConnections.clear();
         m_currentSession->destroy();
-        m_currentSession->deleteLater();
         m_currentSession = 0;
     }
 }

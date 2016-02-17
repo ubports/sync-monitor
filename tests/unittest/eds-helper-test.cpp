@@ -39,30 +39,6 @@ class EdsHelperTest : public QObject
     Q_OBJECT
 
 private Q_SLOTS:
-    void testCreateAContact()
-    {
-        EdsHelperMock mock;
-        QSignalSpy spy(&mock, SIGNAL(dataChanged(QString,QString)));
-        QContact c;
-
-        QContactName name;
-        name.setFirstName("Foo");
-        name.setLastName("Bar");
-        c.saveDetail(&name);
-
-        QContactSyncTarget syncTarget;
-        syncTarget.setSyncTarget("address-book-test");
-        c.saveDetail(&syncTarget);
-
-        mock.contactEngine()->saveContact(&c);
-
-        // check if the signal dataChanged was fired with contacts
-        QTRY_COMPARE(spy.count() , 1);
-        QList<QVariant> args = spy.takeFirst();
-        QCOMPARE(args[0].toString(), QStringLiteral(CONTACTS_SERVICE_NAME));
-        QCOMPARE(args[1].toString(), QStringLiteral("address-book-test"));
-    }
-
     void testCreateACalendarEvent()
     {
         EdsHelperMock mock;
@@ -89,20 +65,6 @@ private Q_SLOTS:
         mock.freezeNotify();
         QSignalSpy spy(&mock, SIGNAL(dataChanged(QString,QString)));
 
-        // create contact
-        QContact c;
-        QContactName name;
-        name.setFirstName("Foo");
-        name.setLastName("Bar");
-        c.saveDetail(&name);
-
-        QContactSyncTarget syncTarget;
-        syncTarget.setSyncTarget("address-book-test");
-        c.saveDetail(&syncTarget);
-
-        mock.contactEngine()->saveContact(&c);
-        QCOMPARE(spy.count(), 0);
-
         // create a event
         QOrganizerEvent ev;
 
@@ -116,13 +78,9 @@ private Q_SLOTS:
 
         // flush all pending events
         mock.flush();
-        QTRY_COMPARE(spy.count(), 2);
+        QTRY_COMPARE(spy.count(), 1);
 
         QList<QVariant> args = spy.takeFirst();
-        QCOMPARE(args[0].toString(), QStringLiteral(CONTACTS_SERVICE_NAME));
-        QCOMPARE(args[1].toString(), QStringLiteral("address-book-test"));
-
-        args = spy.takeFirst();
         QCOMPARE(args[0].toString(), QStringLiteral(CALENDAR_SERVICE_NAME));
         QCOMPARE(args[1].toString(), QStringLiteral("Default Collection"));
     }

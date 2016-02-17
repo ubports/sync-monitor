@@ -1,4 +1,4 @@
-﻿/*
+/*
  * Copyright 2014 Canonical Ltd.
  *
  * This file is part of sync-monitor.
@@ -26,7 +26,7 @@
 
 using namespace Accounts;
 
-SyncConfigure::SyncConfigure(Accounts::Account *account,
+SyncConfigure::SyncConfigure(Account *account,
                              QSettings *settings,
                              QObject *parent)
     : QObject(parent),
@@ -44,20 +44,72 @@ AccountId SyncConfigure::accountId() const
     return m_account->id();
 }
 
-void SyncConfigure::configure()
-{
-    QStringList services;
-    Q_FOREACH(Service service, m_account->services()) {
-        services << service.serviceType();
-    }
-    configurePeer(services);
-}
-
 QString SyncConfigure::accountSessionName(Account *account)
 {
     return QString("%1-%2")
             .arg(account->providerName())
             .arg(account->id());
+}
+
+void SyncConfigure::configure()
+{
+    fetchRemoteCalendars();
+}
+
+void SyncConfigure::fetchRemoteCalendars()
+{
+    SyncEvolutionServerProxy *proxy = SyncEvolutionServerProxy::instance();
+
+    QString peerName("gcal_tmp");
+    SyncEvolutionSessionProxy *session = proxy->openSession(peerName, QStringList());
+
+    if (session->status() != "queueing") {
+        fetchRemoteCalendarsFromSession(session);
+    } else {
+        connect(session, &SyncEvolutionSessionProxy::statusChanged,
+                [this, session](const QString &status, uint errorNuber, QSyncStatusMap source) {
+            if (errorNuber != 0) {
+                qWarning() << "Fail to configure peer" << errorNuber;
+                session->destroy();
+                Q_EMIT error(QStringList(CALENDAR_SERVICE_NAME));
+            } else if (status != "queueing") {
+                fetchRemoteCalendarsFromSession(session);
+            }
+        });
+    }
+}
+
+void SyncConfigure::fetchRemoteCalendarsFromSession(SyncEvolutionSessionProxy *session)
+{
+    QStringMultiMap config = session->getConfig("Google", true);
+    config[""]["username"] = QString("uoa:%1,google-caldav").arg(m_account->id());
+    config[""]["password"] = QString();
+    config["source/calendar"]["backend"] = QString("caldav");
+    if (session->saveConfig(QString(), config, true)) {
+        connect(session, &SyncEvolutionSessionProxy::databasesReceived,
+                this, &SyncConfigure::fetchRemoteCalendarsSessionDone);
+        session->getDatabases(CALENDAR_SERVICE_NAME);
+        qDebug() << "Fetching remote calendars (wait...)";
+    } else {
+        session->destroy();
+        fetchRemoteCalendarsSessionDone(QArrayOfDatabases());
+    }
+}
+
+void SyncConfigure::fetchRemoteCalendarsSessionDone(const QArrayOfDatabases &databases)
+{
+    SyncEvolutionSessionProxy *session = qobject_cast<SyncEvolutionSessionProxy*>(QObject::sender());
+    if (session) {
+        session->destroy();
+    }
+
+    qDebug() << "Remote calendars received:";
+    Q_FOREACH(const SyncDatabase &db, databases) {
+        qDebug() << "Name" << db.name << "Source" << db.source << "flag" << db.flag;
+    }
+
+    m_remoteDatabasesByService.insert(CALENDAR_SERVICE_NAME, databases);
+    configurePeer(QStringList() << CALENDAR_SERVICE_NAME);
 }
 
 void SyncConfigure::configurePeer(const QStringList &services)
@@ -66,36 +118,26 @@ void SyncConfigure::configurePeer(const QStringList &services)
     QString peerName = accountSessionName(m_account);
     SyncEvolutionSessionProxy *session = proxy->openSession(peerName,
                                                             QStringList() << "all-configs");
-    m_peers.insert(session, services);
-    connect(session, &SyncEvolutionSessionProxy::statusChanged,
-        this, &SyncConfigure::onPeerSessionStatusChanged);
 
-    qDebug() << "peer session created" << peerName << session->status();
     if (session->status() != "queueing") {
         continuePeerConfig(session, services);
-    }
-}
-
-void SyncConfigure::onPeerSessionStatusChanged(const QString &status, uint errorNuber, QSyncStatusMap source)
-{
-    SyncEvolutionSessionProxy *session = qobject_cast<SyncEvolutionSessionProxy*>(QObject::sender());
-
-    if (errorNuber != 0) {
-        qWarning() << "Fail to configure peer" << errorNuber;
-        if (session) {
-            Q_EMIT error(m_peers.take(session));
-            session->destroy();
-            delete session;
-        }
     } else {
-        if (status != "queueing") {
-            continuePeerConfig(session, m_peers.value(session));
-        }
+        connect(session, &SyncEvolutionSessionProxy::statusChanged,
+                [this, session, services](const QString &status, uint errorNuber, QSyncStatusMap source) {
+            if (errorNuber != 0) {
+                qWarning() << "Fail to configure peer" << errorNuber;
+                session->destroy();
+                Q_EMIT error(services);
+            } else if (status != "queueing") {
+                continuePeerConfig(session, services);
+            }
+        });
     }
 }
 
 void SyncConfigure::continuePeerConfig(SyncEvolutionSessionProxy *session, const QStringList &services)
 {
+    //TODO: should we disconnect statusChanged ???
     SyncEvolutionServerProxy *proxy = SyncEvolutionServerProxy::instance();
     QStringList configs = proxy->configs();
 
@@ -105,7 +147,7 @@ void SyncConfigure::continuePeerConfig(SyncEvolutionSessionProxy *session, const
     // config peer
     QStringMultiMap config;
     if (configs.contains(peerConfigName)) {
-        config = session->getConfig(peerConfigName, true);
+        config = session->getConfig(peerConfigName, false);
     } else {
         m_settings->beginGroup(GLOBAL_CONFIG_GROUP);
         QString templateName = m_settings->value("template", "Google").toString();
@@ -122,7 +164,7 @@ void SyncConfigure::continuePeerConfig(SyncEvolutionSessionProxy *session, const
 
     static QMap<QString, QString> templates;
     if (templates.isEmpty()) {
-        templates.insert(CONTACTS_SERVICE_NAME, QString("source/addressbook"));
+        //templates.insert(CONTACTS_SERVICE_NAME, QString("source/addressbook"));
         templates.insert(CALENDAR_SERVICE_NAME, QString("source/calendar"));
     }
 
@@ -139,16 +181,17 @@ void SyncConfigure::continuePeerConfig(SyncEvolutionSessionProxy *session, const
             continue;
         }
 
-        QArrayOfDatabases dbs = listDatabase(session, peerName, service);
-        if (dbs.isEmpty()) {
-            qWarning() << "Fail to get remote databases";
-            continue;
-        }
-
         // create new sources if necessary
         QStringMap configTemplate = config.value(templateSource);
         if (configTemplate.isEmpty()) {
             qWarning() << "Template not found" << templateSource;
+            continue;
+        }
+
+        // check for new database
+        QArrayOfDatabases dbs = m_remoteDatabasesByService.value(service);
+        if (dbs.isEmpty()) {
+            qWarning() << "Fail to get remote databases";
             continue;
         }
 
@@ -161,15 +204,14 @@ void SyncConfigure::continuePeerConfig(SyncEvolutionSessionProxy *session, const
             QString sourceName = QString("%1_%2").arg(service).arg(formatSourceName(db.name));
             QString fullSourceName = QString("source/%1").arg(sourceName);
             if (config.contains(fullSourceName)) {
-                qDebug() << "Source already configured" << sourceName;
-                continue;
+                qDebug() << "Source already configured" << sourceName << fullSourceName;
+            } else {
+                changed |= true;
+                qDebug() << "Config source" << fullSourceName << sourceName << "for database" << db.name << db.source;
+                QStringMap sourceConfig(configTemplate);
+                sourceConfig["database"] = db.source;
+                config[fullSourceName] = sourceConfig;
             }
-
-            changed |= true;
-            qDebug() << "Config source" << sourceName << "for database" << db.name << db.source;
-            QStringMap sourceConfig(configTemplate);
-            sourceConfig["database"] = db.source;
-            config[fullSourceName] = sourceConfig;
 
             sourceToDatabase.insert(fullSourceName, localDbId);
         }
@@ -202,14 +244,12 @@ void SyncConfigure::continuePeerConfig(SyncEvolutionSessionProxy *session, const
     }
 
     session->destroy();
-    delete session;
 
     // local session
     session = proxy->openSession("", QStringList() << "all-configs");
     if (session->status() == "queueing") {
         qWarning() << "Fail to open local session";
         session->destroy();
-        delete session;
         return;
     }
 
@@ -248,46 +288,9 @@ void SyncConfigure::continuePeerConfig(SyncEvolutionSessionProxy *session, const
     }
 
     session->destroy();
-    delete session;
     Q_EMIT done(services);
 }
 
-QArrayOfDatabases SyncConfigure::listDatabase(SyncEvolutionSessionProxy *session,
-                                              const QString &peerName,
-                                              const QString &serviceName)
-{
-    QArrayOfDatabases dbs;
-    if (serviceName != "calendar") {
-        SyncDatabase defaultDB;
-        defaultDB.flag = true;
-        defaultDB.name = m_account->displayName();
-        defaultDB.source = m_account->displayName();
-        return dbs << defaultDB;
-    }
-
-    // loads settings
-    m_settings->beginGroup(serviceName);
-    QString uoaServiceName = m_settings->value("uoa-service", "").toString();
-    m_settings->endGroup();
-
-    QStringMultiMap config = session->getConfig("Google", true);
-    config[""]["username"] = QString("uoa:%1,%2").arg(m_account->id()).arg(uoaServiceName);
-    config[""]["password"] = QString();
-    config["source/calendar"]["backend"] = QString("caldav");
-
-    if (session->saveConfig(peerName, config, true)) {
-        qDebug() << "Fetching remote databases " << serviceName << "(wait...)";
-        dbs = session->getDatabases(serviceName);
-        Q_FOREACH(const SyncDatabase &db, dbs) {
-            qDebug() << "Name" << db.name << "Source" << db.source << "flag" << db.flag;
-        }
-        qDebug() << "Done.";
-    } else {
-        qWarning() << "Fail to save database query";
-    }
-
-    return dbs;
-}
 
 QString SyncConfigure::formatSourceName(const QString &name)
 {
@@ -297,7 +300,7 @@ QString SyncConfigure::formatSourceName(const QString &name)
             sourceName += name.at(i);
         }
     }
-    return sourceName;
+    return sourceName.toLower();
 }
 
 void SyncConfigure::dumpMap(const QStringMap &map)

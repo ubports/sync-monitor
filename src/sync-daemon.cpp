@@ -26,6 +26,7 @@
 #include "notify-message.h"
 #include "provider-template.h"
 #include "sync-network.h"
+#include "syncevolution-server-proxy.h"
 
 #include <QtCore/QDebug>
 #include <QtCore/QTimer>
@@ -307,10 +308,12 @@ void SyncDaemon::addAccount(const AccountId &accountId, bool startSync)
                                                m_provider->settings(acc->providerName()),
                                                this);
         m_accounts.insert(accountId, syncAcc);
-        connect(syncAcc, SIGNAL(syncStarted(QString,QString,bool)),
-                         SLOT(onAccountSyncStarted(QString, QString, bool)));
-        connect(syncAcc, SIGNAL(syncFinished(QString, QString, bool, QString, QString)),
-                         SLOT(onAccountSyncFinished(QString, QString, bool, QString, QString)));
+        connect(syncAcc, SIGNAL(syncSourceStarted(QString,QString,bool)),
+                         SLOT(onAccountSourceSyncStarted(QString, QString, bool)));
+        connect(syncAcc, SIGNAL(syncSourceFinished(QString,QString,bool,QString,QString)),
+                         SLOT(onAccountSourceSyncFinished(QString,QString,bool,QString,QString)));
+        connect(syncAcc, SIGNAL(syncFinished(QString,QMap<QString,QString>)),
+                         SLOT(onAccountSyncFinished(QString,QMap<QString,QString>)));
         connect(syncAcc, SIGNAL(enableChanged(QString, bool)),
                          SLOT(onAccountEnableChanged(QString, bool)));
         if (startSync) {
@@ -432,9 +435,9 @@ void SyncDaemon::runAuthentication()
     url_dispatch_send(appCommand.toUtf8().constData(), NULL, NULL);
 }
 
-void SyncDaemon::onAccountSyncStarted(const QString &serviceName,
-                                      const QString &sourceName,
-                                      bool firstSync)
+void SyncDaemon::onAccountSourceSyncStarted(const QString &serviceName,
+                                            const QString &sourceName,
+                                            bool firstSync)
 {
     SyncAccount *acc = qobject_cast<SyncAccount*>(QObject::sender());
     if (firstSync) {
@@ -442,27 +445,25 @@ void SyncDaemon::onAccountSyncStarted(const QString &serviceName,
         notify->show(_("Synchronization"),
                      QString(_("Start sync:  %1 (%2)"))
                          .arg(acc->displayName())
-                         .arg(serviceName),
+                         .arg(sourceName.split("_").last()),
                      acc->iconName(serviceName));
     }
     m_syncElapsedTime.restart();
     qDebug() << QString("[%3] Start sync:  %1 (%2)")
                 .arg(acc->displayName())
-                .arg(serviceName)
+                .arg(serviceName + "/" + sourceName)
                 .arg(QDateTime::currentDateTime().toString(Qt::SystemLocaleShortDate));
     Q_EMIT syncStarted(acc, serviceName);
 }
 
-void SyncDaemon::onAccountSyncFinished(const QString &serviceName,
-                                       const QString &sourceName,
-                                       const bool firstSync,
-                                       const QString &status,
-                                       const QString &mode)
+void SyncDaemon::onAccountSourceSyncFinished(const QString &serviceName,
+                                             const QString &sourceName,
+                                             const bool firstSync,
+                                             const QString &status,
+                                             const QString &mode)
 {
-    // error on that list will trigger a new sync
-    static QStringList whiteListStatus;
+    Q_UNUSED(mode);
 
-    uint errorCode = status.toUInt();
     SyncAccount *acc = qobject_cast<SyncAccount*>(QObject::sender());
     QString errorMessage = SyncAccount::statusDescription(status);
 
@@ -471,20 +472,29 @@ void SyncDaemon::onAccountSyncFinished(const QString &serviceName,
         notify->show(_("Synchronization"),
                      QString(_("Sync done: %1 (%2)"))
                          .arg(acc->displayName())
-                         .arg(serviceName),
+                         .arg(sourceName.split("_").last()),
                      acc->iconName(serviceName));
     }
 
-    Q_EMIT syncFinished(acc, serviceName);
-
     qDebug() << QString("[%6] Sync done: %1 (%2) Status: %3 Error: %4 Duration: %5s")
                 .arg(acc->displayName())
-                .arg(serviceName)
+                .arg(serviceName + "/" + sourceName)
                 .arg(status)
                 .arg(errorMessage.isEmpty() ? "None" : errorMessage)
                 .arg((m_syncElapsedTime.elapsed() < 1000 ? 1  : m_syncElapsedTime.elapsed() / 1000))
                 .arg(QDateTime::currentDateTime().toString(Qt::SystemLocaleShortDate));
 
+}
+
+void SyncDaemon::onAccountSyncFinished(const QString &serviceName,
+                                       const QMap<QString, QString> &statusList)
+{
+    // error on that list will trigger a new sync
+    static QStringList whiteListStatus;
+
+    SyncAccount *acc = qobject_cast<SyncAccount*>(QObject::sender());
+
+    Q_EMIT syncFinished(acc, serviceName);
 
     // populate white list erros
     if (whiteListStatus.isEmpty()) {
@@ -499,24 +509,35 @@ void SyncDaemon::onAccountSyncFinished(const QString &serviceName,
         whiteListStatus << QStringLiteral("10500");
     }
 
-    // only re-sync if sync mode != "slow", to avoid sync loops
-    if ((acc->lastError() == 0) && !errorMessage.isEmpty() && whiteListStatus.contains(status)) {
-        // white list error retry the sync
-        m_syncQueue->push(acc, serviceName, false);
-    } else if (status.endsWith("403")){
-        authenticateAccount(acc, serviceName);
-        errorCode = 0;
-    } else if (!errorMessage.isEmpty()) {
-        NotifyMessage *notify = new NotifyMessage(true, this);
-        notify->show(_("Synchronization"),
-                     QString(_("Fail to sync %1 (%2).\n%3"))
-                         .arg(acc->displayName())
-                         .arg(serviceName)
-                         .arg(errorMessage),
-                     acc->iconName(serviceName));
+    // check if we are going re-sync due a know problem
+    uint errorCode = 0;
+    Q_FOREACH(const QString &status, statusList.values()) {
+        QString errorMessage = SyncAccount::statusDescription(status);
+        errorCode = status.toUInt();
+
+        if ((acc->lastError() == 0) && !errorMessage.isEmpty() && whiteListStatus.contains(status)) {
+            // white list error retry the sync
+            m_syncQueue->push(acc, serviceName, false);
+            break;
+        } else if (status.endsWith("403")){
+            authenticateAccount(acc, serviceName);
+            errorCode = 0;
+            break;
+        } else if (!errorMessage.isEmpty()) {
+            NotifyMessage *notify = new NotifyMessage(true, this);
+            notify->show(_("Synchronization"),
+                         QString(_("Fail to sync %1 (%2).\n%3"))
+                             .arg(acc->displayName())
+                             .arg(serviceName)
+                             .arg(errorMessage),
+                         acc->iconName(serviceName));
+            break;
+        }
     }
 
     acc->setLastError(errorCode);
+
+    SyncEvolutionServerProxy::destroy();
     // sync next account
     continueSync();
 }

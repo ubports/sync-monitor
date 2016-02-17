@@ -25,12 +25,15 @@
 #define SYNCEVOLUTION_SERVICE_NAME          "org.syncevolution"
 #define SYNCEVOLUTIOON_SESSION_IFACE_NAME   "org.syncevolution.Session"
 
+uint SyncEvolutionSessionProxy::m_count = 0;
+
 SyncEvolutionSessionProxy::SyncEvolutionSessionProxy(const QString &sessionName,
                                                      const QDBusObjectPath &objectPath,
                                                      QObject *parent)
     : QObject(parent),
       m_sessionName(sessionName)
 {
+    qDebug() << "SESSION CREATED:" << ++m_count << this;
     m_iface = new QDBusInterface(SYNCEVOLUTION_SERVICE_NAME,
                                  objectPath.path(),
                                  SYNCEVOLUTIOON_SESSION_IFACE_NAME);
@@ -48,6 +51,11 @@ SyncEvolutionSessionProxy::SyncEvolutionSessionProxy(const QString &sessionName,
                                   "ProgressChanged",
                                   this,
                                   SLOT(onSessionProgressChanged(int, QSyncProgressMap)));
+}
+
+SyncEvolutionSessionProxy::~SyncEvolutionSessionProxy()
+{
+    qDebug() << "SESSION DESTROYED:" << --m_count << this;
 }
 
 QString SyncEvolutionSessionProxy::sessionName() const
@@ -73,6 +81,9 @@ void SyncEvolutionSessionProxy::destroy()
     m_iface->deleteLater();
 
     m_iface = 0;
+
+    // self destroy
+    deleteLater();
 }
 
 QString SyncEvolutionSessionProxy::status() const
@@ -169,15 +180,25 @@ QArrayOfStringMap SyncEvolutionSessionProxy::reports(uint start, uint maxCount)
     }
 }
 
-QArrayOfDatabases SyncEvolutionSessionProxy::getDatabases(const QString &configName)
+void SyncEvolutionSessionProxy::getDatabases(const QString &sourceName)
 {
-    QDBusReply<QArrayOfDatabases> reply = m_iface->call("GetDatabases", configName);
-    if (reply.error().isValid()) {
-        qWarning() << "Fail to get databases" << reply.error().message();
-        return QArrayOfDatabases();
+    QDBusPendingCall pcall =  m_iface->asyncCall("GetDatabases", sourceName);
+    QDBusPendingCallWatcher *watcher = new QDBusPendingCallWatcher(pcall, this);
+
+    QObject::connect(watcher, SIGNAL(finished(QDBusPendingCallWatcher*)),
+                     this, SLOT(getDatabasesFinished(QDBusPendingCallWatcher*)));
+}
+
+void SyncEvolutionSessionProxy::getDatabasesFinished(QDBusPendingCallWatcher *call)
+{
+    QDBusPendingReply<QArrayOfDatabases> reply = *call;
+    if (reply.isError()) {
+        qWarning() << "Fail to fetch databases" << reply.error().message();
+        Q_EMIT databasesReceived(QArrayOfDatabases());
     } else {
-        return reply.value();
+         Q_EMIT databasesReceived(reply.value());
     }
+    call->deleteLater();
 }
 
 void SyncEvolutionSessionProxy::execute(const QStringList &args)

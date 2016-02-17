@@ -49,16 +49,18 @@ public:
 Q_SIGNALS:
     void done(const QStringList &services);
     void error(const QStringList &services);
-    void databaseReady();
 
 private Q_SLOTS:
-    void onPeerSessionStatusChanged(const QString &status, uint errorNuber, QSyncStatusMap source);
+    void fetchRemoteCalendarsSessionDone(const QArrayOfDatabases &databases);
 
 private:
     Accounts::Account *m_account;
+    QMap<QString, QArrayOfDatabases> m_remoteDatabasesByService;
     QMap<SyncEvolutionSessionProxy*, QStringList> m_peers;
     QSettings *m_settings;
 
+    void fetchRemoteCalendars();
+    void fetchRemoteCalendarsFromSession(SyncEvolutionSessionProxy *session);
     void configurePeer(const QStringList &services);
     void continuePeerConfig(SyncEvolutionSessionProxy *session, const QStringList &services);
     void checkSyncConfig(SyncEvolutionSessionProxy *session,
@@ -66,12 +68,10 @@ private:
                          const QString &serviceName,
                          const QString &localDbId);
     bool createSyncConfig(SyncEvolutionSessionProxy *session, const QString &configName, const QString &peerName, const QString &serviceName, const QString &localDbId);
-    QArrayOfDatabases listDatabase(SyncEvolutionSessionProxy *session, const QString &peerName, const QString &serviceName);
     QString registerDatabase(SyncEvolutionSessionProxy *session, const QString &localDatabaseName, const QString &localDatabaseId);
 
     static QString formatSourceName(const QString &name);
     static bool updateConfig(QStringMultiMap &config, const QString &source, const QString &key, const QString &value);
-
 };
 
 #endif

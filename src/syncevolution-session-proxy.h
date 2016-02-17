@@ -42,22 +42,26 @@ public:
     bool isValid() const;
     void sync(const QString &mode, QStringMap services);
     QArrayOfStringMap reports(uint start, uint maxCount);
-    QArrayOfDatabases getDatabases(const QString &configName);
+    void getDatabases(const QString &sourceName);
     void execute(const QStringList &args);
 
 Q_SIGNALS:
     void statusChanged(const QString &status, uint errorNuber, QSyncStatusMap source);
     void progressChanged(int progress);
+    void databasesReceived(const QArrayOfDatabases &databases);
 
 private Q_SLOTS:
     void onSessionProgressChanged(int progress, QSyncProgressMap sources);
+    void getDatabasesFinished(QDBusPendingCallWatcher *call);
 
 private:
     QString m_sessionName;
     QDBusInterface *m_iface;
-
+    static uint m_count;
 
     SyncEvolutionSessionProxy(const QString &sessionName, const QDBusObjectPath &objectPath, QObject *parent=0);
+    ~SyncEvolutionSessionProxy();
+
     friend class SyncEvolutionServerProxy;
 };
 
