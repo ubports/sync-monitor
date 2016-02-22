@@ -83,6 +83,19 @@ void SyncDaemon::setupAccounts()
     Q_FOREACH(const AccountId &accountId, m_manager->accountList()) {
         addAccount(accountId, false);
     }
+
+    QSettings settings;
+    const QString configVersionKey("config/version");
+    int configVersion = settings.value(configVersionKey, 0).toInt();
+    if (configVersion < 1) {
+        Q_FOREACH(const SyncAccount *acc, m_accounts.values()) {
+            qDebug() << "Try to remove old account config" << acc->displayName();
+            acc->removeOldConfig();
+        }
+        settings.setValue(configVersionKey, 1);
+        settings.sync();
+    }
+
     connect(m_manager,
             SIGNAL(accountCreated(Accounts::AccountId)),
             SLOT(addAccount(Accounts::AccountId)));

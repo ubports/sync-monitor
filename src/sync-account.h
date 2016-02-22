@@ -61,6 +61,7 @@ public:
     QStringList enabledServices() const;
     uint lastError() const;
     void removeConfig();
+    void removeOldConfig() const;
     void setLastError(uint errorCode);
     QString serviceId(const QString &serviceName) const;
 
@@ -109,7 +110,7 @@ private:
     void setState(AccountState state);
 
 
-    QStringMap lastReport(const QString &serviceName) const;
+    QStringMap lastReport(const QString &serviceName, const QString &sourceName) const;
     QString syncMode(const QString &serviceName,
                      const QString &sourceName,
                      bool *firstSync) const;
@@ -123,6 +124,7 @@ private:
     void releaseSession();
 
     QStringList sources(const QString &serviceName) const;
+    QStringMap filterSourceReport(const QStringMap &report, const QString &sourceName) const;
 };
 
 #endif

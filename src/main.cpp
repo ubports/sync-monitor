@@ -35,6 +35,8 @@ int main(int argc, char** argv)
     syncevolution_qt_dbus_register_types();
 
     QCoreApplication app(argc, argv);
+    app.setOrganizationName("Canonical");
+    app.setOrganizationDomain("canonical.com");
     app.setApplicationName("sync-monitor");
 
     setlocale(LC_ALL, "");

@@ -195,7 +195,36 @@ SyncAccount::AccountState SyncAccount::state() const
     return m_state;
 }
 
-QStringMap SyncAccount::lastReport(const QString &serviceName) const
+QStringMap SyncAccount::filterSourceReport(const QStringMap &report, const QString &sourceName) const
+{
+    bool found = false;
+    QStringMap sourceReport;
+    QString sourceKey = QString("source-%1").arg(QString(sourceName).replace("_", "__"));
+
+    Q_FOREACH(const QString &key, report.keys()) {
+        if (key.startsWith("source-")) {
+            if (key.startsWith(sourceKey)) {
+                sourceReport.insert(key, report[key]);
+                found = true;
+            }
+        } else {
+            sourceReport.insert(key, report[key]);
+        }
+    }
+
+    if (!found) {
+        sourceReport.clear();
+    } else {
+        if (sourceReport.value(QString("%1-mode").arg(sourceKey)) == "disabled") {
+            sourceReport.clear();;
+        }
+    }
+
+    return sourceReport;
+}
+
+QStringMap SyncAccount::lastReport(const QString &serviceName,
+                                   const QString &sourceName) const
 {
     const uint pageSize = 100;
     uint index = 0;
@@ -218,19 +247,26 @@ QStringMap SyncAccount::lastReport(const QString &serviceName) const
 
     QString sessionName = SyncConfigure::accountSessionName(m_account);
     index += pageSize;
-    while (reports.size() != pageSize) {
+    while (reports.size() == pageSize) {
         Q_FOREACH(const QStringMap &report, reports) {
             if (report.value("peer") == sessionName) {
-                return report;
+                QStringMap sourceReport = filterSourceReport(report, sourceName);
+                if (!sourceReport.isEmpty()) {
+                    return sourceReport;
+                }
             }
         }
         reports = m_currentSession->reports(index, pageSize);
         index += pageSize;
+
     }
 
     Q_FOREACH(const QStringMap &report, reports) {
         if (report.value("peer") == sessionName) {
-            return report;
+            QStringMap sourceReport = filterSourceReport(report, sourceName);
+            if (!sourceReport.isEmpty()) {
+                return sourceReport;
+            }
         }
     }
 
@@ -241,6 +277,7 @@ QString SyncAccount::syncMode(const QString &serviceName,
                               const QString &sourceName,
                               bool *firstSync) const
 {
+    qDebug() << "Check source report state" << serviceName << sourceName;
     QString lastSyncMode = "two-way";
     QString lastStatus = lastSyncStatus(serviceName, sourceName);
     *firstSync = lastStatus.isEmpty();
@@ -305,7 +342,12 @@ QString SyncAccount::syncMode(const QString &serviceName,
 QString SyncAccount::lastSyncStatus(const QString &serviceName,
                                     const QString &sourceName) const
 {
-    QStringMap lastReport = this->lastReport(serviceName);
+    QStringMap lastReport = this->lastReport(serviceName, sourceName);
+
+//    qDebug() << "REPORT====================================================" << sourceName;
+//    SyncConfigure::dumpMap(lastReport);
+//    qDebug() << "==========================================================";
+
     QString lastStatus;
     if (!lastReport.isEmpty()) {
         lastStatus = lastReport.value("status", "");
@@ -372,18 +414,77 @@ uint SyncAccount::lastError() const
     return m_lastError;
 }
 
+void SyncAccount::removeOldConfig() const
+{
+    QString configPath;
+
+    // remove source
+    configPath = QString("%1/%2-%3-%4")
+            .arg(QStandardPaths::locate(QStandardPaths::ConfigLocation,
+                                        QStringLiteral("syncevolution"),
+                                        QStandardPaths::LocateDirectory))
+            .arg(m_account->providerName())
+            .arg(CALENDAR_SERVICE_NAME)
+            .arg(m_account->id());
+    QDir configDir(configPath);
+    if (configDir.exists()) {
+        if (configDir.removeRecursively()) {
+            qDebug() << "Config dir removed" << configPath;
+        } else {
+            qWarning() << "Fail to remove config dir" << configPath;
+        }
+    } else {
+        qDebug() << "Old config dir not found" << configDir.absolutePath();
+    }
+
+    // remove 'default/source/<service>_uoa_<account-id>
+    configPath = QString("%1/default/sources/%2_uoa_%3")
+            .arg(QStandardPaths::locate(QStandardPaths::ConfigLocation,
+                                        QStringLiteral("syncevolution"),
+                                        QStandardPaths::LocateDirectory))
+            .arg(CALENDAR_SERVICE_NAME)
+            .arg(m_account->id());
+    configDir = QDir(configPath);
+    if (configDir.exists()) {
+        if (configDir.removeRecursively()) {
+            qDebug() << "source dir removed" << configPath;
+        } else {
+            qWarning() << "Fail to remove source dir" << configPath;
+        }
+    } else {
+        qDebug() << "Old config dir not found" << configDir.absolutePath();
+    }
+
+    // remove 'default/peers/<provider>-<service>-<account-id>
+    configPath = QString("%1/default/peers/%2-%3-%4")
+            .arg(QStandardPaths::locate(QStandardPaths::ConfigLocation,
+                                        QStringLiteral("syncevolution"),
+                                        QStandardPaths::LocateDirectory))
+            .arg(m_account->providerName())
+            .arg(CALENDAR_SERVICE_NAME)
+            .arg(m_account->id());
+    configDir = QDir(configPath);
+    if (configDir.exists()) {
+        if (configDir.removeRecursively()) {
+            qDebug() << "peer dir removed" << configPath;
+        } else {
+            qWarning() << "Fail to remove peer dir" << configPath;
+        }
+    } else {
+        qDebug() << "Old config dir not found" << configDir.absolutePath();
+    }
+}
 
 void SyncAccount::removeConfig()
 {
     //TODO
     QString configPath;
     Q_FOREACH(const QString &service, m_availabeServices.keys()) {
-        configPath = QString("%1/%2-%3-%4")
+        configPath = QString("%1/%2-%3")
                 .arg(QStandardPaths::locate(QStandardPaths::ConfigLocation,
                                             QStringLiteral("syncevolution"),
                                             QStandardPaths::LocateDirectory))
                 .arg(m_account->providerName())
-                .arg(service)
                 .arg(m_account->id());
         QDir configDir(configPath);
         if (configDir.exists()) {
