@@ -88,11 +88,16 @@ void EdsHelper::unfreezeNotify()
 void EdsHelper::flush()
 {
     m_freezed = false;
-    contactChangedFilter(m_pendingContacts.toList());
+
+    if (m_contactEngine) {
+        contactChangedFilter(m_pendingContacts.toList());
+    }
     m_pendingContacts.clear();
 
-    Q_FOREACH(const QString &calendar, m_pendingCalendars) {
-        Q_EMIT dataChanged(CALENDAR_SERVICE_NAME, calendar);
+    if (m_organizerEngine) {
+        Q_FOREACH(const QString &calendar, m_pendingCalendars) {
+            Q_EMIT dataChanged(CALENDAR_SERVICE_NAME, calendar);
+        }
     }
     m_pendingCalendars.clear();
 }
