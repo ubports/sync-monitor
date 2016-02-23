@@ -45,6 +45,7 @@ public:
     static QString accountSessionName(Accounts::Account *account);
     static void dumpMap(const QStringMultiMap &map);
     static void dumpMap(const QStringMap &map);
+    static void removeAccountSourceConfig(Accounts::Account *account, const QString &sourceName);
 
 Q_SIGNALS:
     void done(const QStringList &services);
@@ -74,6 +75,7 @@ private:
 
     static QString formatSourceName(const QString &name);
     static bool updateConfig(QStringMultiMap &config, const QString &source, const QString &key, const QString &value);
+    static bool removeConfigDir(const QString &dirPath);
 };
 
 #endif

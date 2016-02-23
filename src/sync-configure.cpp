@@ -346,7 +346,8 @@ void SyncConfigure::continuePeerConfig(SyncEvolutionSessionProxy *session, const
 
     // remove local sources if necessary
     Q_FOREACH(const QString &key, sourcesRemoved) {
-        config[key] = QStringMap();
+        qDebug() << "Reset local config" << key;
+        config.remove(key);
     }
 
     if (changed && !session->saveConfig("@default", config)) {
@@ -371,9 +372,15 @@ void SyncConfigure::continuePeerConfig(SyncEvolutionSessionProxy *session, const
 
     session->destroy();
     SyncEvolutionServerProxy::destroy();
+
+    // remove sources dir when necessary
+    Q_FOREACH(const QString &key, sourcesRemoved) {
+        QString sourceName = key.mid(key.indexOf('/') + 1);
+        removeAccountSourceConfig(m_account, sourceName);
+    }
+
     Q_EMIT done(services);
 }
-
 
 QString SyncConfigure::formatSourceName(const QString &name)
 {
@@ -384,6 +391,39 @@ QString SyncConfigure::formatSourceName(const QString &name)
         }
     }
     return sourceName.toLower();
+}
+
+void SyncConfigure::removeAccountSourceConfig(Account *account, const QString &sourceName)
+{
+    QString configPath = QString("%1/default/sources/%2")
+            .arg(QStandardPaths::locate(QStandardPaths::ConfigLocation,
+                                        QStringLiteral("syncevolution"),
+                                        QStandardPaths::LocateDirectory))
+            .arg(sourceName);
+    removeConfigDir(configPath);
+
+    configPath = QString("%1/default/peers/%2-%3/sources/%4")
+            .arg(QStandardPaths::locate(QStandardPaths::ConfigLocation,
+                                        QStringLiteral("syncevolution"),
+                                        QStandardPaths::LocateDirectory))
+            .arg(account->providerName())
+            .arg(account->id())
+            .arg(sourceName);
+    removeConfigDir(configPath);
+}
+
+bool SyncConfigure::removeConfigDir(const QString &dirPath)
+{
+    QDir dir(dirPath);
+    if (dir.exists()) {
+        if (dir.removeRecursively()) {
+            qDebug() << "Config dir removed" << dir.absolutePath();
+        } else {
+            qWarning() << "Fail to remove config dir" << dir.absolutePath();
+        }
+    } else {
+        qDebug() << "Remove source config dir not found" << dir.absolutePath();
+    }
 }
 
 void SyncConfigure::dumpMap(const QStringMap &map)
