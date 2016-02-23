@@ -15,7 +15,6 @@ macro(TRANSLATE_DESKTOP INPUT_FILES)
     TRANSLATE_FILES(${INPUT_FILES} d)
 endmacro()
 
-add_subdirectory(applications)
 add_subdirectory(services)
 add_subdirectory(desktop)
 

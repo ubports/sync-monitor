@@ -37,9 +37,25 @@ SyncAccount::SyncAccount(Account *account,
       m_account(account),
       m_state(SyncAccount::Idle),
       m_settings(settings),
-      m_lastError(0)
+      m_lastError(0),
+      m_retrySync(true)
 {
     setup();
+}
+
+SyncAccount::SyncAccount(Account *account,
+                         const QString &service,
+                         QSettings *settings,
+                         QObject *parent)
+    : QObject(parent),
+      m_currentSession(0),
+      m_account(account),
+      m_state(SyncAccount::Idle),
+      m_settings(settings),
+      m_lastError(0),
+      m_retrySync(true)
+{
+    m_availabeServices.insert(service, true);
 }
 
 SyncAccount::~SyncAccount()
@@ -92,7 +108,14 @@ void SyncAccount::cancel(const QString &serviceName)
     if (m_currentSession) {
         m_currentSession->destroy();
         m_currentSession = 0;
+
+        if (m_state == SyncAccount::Syncing) {
+            Q_EMIT syncError(serviceName, "canceled");
+        } else {
+            qDebug() << "Cancelled with no sync state";
+        }
         setState(SyncAccount::Idle);
+
     }
 }
 
@@ -513,6 +536,16 @@ QString SyncAccount::serviceId(const QString &serviceName) const
     return QString();
 }
 
+bool SyncAccount::retrySync() const
+{
+    return m_retrySync;
+}
+
+void SyncAccount::setRetrySync(bool retry)
+{
+    m_retrySync = retry;
+}
+
 void SyncAccount::onAccountEnabledChanged(const QString &serviceName, bool enabled)
 {
     // empty service name means that the hole account has been enabled/disabled
@@ -728,6 +761,8 @@ QString SyncAccount::statusDescription(const QString &status)
     case 20006:
     case 20007:
         return _("Server sent bad content");
+    case 20017:
+        return _("Sync canceled");
     case 20020:
         return _("Connection timeout");
     case 20021:

@@ -1,3 +1,31 @@
+sync-monitor (0.2+16.04.20151027.1-0ubuntu1) xenial; urgency=medium
+
+  * Avoid crash when account not found. (LP: #1365197)
+
+ -- Renato Araujo Oliveira Filho <renato.filho@canonical.com>  Tue, 27 Oct 2015 18:44:01 +0000
+
+sync-monitor (0.2+15.10.20151020-0ubuntu1) wily; urgency=medium
+
+  [ Renato Araujo Oliveira Filho ]
+  * Export 'syncAcount' function over DBUs to be used during the account
+    migration.
+  * Revert google-carddav.service.in removal.
+
+ -- Bill Filler <ci-train-bot@canonical.com>  Tue, 20 Oct 2015 08:25:13 +0000
+
+sync-monitor (0.2+15.10.20150929-0ubuntu1) wily; urgency=medium
+
+  [ Renato Araujo Oliveira Filho ]
+  * Do not sync contacts. Contacts sync will be handled by buteo.
+
+ -- CI Train Bot <ci-train-bot@canonical.com>  Tue, 29 Sep 2015 19:17:59 +0000
+
+sync-monitor (0.1+15.04.20150327-0ubuntu2~gcc5.1) wily; urgency=medium
+
+  * No-change test rebuild for g++5 ABI transition
+
+ -- Steve Langasek <steve.langasek@ubuntu.com>  Wed, 15 Jul 2015 16:04:00 +0000
+
 sync-monitor (0.1+15.04.20150327-0ubuntu1) vivid; urgency=medium
 
   [ CI Train Bot ]

@@ -59,21 +59,23 @@ Q_SIGNALS:
 public Q_SLOTS:
     void quit();
     void syncAll(const QString &serviceName = QString(), bool runNow=false);
+    void syncAccount(quint32 accountId, const QString &service);
     void cancel(const QString &serviceName = QString());
 
 private Q_SLOTS:
     void continueSync();
     void addAccount(const Accounts::AccountId &accountId, bool startSync=true);
     void removeAccount(const Accounts::AccountId &accountId);
-    void removeAccountSource();
     void destroyAccount();
     void authenticateAccount(const SyncAccount *account,
                              const QString &serviceName);
     void runAuthentication();
 
+
     void onAccountSourceSyncStarted(const QString &serviceName, const QString &source, bool firstSync);
     void onAccountSourceSyncFinished(const QString &serviceName, const QString &sourceName, const bool firstSync, const QString &status, const QString &mode);
     void onAccountSyncFinished(const QString &serviceName, const QMap<QString, QString> &statusList);
+    void onAccountSyncError(const QString &serviceName, const QString &error);
     void onAccountEnableChanged(const QString &serviceName, bool enabled);
     void onDataChanged(const QString &serviceName, const QString &sourceName);
     void onClientAttached();

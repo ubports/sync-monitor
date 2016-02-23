@@ -25,10 +25,13 @@
 #include <QtCore/QSet>
 
 #include <QtOrganizer/QOrganizerManager>
+#include <QtContacts/QContactManager>
+#include <QtContacts/QContactAbstractRequest>
 
 #include <QtDBus/QDBusInterface>
 
 // necessary for singna/slot signatures;
+using namespace QtContacts;
 using namespace QtOrganizer;
 
 class EdsHelper : public QObject
@@ -39,7 +42,6 @@ public:
               const QString &contactManager = "galera",
               const QString &organizerManager = "eds");
     ~EdsHelper();
-    QStringList sources(const QString &serviceName) const;
     QString createSource(const QString &serviceName, const QString &sourceName);
     void removeSource(const QString &serviceName, const QString &sourceName);
     void freezeNotify();
@@ -51,11 +53,16 @@ Q_SIGNALS:
     void dataChanged(const QString &serviceName, const QString &sourceName);
 
 private Q_SLOTS:
+    void contactChangedFilter(const QList<QContactId>& contactIds);
+    void contactChanged(const QString &sourceName = QString());
+    void contactDataChanged();
     void calendarChanged(const QList<QOrganizerItemId> &itemIds);
+    void contactFetchStateChanged(QContactAbstractRequest::State newState);
     void calendarCollectionsChanged();
 
 protected:
     QtOrganizer::QOrganizerManager *m_organizerEngine;
+    QtContacts::QContactManager *m_contactEngine;
 
     virtual QString getCollectionIdFromItemId(const QtOrganizer::QOrganizerItemId &itemId) const;
 
@@ -66,12 +73,14 @@ private:
     // cache calendar collections
     QList<QtOrganizer::QOrganizerCollection> m_calendarCollections;
 
+    QSet<QtContacts::QContactId> m_pendingContacts;
     QSet<QString> m_pendingCalendars;
 
     QString createOrganizerSource(const QString &sourceName);
-    QStringList organizerSources() const;
+    QString createContactsSource(const QString &sourceName);
 
     void removeOrganizerSource(const QString &sourceName);
+    void removeContactsSource(const QString &sourceName);
 };
 
 #endif
