@@ -360,6 +360,7 @@ void EdsHelper::createOrganizerSource(const QString &sourceName)
 
     QOrganizerCollection collection;
     collection.setMetaData(QOrganizerCollection::KeyName, sourceName);
+    collection.setExtendedMetaData("collection-selected", true);
     if (!m_organizerEngine->saveCollection(&collection)) {
         qWarning() << "Fail to create collection" << sourceName;
     }
