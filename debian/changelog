@@ -1,3 +1,9 @@
+sync-monitor (0.2+16.04.20160304-0ubuntu1) xenial; urgency=medium
+
+  * Create the organizer collection enabled by default.
+
+ -- Renato Araujo Oliveira Filho <renato.filho@canonical.com>  Fri, 04 Mar 2016 16:13:47 +0000
+
 sync-monitor (0.2+16.04.20151027.1-0ubuntu1) xenial; urgency=medium
 
   * Avoid crash when account not found. (LP: #1365197)
