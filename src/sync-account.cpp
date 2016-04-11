@@ -417,10 +417,12 @@ void SyncAccount::setRetrySync(bool retry)
 
 QString SyncAccount::lastSuccessfulSyncDate(const QString &serviceName)
 {
-    bool needSession = (m_currentSession == 0);
-    if (needSession) {
-        prepareSession(serviceName);
+    if (m_currentSession) {
+        qWarning() << "Sync in progress can not load log right now";
+        return QDateTime::currentDateTime().toUTC().toString(Qt::ISODate);
     }
+
+    prepareSession(serviceName);
 
     QString lastSyncDate;
     QStringMap report = lastReport(serviceName, true);
@@ -429,9 +431,7 @@ QString SyncAccount::lastSuccessfulSyncDate(const QString &serviceName)
         lastSyncDate = QDateTime::fromTime_t(lastSync).toUTC().toString(Qt::ISODate);
     }
 
-    if (needSession) {
-        releaseSession();
-    }
+    releaseSession();
 
     return lastSyncDate;
 }
