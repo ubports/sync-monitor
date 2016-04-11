@@ -64,6 +64,11 @@ class SyncDBus : public QDBusAbstractAdaptor
 "      <arg direction=\"in\" type=\"u\"/>\n"
 "      <arg direction=\"in\" type=\"s\"/>\n"
 "    </method>\n"
+"    <method name=\"lastSuccessfulSyncDate\">\n"
+"      <arg direction=\"in\" type=\"u\"/>\n"
+"      <arg direction=\"in\" type=\"s\"/>\n"
+"      <arg direction=\"out\" type=\"s\" name=\"date\"/>\n"
+"    </method>\n"
 "    <method name=\"cancel\">\n"
 "      <arg direction=\"in\" type=\"as\"/>\n"
 "    </method>\n"
@@ -90,6 +95,7 @@ Q_SIGNALS:
 public Q_SLOTS:
     void sync(QStringList service);
     void syncAccount(quint32 accountId, const QString &service);
+    QString lastSuccessfulSyncDate(quint32 accountId, const QString &service);
     void cancel(QStringList services);
     QString state() const;
     QStringList enabledServices() const;

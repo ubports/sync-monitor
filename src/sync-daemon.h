@@ -46,6 +46,7 @@ public:
     QStringList availableServices() const;
     QStringList enabledServices() const;
     bool isOnline() const;
+    QString lastSuccessfulSyncDate(quint32 accountId, const QString &service);
 
 Q_SIGNALS:
     void syncStarted(SyncAccount *syncAcc, const QString &serviceName);

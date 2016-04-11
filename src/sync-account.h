@@ -67,6 +67,7 @@ public:
     QString serviceId(const QString &serviceName) const;
     bool retrySync() const;
     void setRetrySync(bool retry);
+    QString lastSuccessfulSyncDate(const QString &serviceName) const;
 
     static QString statusDescription(const QString &status);
 
@@ -109,7 +110,7 @@ private:
     void continueSync(const QString &serviceName);
     void attachSession(SyncEvolutionSessionProxy *session);
     void releaseSession();
-    QStringMap lastReport(const QString &serviceName) const;
+    QStringMap lastReport(const QString &serviceName, bool onlySuccessful = false) const;
     QString syncMode(const QString &serviceName, bool *firstSync) const;
     QString lastSyncStatus(const QString &serviceName, QString *lastSyncMode) const;
     bool syncService(const QString &serviceName);

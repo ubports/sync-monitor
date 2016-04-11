@@ -95,6 +95,11 @@ void SyncDBus::detach()
     Q_EMIT clientDeattached(m_clientCount);
 }
 
+QString SyncDBus::lastSuccessfulSyncDate(quint32 accountId, const QString &service)
+{
+    return m_parent->lastSuccessfulSyncDate(accountId, service);
+}
+
 void SyncDBus::onSyncStarted(SyncAccount *syncAcc, const QString &serviceName)
 {
     updateState();

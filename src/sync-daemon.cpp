@@ -345,6 +345,15 @@ bool SyncDaemon::isOnline() const
     return m_networkStatus->state() != SyncNetwork::NetworkOffline;
 }
 
+QString SyncDaemon::lastSuccessfulSyncDate(quint32 accountId, const QString &service)
+{
+    SyncAccount *acc = m_accounts.value(accountId, 0);
+    if (acc) {
+        acc->lastSuccessfulSyncDate(service);
+    }
+    return QString();
+}
+
 void SyncDaemon::addAccount(const AccountId &accountId, bool startSync)
 {
     Account *acc = m_manager->account(accountId);

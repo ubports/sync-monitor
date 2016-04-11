@@ -210,8 +210,16 @@ SyncAccount::AccountState SyncAccount::state() const
     return m_state;
 }
 
-QStringMap SyncAccount::lastReport(const QString &serviceName) const
+QStringMap SyncAccount::lastReport(const QString &serviceName, bool onlySuccessful) const
 {
+    static QStringList okStatus;
+
+    if (okStatus.isEmpty()) {
+        okStatus << "0"
+                 << "200"
+                 << "204"
+                 << "207";
+    }
     const uint pageSize = 100;
     uint index = 0;
     if (!m_currentSession) {
@@ -228,20 +236,25 @@ QStringMap SyncAccount::lastReport(const QString &serviceName) const
 
     QString sessionName = this->sessionName(serviceName);
     index += pageSize;
-    while (reports.size() != pageSize) {
+    while (true) {
         Q_FOREACH(const QStringMap &report, reports) {
             if (report.value("peer") == sessionName) {
-                return report;
+                if (onlySuccessful) {
+                    QString status = report.value("status", "");
+                    if (okStatus.contains(status)) {
+                        return report;
+                    }
+                } else {
+                    return report;
+                }
             }
         }
+
+        if (reports.size() != pageSize)
+            break;
+
         reports = m_currentSession->reports(index, pageSize);
         index += pageSize;
-    }
-
-    Q_FOREACH(const QStringMap &report, reports) {
-        if (report.value("peer") == sessionName) {
-            return report;
-        }
     }
 
     return QStringMap();
@@ -400,6 +413,15 @@ bool SyncAccount::retrySync() const
 void SyncAccount::setRetrySync(bool retry)
 {
     m_retrySync = retry;
+}
+
+QString SyncAccount::lastSuccessfulSyncDate(const QString &serviceName) const
+{
+    QStringMap report = lastReport(serviceName, true);
+    if (report.contains("start")) {
+        return QDateTime::fromTime_t(report["start"].toUInt()).toString(Qt::ISODate);
+    }
+    return QString();
 }
 
 void SyncAccount::onAccountEnabledChanged(const QString &serviceName, bool enabled)
