@@ -415,13 +415,25 @@ void SyncAccount::setRetrySync(bool retry)
     m_retrySync = retry;
 }
 
-QString SyncAccount::lastSuccessfulSyncDate(const QString &serviceName) const
+QString SyncAccount::lastSuccessfulSyncDate(const QString &serviceName)
 {
+    bool needSession = (m_currentSession == 0);
+    if (needSession) {
+        prepareSession(serviceName);
+    }
+
+    QString lastSyncDate;
     QStringMap report = lastReport(serviceName, true);
     if (report.contains("start")) {
-        return QDateTime::fromTime_t(report["start"].toUInt()).toString(Qt::ISODate);
+        uint lastSync = report["start"].toUInt();
+        lastSyncDate = QDateTime::fromTime_t(lastSync).toUTC().toString(Qt::ISODate);
     }
-    return QString();
+
+    if (needSession) {
+        releaseSession();
+    }
+
+    return lastSyncDate;
 }
 
 void SyncAccount::onAccountEnabledChanged(const QString &serviceName, bool enabled)

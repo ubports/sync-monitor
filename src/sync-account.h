@@ -67,7 +67,7 @@ public:
     QString serviceId(const QString &serviceName) const;
     bool retrySync() const;
     void setRetrySync(bool retry);
-    QString lastSuccessfulSyncDate(const QString &serviceName) const;
+    QString lastSuccessfulSyncDate(const QString &serviceName);
 
     static QString statusDescription(const QString &status);
 

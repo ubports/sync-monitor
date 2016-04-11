@@ -349,7 +349,9 @@ QString SyncDaemon::lastSuccessfulSyncDate(quint32 accountId, const QString &ser
 {
     SyncAccount *acc = m_accounts.value(accountId, 0);
     if (acc) {
-        acc->lastSuccessfulSyncDate(service);
+        return acc->lastSuccessfulSyncDate(service);
+    } else {
+        qWarning() << "Account not found:" << accountId;
     }
     return QString();
 }
