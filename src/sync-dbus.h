@@ -95,7 +95,7 @@ Q_SIGNALS:
 public Q_SLOTS:
     void sync(QStringList service);
     void syncAccount(quint32 accountId, const QString &service);
-    QString lastSuccessfulSyncDate(quint32 accountId, const QString &service);
+    QString lastSuccessfulSyncDate(quint32 accountId, const QString &service, const QDBusMessage &message);
     void cancel(QStringList services);
     QString state() const;
     QStringList enabledServices() const;

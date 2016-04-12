@@ -95,9 +95,15 @@ void SyncDBus::detach()
     Q_EMIT clientDeattached(m_clientCount);
 }
 
-QString SyncDBus::lastSuccessfulSyncDate(quint32 accountId, const QString &service)
+QString SyncDBus::lastSuccessfulSyncDate(quint32 accountId, const QString &service, const QDBusMessage &message)
 {
-    return m_parent->lastSuccessfulSyncDate(accountId, service);
+    message.setDelayedReply(true);
+
+    QString result = m_parent->lastSuccessfulSyncDate(accountId, service);
+    qDebug() << "Result" << result;
+    QDBusMessage reply = message.createReply(QVariant::fromValue<QString>(result));
+    QDBusConnection::sessionBus().send(reply);
+    return result;
 }
 
 void SyncDBus::onSyncStarted(SyncAccount *syncAcc, const QString &serviceName)
