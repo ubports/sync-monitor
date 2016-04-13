@@ -53,7 +53,7 @@ QString PowerdProxy::requestWakelock(const QString &name) const
 
 bool PowerdProxy::clearWakelock(const QString &cookie) const
 {
-    QDBusReply<QString> reply = m_iface->call("clearSysState", cookie);
+    QDBusReply<void> reply = m_iface->call("clearSysState", cookie);
     if (reply.error().isValid()) {
         qWarning() << "Fail to clear wake lock" << reply.error().message();
         return false;
