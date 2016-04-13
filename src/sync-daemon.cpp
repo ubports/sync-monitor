@@ -26,6 +26,7 @@
 #include "notify-message.h"
 #include "provider-template.h"
 #include "sync-network.h"
+#include "powerd-proxy.h"
 
 #include <QtCore/QDebug>
 #include <QtCore/QTimer>
@@ -56,6 +57,10 @@ SyncDaemon::SyncDaemon()
     m_networkStatus = new SyncNetwork(this);
     connect(m_networkStatus, SIGNAL(stateChanged(SyncNetwork::NetworkState)), SLOT(onOnlineStatusChanged(SyncNetwork::NetworkState)));
 
+    m_powerd = new PowerdProxy(this);
+    connect(this, SIGNAL(syncAboutToStart()), m_powerd, SLOT(lock()));
+    connect(this, SIGNAL(done()), m_powerd, SLOT(unlock()));
+
     m_timeout = new QTimer(this);
     m_timeout->setInterval(DAEMON_SYNC_TIMEOUT);
     m_timeout->setSingleShot(true);
@@ -69,6 +74,7 @@ SyncDaemon::~SyncDaemon()
     delete m_syncQueue;
     delete m_offlineQueue;
     delete m_networkStatus;
+    delete m_powerd;
 }
 
 void SyncDaemon::setupAccounts()
