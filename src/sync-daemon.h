@@ -23,6 +23,7 @@
 #include <QtCore/QHash>
 #include <QtCore/QTimer>
 #include <QtCore/QElapsedTimer>
+#include <QtCore/QSettings>
 
 #include <Accounts/Manager>
 
@@ -38,6 +39,7 @@ class PowerdProxy;
 class SyncDaemon : public QObject
 {
     Q_OBJECT
+    Q_PROPERTY(bool syncOnMobileConnection READ syncOnMobileConnection WRITE setSyncOnMobileConnection)
 public:
     SyncDaemon();
     ~SyncDaemon();
@@ -48,6 +50,8 @@ public:
     QStringList enabledServices() const;
     bool isOnline() const;
     QString lastSuccessfulSyncDate(quint32 accountId, const QString &service);
+    bool syncOnMobileConnection() const;
+    void setSyncOnMobileConnection(bool flag);
 
 Q_SIGNALS:
     void syncStarted(SyncAccount *syncAcc, const QString &serviceName);
@@ -100,6 +104,7 @@ private:
     bool m_aboutToQuit;
     QElapsedTimer m_syncElapsedTime;
     bool m_firstClient;
+    QSettings m_settings;
 
     void setupAccounts();
     void setupTriggers();

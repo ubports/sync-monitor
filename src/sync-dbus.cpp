@@ -36,6 +36,16 @@ SyncDBus::SyncDBus(const QDBusConnection &connection, SyncDaemon *parent)
     updateState();
 }
 
+bool SyncDBus::syncOnMobileConnection() const
+{
+    return m_parent->syncOnMobileConnection();
+}
+
+void SyncDBus::setSyncOnMobileConnection(bool flag)
+{
+    m_parent->setSyncOnMobileConnection(flag);
+}
+
 void SyncDBus::sync(QStringList services)
 {
     if (services.isEmpty()) {

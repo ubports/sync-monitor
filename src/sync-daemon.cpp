@@ -36,8 +36,9 @@
 using namespace Accounts;
 
 
-#define DAEMON_SYNC_TIMEOUT     1000 * 60 // one minute
-#define SYNC_MONITOR_ICON_PATH  "/usr/share/icons/ubuntu-mobile/actions/scalable/reload.svg"
+#define DAEMON_SYNC_TIMEOUT         1000 * 60 // one minute
+#define SYNC_MONITOR_ICON_PATH      "/usr/share/icons/ubuntu-mobile/actions/scalable/reload.svg"
+#define SYNC_ON_MOBILE_CONFIG_KEY   "sync-on-mobile-connection"
 
 SyncDaemon::SyncDaemon()
     : QObject(0),
@@ -174,42 +175,11 @@ void SyncDaemon::syncAll(const QString &serviceName, bool runNow)
     }
 }
 
-/*
- * This is a helper function used on contact migration it only works for contacts sync
- */
 void SyncDaemon::syncAccount(quint32 accountId, const QString &service)
 {
-    Account *account = m_manager->account(accountId);
-
-    if (account) {
-        // fake a settings object
-        QSettings *contactSettings = new QSettings;
-        contactSettings->setValue("contacts/template", "WebDAV");
-        contactSettings->setValue("contacts/syncURL", "https://www.googleapis.com/.well-known/carddav");
-        contactSettings->setValue("contacts/uoa-service", "google-carddav");
-        contactSettings->setValue("contacts/sync-backend", "evolution-contacts");
-        contactSettings->setValue("contacts/sync-uri", "addressbook");
-
-        SyncAccount *acc = new SyncAccount(account, service, contactSettings, this);
-        if (!isOnline()) {
-            qWarning() << "Network is off ignore sync request";
-            Q_EMIT syncError(acc, service, "20017");
-            account->deleteLater();
-        } else {
-            acc->setRetrySync(false);
-            connect(acc, SIGNAL(syncStarted(QString, bool)),
-                         SLOT(onAccountSyncStarted(QString, bool)));
-            connect(acc, SIGNAL(syncFinished(QString, bool, QString, QString)),
-                         SLOT(onAccountSyncFinished(QString, bool, QString, QString)));
-            connect(acc, SIGNAL(syncError(QString,QString)),
-                         SLOT(onAccountSyncError(QString,QString)));
-            connect(acc, SIGNAL(syncError(QString,QString)),
-                    acc, SLOT(deleteLater()), Qt::QueuedConnection);
-            connect(acc, SIGNAL(syncFinished(QString,bool,QString,QString)),
-                    acc, SLOT(deleteLater()), Qt::QueuedConnection);
-            contactSettings->setParent(acc);
-            sync(acc, service, true);
-        }
+    SyncAccount *acc = m_accounts.value(accountId);
+    if (acc) {
+        sync(acc, service, false);
     }
 }
 
@@ -362,6 +332,17 @@ QString SyncDaemon::lastSuccessfulSyncDate(quint32 accountId, const QString &ser
     return QString();
 }
 
+bool SyncDaemon::syncOnMobileConnection() const
+{
+    return m_settings.value(SYNC_ON_MOBILE_CONFIG_KEY, false).toBool();
+}
+
+void SyncDaemon::setSyncOnMobileConnection(bool flag)
+{
+    m_settings.setValue(SYNC_ON_MOBILE_CONFIG_KEY, flag);
+    m_settings.sync();
+}
+
 void SyncDaemon::addAccount(const AccountId &accountId, bool startSync)
 {
     Account *acc = m_manager->account(accountId);
@@ -412,7 +393,7 @@ void SyncDaemon::sync(SyncAccount *syncAcc, const QString &serviceName, bool run
         qDebug() << "Account aready in the queue, ignore request;";
     } else {
         qDebug() << "Pushed into queue with immediately sync?" << runNow << "Sync is running" << m_syncing;
-        m_syncQueue->push(syncAcc, serviceName, runNow);
+        m_syncQueue->push(syncAcc, serviceName, runNow || syncOnMobileConnection());
         // if not syncing start a full sync
         if (!m_syncing) {
             qDebug() << "Request sync";
