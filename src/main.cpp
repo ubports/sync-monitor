@@ -36,6 +36,8 @@ int main(int argc, char** argv)
 
     QCoreApplication app(argc, argv);
     app.setApplicationName("sync-monitor");
+    app.setOrganizationName("canonical");
+    app.setOrganizationDomain("canonical.com");
 
     setlocale(LC_ALL, "");
     C::bindtextdomain(GETTEXT_PACKAGE, GETTEXT_LOCALEDIR);

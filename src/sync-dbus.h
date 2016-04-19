@@ -39,6 +39,7 @@ class SyncDBus : public QDBusAbstractAdaptor
 "  <interface name=\"com.canonical.SyncMonitor\">\n"
 "    <property name=\"state\" type=\"s\" access=\"read\"/>\n"
 "    <property name=\"enabledServices\" type=\"as\" access=\"read\"/>\n"
+"    <property name=\"syncOnMobileConnection\" type=\"b\" access=\"readwrite\"/>\n"
 "    <signal name=\"syncStarted\">\n"
 "      <arg direction=\"out\" type=\"s\" name=\"account\"/>\n"
 "      <arg direction=\"out\" type=\"s\" name=\"service\"/>\n"
@@ -64,6 +65,11 @@ class SyncDBus : public QDBusAbstractAdaptor
 "      <arg direction=\"in\" type=\"u\"/>\n"
 "      <arg direction=\"in\" type=\"s\"/>\n"
 "    </method>\n"
+"    <method name=\"lastSuccessfulSyncDate\">\n"
+"      <arg direction=\"in\" type=\"u\"/>\n"
+"      <arg direction=\"in\" type=\"s\"/>\n"
+"      <arg direction=\"out\" type=\"s\" name=\"date\"/>\n"
+"    </method>\n"
 "    <method name=\"cancel\">\n"
 "      <arg direction=\"in\" type=\"as\"/>\n"
 "    </method>\n"
@@ -73,10 +79,13 @@ class SyncDBus : public QDBusAbstractAdaptor
         "")
     Q_PROPERTY(QString state READ state NOTIFY stateChanged)
     Q_PROPERTY(QStringList enabledServices READ enabledServices NOTIFY enabledServicesChanged)
+    Q_PROPERTY(bool syncOnMobileConnection READ syncOnMobileConnection WRITE setSyncOnMobileConnection)
 
 public:
     SyncDBus(const QDBusConnection &connection, SyncDaemon *parent);
     bool start();
+    bool syncOnMobileConnection() const;
+    void setSyncOnMobileConnection(bool flag);
 
 Q_SIGNALS:
     void syncStarted(const QString &account, const QString &service);
@@ -90,6 +99,7 @@ Q_SIGNALS:
 public Q_SLOTS:
     void sync(QStringList service);
     void syncAccount(quint32 accountId, const QString &service);
+    QString lastSuccessfulSyncDate(quint32 accountId, const QString &service, const QDBusMessage &message);
     void cancel(QStringList services);
     QString state() const;
     QStringList enabledServices() const;
