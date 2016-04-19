@@ -108,11 +108,11 @@ void SyncDaemon::setupTriggers()
 void SyncDaemon::onDataChanged(const QString &serviceName, const QString &sourceName)
 {
     if (sourceName.isEmpty()) {
-        syncAll(serviceName);
+        syncAll(serviceName, false, false);
     } else {
         Q_FOREACH(SyncAccount *acc, m_accounts.values()) {
             if (acc->displayName() == sourceName) {
-                sync(acc, serviceName);
+                sync(acc, serviceName, false, false);
                 return;
             }
         }
@@ -163,14 +163,14 @@ void SyncDaemon::onOnlineStatusChanged(SyncNetwork::NetworkState state)
     Q_EMIT accountsChanged();
 }
 
-void SyncDaemon::syncAll(const QString &serviceName, bool runNow)
+void SyncDaemon::syncAll(const QString &serviceName, bool runNow, bool syncOnMobile)
 {
     // if runNow is set we will sync all accounts
     Q_FOREACH(SyncAccount *acc, m_accounts.values()) {
         if (serviceName.isEmpty()) {
-            sync(acc, QString(), runNow);
+            sync(acc, QString(), runNow, syncOnMobile);
         } else if (acc->availableServices().contains(serviceName)) {
-            sync(acc, serviceName, runNow);
+            sync(acc, serviceName, runNow, syncOnMobile);
         }
     }
 }
@@ -179,7 +179,7 @@ void SyncDaemon::syncAccount(quint32 accountId, const QString &service)
 {
     SyncAccount *acc = m_accounts.value(accountId);
     if (acc) {
-        sync(acc, service, false);
+        sync(acc, service, true, false);
     }
 }
 
@@ -365,7 +365,7 @@ void SyncDaemon::addAccount(const AccountId &accountId, bool startSync)
         connect(syncAcc, SIGNAL(syncError(QString,QString)),
                          SLOT(onAccountSyncError(QString, QString)));
         if (startSync) {
-            sync(syncAcc, QString(), true);
+            sync(syncAcc, QString(), true, true);
         }
         Q_EMIT accountsChanged();
     }
@@ -383,7 +383,7 @@ void SyncDaemon::sync(bool runNow)
     }
 }
 
-void SyncDaemon::sync(SyncAccount *syncAcc, const QString &serviceName, bool runNow)
+void SyncDaemon::sync(SyncAccount *syncAcc, const QString &serviceName, bool runNow, bool syncOnMobile)
 {
     qDebug() << "syn requested for account:" << syncAcc->displayName() << serviceName;
 
@@ -393,7 +393,7 @@ void SyncDaemon::sync(SyncAccount *syncAcc, const QString &serviceName, bool run
         qDebug() << "Account aready in the queue, ignore request;";
     } else {
         qDebug() << "Pushed into queue with immediately sync?" << runNow << "Sync is running" << m_syncing;
-        m_syncQueue->push(syncAcc, serviceName, runNow || syncOnMobileConnection());
+        m_syncQueue->push(syncAcc, serviceName, syncOnMobile || syncOnMobileConnection());
         // if not syncing start a full sync
         if (!m_syncing) {
             qDebug() << "Request sync";
@@ -557,7 +557,7 @@ void SyncDaemon::onAccountEnableChanged(const QString &serviceName, bool enabled
 {
     SyncAccount *acc = qobject_cast<SyncAccount*>(QObject::sender());
     if (enabled) {
-        sync(acc, serviceName, true);
+        sync(acc, serviceName, true, true);
     } else {
         cancel(acc, serviceName);
     }

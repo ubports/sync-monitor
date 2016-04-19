@@ -49,10 +49,10 @@ void SyncDBus::setSyncOnMobileConnection(bool flag)
 void SyncDBus::sync(QStringList services)
 {
     if (services.isEmpty()) {
-        m_parent->syncAll(QString(), true);
+        m_parent->syncAll(QString(), true, true);
     } else {
         Q_FOREACH(const QString &service, services) {
-            m_parent->syncAll(service, true);
+            m_parent->syncAll(service, true, true);
         }
     }
 }
