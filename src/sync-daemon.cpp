@@ -397,16 +397,16 @@ void SyncDaemon::sync(SyncAccount *syncAcc, const QString &serviceName, bool run
         // if not syncing start a full sync
         if (!m_syncing) {
             qDebug() << "Request sync";
-            sync(runNow);
             Q_EMIT syncAboutToStart();
+            sync(runNow);
             return;
         }
     }
 
     // immediately request, force sync to start
     if (runNow && !isSyncing()) {
-        sync(runNow);
         Q_EMIT syncAboutToStart();
+        sync(runNow);
     }
 }
 
