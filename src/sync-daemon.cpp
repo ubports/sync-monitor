@@ -59,8 +59,8 @@ SyncDaemon::SyncDaemon()
     connect(m_networkStatus, SIGNAL(stateChanged(SyncNetwork::NetworkState)), SLOT(onOnlineStatusChanged(SyncNetwork::NetworkState)));
 
     m_powerd = new PowerdProxy(this);
-    connect(this, SIGNAL(syncAboutToStart()), m_powerd, SLOT(lock()));
-    connect(this, SIGNAL(done()), m_powerd, SLOT(unlock()));
+    connect(this, SIGNAL(syncAboutToStart()), m_powerd, SLOT(lock()), Qt::DirectConnection);
+    connect(this, SIGNAL(done()), m_powerd, SLOT(unlock()), Qt::DirectConnection);
 
     m_timeout = new QTimer(this);
     m_timeout->setInterval(DAEMON_SYNC_TIMEOUT);
@@ -397,16 +397,16 @@ void SyncDaemon::sync(SyncAccount *syncAcc, const QString &serviceName, bool run
         // if not syncing start a full sync
         if (!m_syncing) {
             qDebug() << "Request sync";
-            sync(runNow);
             Q_EMIT syncAboutToStart();
+            sync(runNow);
             return;
         }
     }
 
     // immediately request, force sync to start
     if (runNow && !isSyncing()) {
-        sync(runNow);
         Q_EMIT syncAboutToStart();
+        sync(runNow);
     }
 }
 
