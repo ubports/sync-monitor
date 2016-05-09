@@ -59,8 +59,8 @@ SyncDaemon::SyncDaemon()
     connect(m_networkStatus, SIGNAL(stateChanged(SyncNetwork::NetworkState)), SLOT(onOnlineStatusChanged(SyncNetwork::NetworkState)));
 
     m_powerd = new PowerdProxy(this);
-    connect(this, SIGNAL(syncAboutToStart()), m_powerd, SLOT(lock()), Qt::DirectConnection);
-    connect(this, SIGNAL(done()), m_powerd, SLOT(unlock()), Qt::DirectConnection);
+    connect(this, SIGNAL(syncAboutToStart()), m_powerd, SLOT(lock()));
+    connect(this, SIGNAL(done()), m_powerd, SLOT(unlock()));
 
     m_timeout = new QTimer(this);
     m_timeout->setInterval(DAEMON_SYNC_TIMEOUT);
