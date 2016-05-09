@@ -1,3 +1,10 @@
+sync-monitor (0.2+16.04.20160509.1-0ubuntu1) xenial; urgency=medium
+
+  * Make sure that signal 'syncAboutToStart' is fired before 'syncDone';
+    (LP: #1579936)
+
+ -- Renato Araujo Oliveira Filho <renato.filho@canonical.com>  Mon, 09 May 2016 23:04:18 +0000
+
 sync-monitor (0.2+16.04.20160419-0ubuntu1) xenial; urgency=medium
 
   * Export the last successful sync data.
