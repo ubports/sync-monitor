@@ -70,6 +70,7 @@ public:
     QString serviceId(const QString &serviceName) const;
     bool retrySync() const;
     void setRetrySync(bool retry);
+    QString lastSuccessfulSyncDate(const QString &serviceName, const QString &sourceName, uint accountId);
 
     static QString statusDescription(const QString &status);
 
@@ -117,14 +118,9 @@ private:
     void continueSync();
 
     void setState(AccountState state);
-
-
-    QStringMap lastReport(const QString &serviceName, const QString &sourceName) const;
-    QString syncMode(const QString &serviceName,
-                     const QString &sourceName,
-                     bool *firstSync) const;
-    QString lastSyncStatus(const QString &serviceName,
-                           const QString &sourceName) const;
+    QStringMap lastReport(const QString &serviceName, const QString &sourceName, bool onlySuccessful = false) const;
+    QString syncMode(const QString &serviceName, const QString &sourceName, bool *firstSync) const;
+    QString lastSyncStatus(const QString &serviceName, const QString &sourceName) const;
     bool syncService(const QString &serviceName);
     void setupServices();
     void dumpReport(const QStringMap &report) const;

@@ -38,6 +38,8 @@ int main(int argc, char** argv)
     app.setOrganizationName("Canonical");
     app.setOrganizationDomain("canonical.com");
     app.setApplicationName("sync-monitor");
+    app.setOrganizationName("canonical");
+    app.setOrganizationDomain("canonical.com");
 
     setlocale(LC_ALL, "");
     C::bindtextdomain(GETTEXT_PACKAGE, GETTEXT_LOCALEDIR);

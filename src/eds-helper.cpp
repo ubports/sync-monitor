@@ -373,6 +373,7 @@ QString EdsHelper::createOrganizerSource(const QString &sourceName, int accountI
     QOrganizerCollection collection;
     collection.setMetaData(QOrganizerCollection::KeyName, sourceName);
     collection.setExtendedMetaData(COLLECTION_ACCOUNT_ID_METADATA, accountId);
+    collection.setExtendedMetaData("collection-selected", true);
     if (!m_organizerEngine->saveCollection(&collection)) {
         qWarning() << "Fail to create collection" << sourceName;
         return QString();

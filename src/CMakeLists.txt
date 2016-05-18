@@ -9,6 +9,8 @@ set(SYNQ_LIB_SRC
     eds-helper.cpp
     notify-message.h
     notify-message.cpp
+    powerd-proxy.h
+    powerd-proxy.cpp
     provider-template.h
     provider-template.cpp
     sync-account.h

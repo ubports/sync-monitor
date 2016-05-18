@@ -36,13 +36,23 @@ SyncDBus::SyncDBus(const QDBusConnection &connection, SyncDaemon *parent)
     updateState();
 }
 
+bool SyncDBus::syncOnMobileConnection() const
+{
+    return m_parent->syncOnMobileConnection();
+}
+
+void SyncDBus::setSyncOnMobileConnection(bool flag)
+{
+    m_parent->setSyncOnMobileConnection(flag);
+}
+
 void SyncDBus::sync(QStringList services)
 {
     if (services.isEmpty()) {
-        m_parent->syncAll(QString(), true);
+        m_parent->syncAll(QString(), true, true);
     } else {
         Q_FOREACH(const QString &service, services) {
-            m_parent->syncAll(service, true);
+            m_parent->syncAll(service, true, true);
         }
     }
 }
@@ -93,6 +103,17 @@ void SyncDBus::detach()
 {
     m_clientCount--;
     Q_EMIT clientDeattached(m_clientCount);
+}
+
+QString SyncDBus::lastSuccessfulSyncDate(quint32 accountId, const QString &service, const QString &source, const QDBusMessage &message)
+{
+    message.setDelayedReply(true);
+
+    QString result = m_parent->lastSuccessfulSyncDate(accountId, service, source);
+    qDebug() << "Result" << result;
+    QDBusMessage reply = message.createReply(QVariant::fromValue<QString>(result));
+    QDBusConnection::sessionBus().send(reply);
+    return result;
 }
 
 void SyncDBus::onSyncStarted(SyncAccount *syncAcc, const QString &serviceName)

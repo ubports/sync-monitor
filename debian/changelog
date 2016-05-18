@@ -1,3 +1,22 @@
+sync-monitor (0.2+16.04.20160509.1-0ubuntu1) xenial; urgency=medium
+
+  * Make sure that signal 'syncAboutToStart' is fired before 'syncDone';
+    (LP: #1579936)
+
+ -- Renato Araujo Oliveira Filho <renato.filho@canonical.com>  Mon, 09 May 2016 23:04:18 +0000
+
+sync-monitor (0.2+16.04.20160419-0ubuntu1) xenial; urgency=medium
+
+  * Export the last successful sync data.
+
+ -- Renato Araujo Oliveira Filho <renato.filho@canonical.com>  Tue, 19 Apr 2016 19:32:31 +0000
+
+sync-monitor (0.2+16.04.20160304-0ubuntu1) xenial; urgency=medium
+
+  * Create the organizer collection enabled by default.
+
+ -- Renato Araujo Oliveira Filho <renato.filho@canonical.com>  Fri, 04 Mar 2016 16:13:47 +0000
+
 sync-monitor (0.2+16.04.20151027.1-0ubuntu1) xenial; urgency=medium
 
   * Avoid crash when account not found. (LP: #1365197)

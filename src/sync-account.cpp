@@ -247,8 +247,17 @@ QStringMap SyncAccount::filterSourceReport(const QStringMap &report, const QStri
 }
 
 QStringMap SyncAccount::lastReport(const QString &serviceName,
-                                   const QString &sourceName) const
+                                   const QString &sourceName,
+                                   bool onlySuccessful) const
 {
+    static QStringList okStatus;
+
+    if (okStatus.isEmpty()) {
+        okStatus << "0"
+                 << "200"
+                 << "204"
+                 << "207";
+    }
     const uint pageSize = 100;
     uint index = 0;
     if (!m_currentSession) {
@@ -270,27 +279,28 @@ QStringMap SyncAccount::lastReport(const QString &serviceName,
 
     QString sessionName = SyncConfigure::accountSessionName(m_account);
     index += pageSize;
-    while (reports.size() == pageSize) {
+    while (true) {
         Q_FOREACH(const QStringMap &report, reports) {
             if (report.value("peer") == sessionName) {
                 QStringMap sourceReport = filterSourceReport(report, sourceName);
                 if (!sourceReport.isEmpty()) {
-                    return sourceReport;
+                    if (onlySuccessful) {
+                        QString status = report.value("status", "");
+                        if (okStatus.contains(status)) {
+                            return report;
+                        }
+                    } else {
+                        return report;
+                    }
                 }
             }
         }
+
+        if (reports.size() != pageSize)
+            break;
+
         reports = m_currentSession->reports(index, pageSize);
         index += pageSize;
-
-    }
-
-    Q_FOREACH(const QStringMap &report, reports) {
-        if (report.value("peer") == sessionName) {
-            QStringMap sourceReport = filterSourceReport(report, sourceName);
-            if (!sourceReport.isEmpty()) {
-                return sourceReport;
-            }
-        }
     }
 
     return QStringMap();
@@ -544,6 +554,31 @@ bool SyncAccount::retrySync() const
 void SyncAccount::setRetrySync(bool retry)
 {
     m_retrySync = retry;
+}
+
+QString SyncAccount::lastSuccessfulSyncDate(const QString &serviceName,
+                                            const QString &sourceName,
+                                            uint accountId)
+{
+    Q_UNUSED(accountId)
+    if (m_currentSession) {
+        qWarning() << "Sync in progress can not load log right now";
+        return QDateTime::currentDateTime().toUTC().toString(Qt::ISODate);
+    }
+
+    prepareSession(serviceName);
+
+    QString lastSyncDate;
+    //FIXME: Query the source id, based on sourceName and accountId
+    QStringMap report = lastReport(serviceName, sourceName, true);
+    if (report.contains("start")) {
+        uint lastSync = report["start"].toUInt();
+        lastSyncDate = QDateTime::fromTime_t(lastSync).toUTC().toString(Qt::ISODate);
+    }
+
+    releaseSession();
+
+    return lastSyncDate;
 }
 
 void SyncAccount::onAccountEnabledChanged(const QString &serviceName, bool enabled)

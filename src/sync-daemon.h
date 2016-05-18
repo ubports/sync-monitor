@@ -23,6 +23,7 @@
 #include <QtCore/QHash>
 #include <QtCore/QTimer>
 #include <QtCore/QElapsedTimer>
+#include <QtCore/QSettings>
 
 #include <Accounts/Manager>
 
@@ -33,10 +34,12 @@ class EdsHelper;
 class ProviderTemplate;
 class SyncQueue;
 class SyncDBus;
+class PowerdProxy;
 
 class SyncDaemon : public QObject
 {
     Q_OBJECT
+    Q_PROPERTY(bool syncOnMobileConnection READ syncOnMobileConnection WRITE setSyncOnMobileConnection)
 public:
     SyncDaemon();
     ~SyncDaemon();
@@ -46,6 +49,9 @@ public:
     QStringList availableServices() const;
     QStringList enabledServices() const;
     bool isOnline() const;
+    QString lastSuccessfulSyncDate(quint32 accountId, const QString &service, const QString &source);
+    bool syncOnMobileConnection() const;
+    void setSyncOnMobileConnection(bool flag);
 
 Q_SIGNALS:
     void syncStarted(SyncAccount *syncAcc, const QString &serviceName);
@@ -58,7 +64,7 @@ Q_SIGNALS:
 
 public Q_SLOTS:
     void quit();
-    void syncAll(const QString &serviceName = QString(), bool runNow=false);
+    void syncAll(const QString &serviceName, bool runNow, bool syncOnMobile);
     void syncAccount(quint32 accountId, const QString &service);
     void cancel(const QString &serviceName = QString());
 
@@ -94,14 +100,16 @@ private:
     ProviderTemplate *m_provider;
     SyncDBus *m_dbusAddaptor;
     SyncNetwork *m_networkStatus;
+    PowerdProxy *m_powerd;
     bool m_syncing;
     bool m_aboutToQuit;
     QElapsedTimer m_syncElapsedTime;
     bool m_firstClient;
+    QSettings m_settings;
 
     void setupAccounts();
     void setupTriggers();
-    void sync(SyncAccount *syncAcc, const QString &serviceName = QString(), bool runNow = false);
+    void sync(SyncAccount *syncAcc, const QString &serviceName, bool runNow, bool syncOnMobile);
     void cancel(SyncAccount *syncAcc, const QString &serviceName = QString());
     void setup();
     void sync(bool runNow);
