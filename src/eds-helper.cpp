@@ -309,22 +309,22 @@ void EdsHelper::removeOrganizerSource(const QString &sourceName, int accountId)
         return;
     }
 
-    QOrganizerCollectionId collectionId;
+    QList<QPair<QOrganizerCollectionId, QString> > collectionsToRemove;
     QList<QOrganizerCollection> result = m_organizerEngine->collections();
     Q_FOREACH(const QOrganizerCollection &collection, result) {
         if ((sourceName.isEmpty() || (collection.metaData(QOrganizerCollection::KeyName).toString() == sourceName)) &&
             (collection.extendedMetaData(COLLECTION_ACCOUNT_ID_METADATA).toInt() == accountId)) {
-            collectionId = collection.id();
-            break;
+            collectionsToRemove << qMakePair(collection.id(), collection.metaData(QOrganizerCollection::KeyName).toString());
         }
     }
 
-    if (!collectionId.isNull()) {
-        if (!m_organizerEngine->removeCollection(collectionId)) {
-            qWarning() << "Fail to remove calendar source" <<  sourceName;
+    while (!collectionsToRemove.isEmpty()) {
+        QPair<QOrganizerCollectionId, QString> collection = collectionsToRemove.takeFirst();
+        if (!m_organizerEngine->removeCollection(collection.first)) {
+            qWarning() << "Fail to remove calendar source" <<  collection.second;
+        } else {
+            qDebug() << "Collection removed:" << collection.second;
         }
-    } else {
-        qWarning() << "Calendar source not found" << sourceName;
     }
 }
 
