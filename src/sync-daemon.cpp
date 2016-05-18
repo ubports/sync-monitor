@@ -445,7 +445,7 @@ void SyncDaemon::removeAccount(const AccountId &accountId)
     SyncAccount *syncAcc = m_accounts.take(accountId);
     if (syncAcc) {
         cancel(syncAcc);
-        m_eds->removeSource("", syncAcc->displayName());
+        m_eds->removeSource("", "", accountId);
     }
     Q_EMIT accountsChanged();
 }

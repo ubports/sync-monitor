@@ -15,6 +15,7 @@
 #include "config.h"
 
 #define CHANGE_TIMEOUT      3000
+#define COLLECTION_ACCOUNT_ID_METADATA  "collection-account-id"
 
 using namespace QtOrganizer;
 using namespace QtContacts;
@@ -48,12 +49,12 @@ EdsHelper::~EdsHelper()
     delete m_organizerEngine;
 }
 
-QString EdsHelper::createSource(const QString &serviceName, const QString &sourceName)
+QString EdsHelper::createSource(const QString &serviceName, const QString &sourceName, int accountId)
 {
     if (serviceName == CONTACTS_SERVICE_NAME) {
         return createContactsSource(sourceName);
     } else if (serviceName == CALENDAR_SERVICE_NAME) {
-        return createOrganizerSource(sourceName);
+        return createOrganizerSource(sourceName, accountId);
     } else {
         qWarning() << "Service not supported:" << serviceName;
         return QString();
@@ -61,14 +62,14 @@ QString EdsHelper::createSource(const QString &serviceName, const QString &sourc
 }
 
 
-void EdsHelper::removeSource(const QString &serviceName, const QString &sourceName)
+void EdsHelper::removeSource(const QString &serviceName, const QString &sourceName, int accountId)
 {
     if (serviceName.isEmpty() || (serviceName == CONTACTS_SERVICE_NAME)) {
         removeContactsSource(sourceName);
     }
 
     if (serviceName.isEmpty() || (serviceName == CALENDAR_SERVICE_NAME)) {
-        removeOrganizerSource(sourceName);
+        removeOrganizerSource(sourceName, accountId);
     }
 }
 
@@ -300,8 +301,8 @@ QString EdsHelper::createContactsSource(const QString &sourceName)
         contact.id().toString();
     }
 }
-
-void EdsHelper::removeOrganizerSource(const QString &sourceName)
+// use empty sourceName to remove all sources
+void EdsHelper::removeOrganizerSource(const QString &sourceName, int accountId)
 {
     if (!m_organizerEngine) {
         qWarning() << "Request to remove organizer source with a null organize engine";
@@ -311,7 +312,8 @@ void EdsHelper::removeOrganizerSource(const QString &sourceName)
     QOrganizerCollectionId collectionId;
     QList<QOrganizerCollection> result = m_organizerEngine->collections();
     Q_FOREACH(const QOrganizerCollection &collection, result) {
-        if (collection.metaData(QOrganizerCollection::KeyName).toString() == sourceName) {
+        if ((sourceName.isEmpty() || (collection.metaData(QOrganizerCollection::KeyName).toString() == sourceName)) &&
+            (collection.extendedMetaData(COLLECTION_ACCOUNT_ID_METADATA).toInt() == accountId)) {
             collectionId = collection.id();
             break;
         }
@@ -353,7 +355,7 @@ void EdsHelper::removeContactsSource(const QString &sourceName)
     }
 }
 
-QString EdsHelper::createOrganizerSource(const QString &sourceName)
+QString EdsHelper::createOrganizerSource(const QString &sourceName, int accountId)
 {
     if (!m_organizerEngine) {
         qWarning() << "Request to create an organizer source with a null organize engine";
@@ -362,13 +364,15 @@ QString EdsHelper::createOrganizerSource(const QString &sourceName)
 
     QList<QOrganizerCollection> result = m_organizerEngine->collections();
     Q_FOREACH(const QOrganizerCollection &collection, result) {
-        if (collection.metaData(QOrganizerCollection::KeyName).toString() == sourceName) {
-            return QString();
+        if ((collection.metaData(QOrganizerCollection::KeyName).toString() == sourceName) &&
+            (collection.extendedMetaData(COLLECTION_ACCOUNT_ID_METADATA) == accountId)) {
+            return collection.id().toString();
         }
     }
 
     QOrganizerCollection collection;
     collection.setMetaData(QOrganizerCollection::KeyName, sourceName);
+    collection.setExtendedMetaData(COLLECTION_ACCOUNT_ID_METADATA, accountId);
     if (!m_organizerEngine->saveCollection(&collection)) {
         qWarning() << "Fail to create collection" << sourceName;
         return QString();

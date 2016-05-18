@@ -265,12 +265,13 @@ void SyncConfigure::continuePeerConfig(SyncEvolutionSessionProxy *session, const
                 continue;
             }
             // local dabase
-            QString localDbName = QString("%1_%2").arg(db.name).arg(m_account->id());
-            QString localDbId = eds.createSource(service, localDbName).split("::").last();
+            QString localDbId = eds.createSource(service, db.name, m_account->id()).split("::").last();
+            qDebug() << "Create evolution source:" << localDbId;
 
             // remote database
             QString sourceName = QString("%1_%2").arg(service).arg(formatSourceName(db.name));
             QString fullSourceName = QString("source/%1").arg(sourceName);
+            qDebug() << "Create syncevolution source" << fullSourceName;
             if (config.contains(fullSourceName)) {
                 qDebug() << "Source already configured" << sourceName << fullSourceName;
             } else {
@@ -291,7 +292,7 @@ void SyncConfigure::continuePeerConfig(SyncEvolutionSessionProxy *session, const
                 if (!sourceToDatabase.contains(key)) {
                     QString localDbName = config[key].value("database");
                     if (!localDbName.isEmpty()) {
-                        eds.removeSource(CALENDAR_SERVICE_NAME, localDbName);
+                        eds.removeSource(CALENDAR_SERVICE_NAME, localDbName, -1);
                     }
                     qDebug() << "Removing old source" << key << localDbName;
                     sourcesRemoved << key;
