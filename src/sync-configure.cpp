@@ -269,7 +269,10 @@ void SyncConfigure::continuePeerConfig(SyncEvolutionSessionProxy *session, const
             qDebug() << "Create evolution source:" << localDbId;
 
             // remote database
-            QString sourceName = QString("%1_%2").arg(service).arg(formatSourceName(db.name));
+            QString sourceName = QString("%1_%2_%3")
+                    .arg(service)
+                    .arg(formatSourceName(db.name))
+                    .arg(m_account->id());
             QString fullSourceName = QString("source/%1").arg(sourceName);
             qDebug() << "Create syncevolution source" << fullSourceName;
             if (config.contains(fullSourceName)) {
