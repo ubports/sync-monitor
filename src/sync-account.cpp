@@ -225,22 +225,14 @@ QStringMap SyncAccount::filterSourceReport(const QStringMap &report, const QStri
     QString sourceKey = QString("source-%1").arg(QString(sourceName).replace("_", "__"));
 
     Q_FOREACH(const QString &key, report.keys()) {
-        if (key.startsWith("source-")) {
-            if (key.startsWith(sourceKey)) {
-                sourceReport.insert(key, report[key]);
-                found = true;
-            }
-        } else {
+        if (key.startsWith(sourceKey)) {
             sourceReport.insert(key, report[key]);
+            found = true;
         }
     }
 
-    if (!found) {
-        sourceReport.clear();
-    } else {
-        if (sourceReport.value(QString("%1-mode").arg(sourceKey)) == "disabled") {
-            sourceReport.clear();;
-        }
+    if (sourceReport.value(QString("%1-mode").arg(sourceKey)) == "disabled") {
+        sourceReport.clear();;
     }
 
     return sourceReport;
@@ -266,9 +258,10 @@ QStringMap SyncAccount::lastReport(const QString &serviceName,
     }
 
     QArrayOfStringMap reports = m_currentSession->reports(index, pageSize);
-//    qDebug() << "REPORT====================================================";
+//    qDebug() << "REPORT(lastReport)========================================";
 //    Q_FOREACH(const QStringMap &map, reports) {
 //        SyncConfigure::dumpMap(map);
+//        qDebug() << "++++++++++++++++++++++++++++++++++++++++++++++++++++++";
 //    }
 //    qDebug() << "==========================================================";
     if (reports.isEmpty()) {
@@ -377,7 +370,7 @@ QString SyncAccount::lastSyncStatus(const QString &serviceName,
 {
     QStringMap lastReport = this->lastReport(serviceName, sourceName);
 
-//    qDebug() << "REPORT====================================================" << sourceName;
+//    qDebug() << "REPORT(lastSyncStatus)====================================" << sourceName;
 //    SyncConfigure::dumpMap(lastReport);
 //    qDebug() << "==========================================================";
 

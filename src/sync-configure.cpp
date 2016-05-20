@@ -1,4 +1,4 @@
-/*
+﻿/*
  * Copyright 2014 Canonical Ltd.
  *
  * This file is part of sync-monitor.
@@ -260,6 +260,9 @@ void SyncConfigure::continuePeerConfig(SyncEvolutionSessionProxy *session, const
             continue;
         }
 
+        // remove calendar, address-book default sources
+        QStringList sourcesRemoved = config.keys();
+
         Q_FOREACH(const SyncDatabase &db, dbs) {
             if (db.name.isEmpty()) {
                 continue;
@@ -271,12 +274,24 @@ void SyncConfigure::continuePeerConfig(SyncEvolutionSessionProxy *session, const
             // remote database
             QString sourceName = QString("%1_%2_%3")
                     .arg(service)
-                    .arg(formatSourceName(db.name))
-                    .arg(m_account->id());
+                    .arg(m_account->id())
+                    .arg(formatSourceName(db.name));
+            // WORKAROUND: trunc source name to 30 chars
+            // Syncevolution only support source names with max 30 chars.
+            sourceName = (sourceName.size() > 30 ? sourceName.left(30) : sourceName);
+
             QString fullSourceName = QString("source/%1").arg(sourceName);
             qDebug() << "Create syncevolution source" << fullSourceName;
             if (config.contains(fullSourceName)) {
-                qDebug() << "Source already configured" << sourceName << fullSourceName;
+                if (config[fullSourceName]["database"] != db.source) {
+                    QStringMap sourceConfig(config[fullSourceName]);
+                    sourceConfig["database"] = db.source;
+                    config[fullSourceName] = sourceConfig;
+                    changed = true;
+                } else {
+                    qDebug() << "Source already configured" << sourceName << fullSourceName;
+                }
+                sourcesRemoved.removeAll(fullSourceName);
             } else {
                 changed = true;
                 qDebug() << "Config source" << fullSourceName << sourceName << "for database" << db.name << db.source;
@@ -288,24 +303,19 @@ void SyncConfigure::continuePeerConfig(SyncEvolutionSessionProxy *session, const
             sourceToDatabase.insert(fullSourceName, localDbId);
         }
 
-        // remove old sources if necessary
-        QString sourcePrefix = QString("source/%1_").arg(service);
-        Q_FOREACH(const QString &key, config.keys()) {
-            if (key.startsWith(sourcePrefix)) {
-                if (!sourceToDatabase.contains(key)) {
-                    QString localDbName = config[key].value("database");
-                    if (!localDbName.isEmpty()) {
-                        eds.removeSource(CALENDAR_SERVICE_NAME, localDbName, -1);
-                    }
-                    qDebug() << "Removing old source" << key << localDbName;
-                    sourcesRemoved << key;
-                    config[key] = QStringMap();
-                    changed = true;
-                }
+        // remove configs not in use
+        Q_FOREACH(const QString &configName, sourcesRemoved) {
+            if (configName.isEmpty())
+                continue;
+            qDebug() << "Remove source not in use:" << configName;
+            QString localDbName = config[configName].value("database");
+            if (!localDbName.isEmpty()) {
+                qDebug() << "Remove local database:" << localDbName;
+                eds.removeSource(CALENDAR_SERVICE_NAME, localDbName, -1);
             }
+            config.remove(configName);
+            changed = true;
         }
-
-        // TODO: remove old local database
     }
 
     if (changed) {
@@ -319,7 +329,6 @@ void SyncConfigure::continuePeerConfig(SyncEvolutionSessionProxy *session, const
     }
 
     session->destroy();
-
     if (!changed) {
         qDebug() << "Sources config did not change. No confign needed";
         Q_EMIT done(services);
@@ -337,22 +346,33 @@ void SyncConfigure::continuePeerConfig(SyncEvolutionSessionProxy *session, const
     // create local sources
     changed = sourcesRemoved.count() > 1;
     config = session->getConfig("@default", false);
+    //qDebug() << "Local sources:" << config.keys();
+
     for(QMap<QString, QString>::Iterator i = sourceToDatabase.begin();
         i != sourceToDatabase.end(); i++) {
-        if (!config.contains(i.key())) {
-            changed = true;
+        const QString configName(i.key());
+
+        // create local source when necessary
+        if (!config.contains(configName)) {
             // extract service name from source name "source/<service>_<database>
-            QString service = i.key().split("/").last().split("_").first();
-            config[i.key()].insert("backend", QString("evolution-%1").arg(service));
-            config[i.key()].insert("database", i.value());
+            const QString sourceName(configName.split("/").last());
+            const QString serviceName(sourceName.split("_").first());
+
+            config[configName].insert("backend", QString("evolution-%1").arg(serviceName));
+            config[configName].insert("database", i.value());
+            qDebug() << "Create local source for[" << configName << "] = " << i.value();
+            changed = true;
         }
     }
 
-    // remove local sources if necessary
-    Q_FOREACH(const QString &key, sourcesRemoved) {
-        qDebug() << "Reset local config" << key;
+#if 0
+    Q_FOREACH(const QString &key, removedLocalConfigs) {
+        if (key.isEmpty())
+            continue;
+        qDebug() << "Remove local config" << key;
         config.remove(key);
     }
+#endif
 
     if (changed && !session->saveConfig("@default", config)) {
         qWarning() << "Fail to save @default config";
@@ -377,11 +397,13 @@ void SyncConfigure::continuePeerConfig(SyncEvolutionSessionProxy *session, const
     session->destroy();
     SyncEvolutionServerProxy::destroy();
 
+#if 0
     // remove sources dir when necessary
     Q_FOREACH(const QString &key, sourcesRemoved) {
         QString sourceName = key.mid(key.indexOf('/') + 1);
         removeAccountSourceConfig(m_account, sourceName);
     }
+#endif
 
     Q_EMIT done(services);
 }
