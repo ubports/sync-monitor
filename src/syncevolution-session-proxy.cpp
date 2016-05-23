@@ -33,7 +33,7 @@ SyncEvolutionSessionProxy::SyncEvolutionSessionProxy(const QString &sessionName,
     : QObject(parent),
       m_sessionName(sessionName)
 {
-    qDebug() << "SESSION CREATED:" << ++m_count << this;
+    ++m_count;
     m_iface = new QDBusInterface(SYNCEVOLUTION_SERVICE_NAME,
                                  objectPath.path(),
                                  SYNCEVOLUTIOON_SESSION_IFACE_NAME);
@@ -55,7 +55,7 @@ SyncEvolutionSessionProxy::SyncEvolutionSessionProxy(const QString &sessionName,
 
 SyncEvolutionSessionProxy::~SyncEvolutionSessionProxy()
 {
-    qDebug() << "SESSION DESTROYED:" << --m_count << this;
+    --m_count;
 }
 
 QString SyncEvolutionSessionProxy::sessionName() const

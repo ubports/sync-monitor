@@ -235,10 +235,14 @@ void SyncConfigure::continuePeerConfig(SyncEvolutionSessionProxy *session, const
     EdsHelper eds;
 
     bool changed = false;
-    QMap<QString, QString> sourceToDatabase;
-    QStringList sourcesRemoved;
+    // Map [source-name] as key [dbId, inUse] as value
+    QMap<QString, QPair<QString, bool> > sourceToDatabase;
 
     Q_FOREACH(const QString &service, services.toSet()) {
+        const QString sourcePrefix = QString("%1_%2")
+                .arg(service)
+                .arg(m_account->id());
+
         qDebug() << "Configure source for service" << service;
         QString templateSource = templates.value(service, "");
         if (templateSource.isEmpty()) {
@@ -260,8 +264,9 @@ void SyncConfigure::continuePeerConfig(SyncEvolutionSessionProxy *session, const
             continue;
         }
 
-        // remove calendar, address-book default sources
-        QStringList sourcesRemoved = config.keys();
+        // remove sources not in use anymore
+        QStringList sourcesToRemove = config.keys();
+        qDebug() << "SOURCES TO REMOVE" << sourcesToRemove;
 
         Q_FOREACH(const SyncDatabase &db, dbs) {
             if (db.name.isEmpty()) {
@@ -269,52 +274,65 @@ void SyncConfigure::continuePeerConfig(SyncEvolutionSessionProxy *session, const
             }
             // local dabase
             QString localDbId = eds.createSource(service, db.name, m_account->id()).split("::").last();
-            qDebug() << "Create evolution source:" << localDbId;
+            qDebug() << "\tCheck for evolution source:" << localDbId;
+
+            // check if source is already configured
+            bool found = false;
+            Q_FOREACH(const QString &key, config.keys()) {
+                if (key.startsWith("source/")) {
+                    if (config[key].value("database") == db.source) {
+                        sourcesToRemove.removeAll(key);
+                        sourceToDatabase.insert(key, qMakePair(localDbId, true));
+                        found = true;
+                        qDebug() << "\tLocal database already configured:" << key << localDbId;
+                        break;
+                    }
+                }
+            }
+
+            // source already configured
+            if (found) {
+                continue;
+            }
 
             // remote database
-            QString sourceName = QString("%1_%2_%3")
-                    .arg(service)
-                    .arg(m_account->id())
+            QString sourceName = QString("%1_%2")
+                    .arg(sourcePrefix)
                     .arg(formatSourceName(db.name));
+
             // WORKAROUND: trunc source name to 30 chars
             // Syncevolution only support source names with max 30 chars.
             sourceName = (sourceName.size() > 30 ? sourceName.left(30) : sourceName);
 
             QString fullSourceName = QString("source/%1").arg(sourceName);
-            qDebug() << "Create syncevolution source" << fullSourceName;
+            qDebug() << "\tCreate syncevolution source" << fullSourceName;
             if (config.contains(fullSourceName)) {
-                if (config[fullSourceName]["database"] != db.source) {
-                    QStringMap sourceConfig(config[fullSourceName]);
-                    sourceConfig["database"] = db.source;
-                    config[fullSourceName] = sourceConfig;
-                    changed = true;
-                } else {
-                    qDebug() << "Source already configured" << sourceName << fullSourceName;
-                }
-                sourcesRemoved.removeAll(fullSourceName);
+                qWarning() << "Source already exists with a different db" << sourceName << config[fullSourceName]["database"];
+                sourcesToRemove.removeAll(fullSourceName);
             } else {
                 changed = true;
-                qDebug() << "Config source" << fullSourceName << sourceName << "for database" << db.name << db.source;
+
+                qDebug() << "\tConfig source" << fullSourceName << sourceName << "for database" << db.name << db.source;
                 QStringMap sourceConfig(configTemplate);
                 sourceConfig["database"] = db.source;
                 config[fullSourceName] = sourceConfig;
-            }
 
-            sourceToDatabase.insert(fullSourceName, localDbId);
+                sourceToDatabase.insert(fullSourceName, qMakePair(localDbId, true));
+            }
         }
 
-        // remove configs not in use
-        Q_FOREACH(const QString &configName, sourcesRemoved) {
-            if (configName.isEmpty())
+        // remove remote configs not in use
+        const QString fullSourcePrefix = QString("source/%1").arg(sourcePrefix);
+        Q_FOREACH(const QString &sourceName, sourcesToRemove) {
+            if (sourceName.isEmpty())
                 continue;
-            qDebug() << "Remove source not in use:" << configName;
-            QString localDbName = config[configName].value("database");
-            if (!localDbName.isEmpty()) {
-                qDebug() << "Remove local database:" << localDbName;
-                eds.removeSource(CALENDAR_SERVICE_NAME, localDbName, -1);
+
+            if (sourceName.startsWith(fullSourcePrefix)) {
+                qDebug() << "Remove source not in use:" << sourceName;
+                // remove config
+                config.remove(sourceName);
+                changed = true;
             }
-            config.remove(configName);
-            changed = true;
         }
     }
 
@@ -335,6 +353,9 @@ void SyncConfigure::continuePeerConfig(SyncEvolutionSessionProxy *session, const
         return;
     }
 
+    qDebug() << "\tStart local config:"
+             << "\n\t-------------------";
+
     // local session
     session = proxy->openSession("", QStringList() << "all-configs");
     if (session->status() == "queueing") {
@@ -344,11 +365,10 @@ void SyncConfigure::continuePeerConfig(SyncEvolutionSessionProxy *session, const
     }
 
     // create local sources
-    changed = sourcesRemoved.count() > 1;
     config = session->getConfig("@default", false);
-    //qDebug() << "Local sources:" << config.keys();
+    qDebug() << "\tLocal sources:" << config.keys();
 
-    for(QMap<QString, QString>::Iterator i = sourceToDatabase.begin();
+    for(QMap<QString, QPair<QString, bool> >::Iterator i = sourceToDatabase.begin();
         i != sourceToDatabase.end(); i++) {
         const QString configName(i.key());
 
@@ -359,20 +379,32 @@ void SyncConfigure::continuePeerConfig(SyncEvolutionSessionProxy *session, const
             const QString serviceName(sourceName.split("_").first());
 
             config[configName].insert("backend", QString("evolution-%1").arg(serviceName));
-            config[configName].insert("database", i.value());
-            qDebug() << "Create local source for[" << configName << "] = " << i.value();
+            config[configName].insert("database", i.value().first);
+            qDebug() << "\tCreate local source for[" << configName << "] = " << i.value().first;
             changed = true;
         }
     }
 
-#if 0
-    Q_FOREACH(const QString &key, removedLocalConfigs) {
-        if (key.isEmpty())
-            continue;
-        qDebug() << "Remove local config" << key;
-        config.remove(key);
+
+    qDebug() << "\tREmote dbs" << sourceToDatabase.keys();
+
+    // remove local configs and databases
+    Q_FOREACH(const QString &service, services.toSet()) {
+        const QString sourcePrefix = QString("source/%1_%2_").arg(service).arg(m_account->id());
+
+        Q_FOREACH(const QString &source, config.keys()) {
+            if (source.startsWith(sourcePrefix)) {
+                if (!sourceToDatabase.contains(source)) {
+                    QString database = config[source].value("database");
+                    if (!database.isEmpty()) {
+                        qDebug() << "Remove local config and database" << source << config[source].value("database");
+                        config.remove(source);
+                        eds.removeSource(service, "qtorganizer:eds::" + database);
+                    }
+                }
+            }
+        }
     }
-#endif
 
     if (changed && !session->saveConfig("@default", config)) {
         qWarning() << "Fail to save @default config";
