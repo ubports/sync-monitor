@@ -243,7 +243,7 @@ void SyncConfigure::continuePeerConfig(SyncEvolutionSessionProxy *session, const
                 .arg(service)
                 .arg(m_account->id());
 
-        qDebug() << "Configure source for service" << service;
+        qDebug() << "Configure source for service" << service << "Account" << m_account->id();
         QString templateSource = templates.value(service, "");
         if (templateSource.isEmpty()) {
             qWarning() << "Fail to find template source. Skip service" << service;
@@ -314,6 +314,7 @@ void SyncConfigure::continuePeerConfig(SyncEvolutionSessionProxy *session, const
 
                 qDebug() << "\tConfig source" << fullSourceName << sourceName << "for database" << db.name << db.source;
                 QStringMap sourceConfig(configTemplate);
+                sourceConfig["backend"] = "CalDav";
                 sourceConfig["database"] = db.source;
                 config[fullSourceName] = sourceConfig;
 
@@ -322,7 +323,7 @@ void SyncConfigure::continuePeerConfig(SyncEvolutionSessionProxy *session, const
         }
 
         // remove remote configs not in use
-        const QString fullSourcePrefix = QString("source/%1").arg(sourcePrefix);
+        const QString fullSourcePrefix = QString("source/%1_").arg(service);
         Q_FOREACH(const QString &sourceName, sourcesToRemove) {
             if (sourceName.isEmpty())
                 continue;

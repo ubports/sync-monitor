@@ -164,7 +164,7 @@ QStringList SyncAccount::sources(const QString &serviceName) const
 
     QStringList sources;
     QStringMultiMap config = m_currentSession->getConfig("@default", false);
-    QString sourcePrefix = QString("source/%1_").arg(serviceName);
+    QString sourcePrefix = QString("source/%1_%2_").arg(serviceName).arg(m_account->id());
     Q_FOREACH(const QString &key, config.keys()) {
         if (key.startsWith(sourcePrefix)) {
             sources << key.split("/").last();
@@ -599,8 +599,6 @@ void SyncAccount::onAccountEnabledChanged(const QString &serviceName, bool enabl
 
 void SyncAccount::onSessionStatusChanged(const QString &status, quint32 error, const QSyncStatusMap &sources)
 {
-    qDebug() << "onSessionStatusChanged" << status << error << "Sources" << sources.size();
-
     if (status != "done") {
         switch (m_state) {
         case SyncAccount::AboutToSync:
