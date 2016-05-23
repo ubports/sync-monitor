@@ -73,6 +73,17 @@ void EdsHelper::removeSource(const QString &serviceName, const QString &sourceNa
     }
 }
 
+void EdsHelper::removeSource(const QString &serviceName, const QString &sourceId)
+{
+    if (serviceName == CONTACTS_SERVICE_NAME) {
+        removeContactsSource(sourceId);
+    }
+
+    if (serviceName == CALENDAR_SERVICE_NAME) {
+        removeOrganizerSource(sourceId);
+    }
+}
+
 void EdsHelper::freezeNotify()
 {
     m_freezed = true;
@@ -352,6 +363,16 @@ void EdsHelper::removeContactsSource(const QString &sourceName)
 
     if (sourceId.isNull() || !m_contactEngine->removeContact(sourceId)) {
         qWarning() << "Fail to remove contact source:" << sourceName;
+    }
+}
+
+void EdsHelper::removeOrganizerSource(const QString &sourceId)
+{
+    QOrganizerCollectionId id = QOrganizerCollectionId::fromString(sourceId);
+    if (!m_organizerEngine->removeCollection(id)) {
+        qWarning() << "Fail to remove calendar source" <<  id;
+    } else {
+        qDebug() << "Collection removed:" << id;
     }
 }
 

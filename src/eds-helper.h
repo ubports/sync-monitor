@@ -44,6 +44,7 @@ public:
     ~EdsHelper();
     QString createSource(const QString &serviceName, const QString &sourceName, int accountId);
     void removeSource(const QString &serviceName, const QString &sourceName, int accountId);
+    void removeSource(const QString &serviceName, const QString &sourceId);
     void freezeNotify();
     void unfreezeNotify();
     void flush();
@@ -81,6 +82,8 @@ private:
 
     void removeOrganizerSource(const QString &sourceName, int accountId);
     void removeContactsSource(const QString &sourceName);
+
+    void removeOrganizerSource(const QString &sourceId);
 };
 
 #endif
