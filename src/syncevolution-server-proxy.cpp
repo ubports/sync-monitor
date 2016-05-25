@@ -101,6 +101,17 @@ void SyncEvolutionServerProxy::getDatabases(const QString &sourceName)
                      this, SLOT(getDatabasesFinished(QDBusPendingCallWatcher*)));
 }
 
+QArrayOfStringMap SyncEvolutionServerProxy::reports(const QString &sessionName, uint start, uint count)
+{
+    QDBusReply<QArrayOfStringMap> reply = m_iface->call("GetReports", sessionName, start, count);
+    if (reply.error().isValid()) {
+        qWarning() << "Fail to get sync reports" << reply.error().message();
+        return QArrayOfStringMap();
+    } else {
+        return reply.value();
+    }
+}
+
 void SyncEvolutionServerProxy::getDatabasesFinished(QDBusPendingCallWatcher *call)
 {
     QDBusPendingReply<QArrayOfDatabases> reply = *call;

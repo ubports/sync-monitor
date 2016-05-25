@@ -39,6 +39,7 @@ public:
     SyncEvolutionSessionProxy *openSession(const QString &sessionName, QStringList flags);
     QStringList configs(bool templates=false) const;
     void getDatabases(const QString &sourceName);
+    QArrayOfStringMap reports(const QString &sessionName, uint start, uint count);
 
 Q_SIGNALS:
     void databasesReceived(const QArrayOfDatabases &databases);

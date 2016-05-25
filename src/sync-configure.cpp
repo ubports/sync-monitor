@@ -99,57 +99,78 @@ void SyncConfigure::fetchRemoteCalendarsFromSession(SyncEvolutionSessionProxy *s
     }
 }
 
-void SyncConfigure::fetchRemoteCalendarsFromCommand()
+QProcess *SyncConfigure::newFetchRemoteCalendarsFromCommand(quint32 accountId)
 {
     // syncevolution --print-databases backend=caldav
     QStringList args;
     args << "--print-databases"
          << "backend=caldav"
-         << QString("username=uoa:%1,google-caldav").arg(m_account->id())
+         << QString("username=uoa:%1,google-caldav").arg(accountId)
          << "syncURL=https://apidata.googleusercontent.com/caldav/v2";
     QProcess *syncEvo = new QProcess;
     syncEvo->setProcessChannelMode(QProcess::MergedChannels);
     syncEvo->start("syncevolution", args);
+    return syncEvo;
+}
+
+void SyncConfigure::fetchRemoteCalendarsFromCommand()
+{
+    QProcess *syncEvo = newFetchRemoteCalendarsFromCommand(m_account->id());
     connect(syncEvo, SIGNAL(finished(int,QProcess::ExitStatus)),
             SLOT(fetchRemoteCalendarsProcessDone(int,QProcess::ExitStatus)));
     qDebug() << "Fetching remote calendars (wait...)";
 }
+
+QArrayOfDatabases SyncConfigure::parseCalendars(const QString &output)
+{
+    QArrayOfDatabases databases;
+
+    if (output.isEmpty())
+        return databases;
+
+    QStringList lines = output.split("\n");
+    while (lines.count() > 0) {
+        if (lines.first().startsWith("caldav:")) {
+            lines.takeFirst();
+            break;
+        }
+        lines.takeFirst();
+    }
+
+    while (lines.count() > 0) {
+        QString line = lines.takeFirst();
+        if (line.isEmpty()) {
+            continue;
+        }
+
+        SyncDatabase db;
+        QStringList fields = line.split("(");
+        if (fields.count() == 2) {
+            db.name = fields.first().trimmed();
+            db.source = fields.at(1).split(")").first();
+            db.flag =fields.at(1).trimmed().endsWith("<default>");
+        } else {
+            qWarning() << "Fail to parse db output" << line;
+        }
+
+        qDebug() << "DB" << db.name << "source" << db.source << "flag" << db.flag;
+        databases << db;
+    }
+
+    return databases;
+}
+
 
 void SyncConfigure::fetchRemoteCalendarsProcessDone(int exitCode, QProcess::ExitStatus exitStatus)
 {
     QProcess *syncEvo = qobject_cast<QProcess*>(QObject::sender());
     QArrayOfDatabases databases;
 
+
     if (exitStatus == QProcess::NormalExit) {
-        QString output = syncEvo->readAll();
-        QStringList lines = output.split("\n");
-        while (lines.count() > 0) {
-            if (lines.first().startsWith("caldav:")) {
-                lines.takeFirst();
-                break;
-            }
-            lines.takeFirst();
-        }
-
-        while (lines.count() > 0) {
-            QString line = lines.takeFirst();
-            if (line.isEmpty()) {
-                continue;
-            }
-
-            SyncDatabase db;
-            QStringList fields = line.split("(");
-            if (fields.count() == 2) {
-                db.name = fields.first().trimmed();
-                db.source = fields.at(1).split(")").first();
-                db.flag =fields.at(1).trimmed().endsWith("<default>");
-            } else {
-                qWarning() << "Fail to parse db output" << line;
-            }
-
-            qDebug() << "DB" << db.name << "source" << db.source << "flag" << db.flag;
-            databases << db;
-        }
+        databases = parseCalendars(syncEvo->readAll());
+    } else {
+        qWarning() << "Fail to query databases" << exitCode << exitStatus;
     }
 
     if (!databases.isEmpty()) {
@@ -158,6 +179,8 @@ void SyncConfigure::fetchRemoteCalendarsProcessDone(int exitCode, QProcess::Exit
     } else {
         error(QStringList() << CALENDAR_SERVICE_NAME);
     }
+
+    syncEvo->deleteLater();
 }
 
 void SyncConfigure::fetchRemoteCalendarsSessionDone(const QArrayOfDatabases &databases)

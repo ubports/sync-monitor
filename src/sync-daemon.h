@@ -52,6 +52,7 @@ public:
     QString lastSuccessfulSyncDate(quint32 accountId, const QString &service, const QString &source);
     bool syncOnMobileConnection() const;
     void setSyncOnMobileConnection(bool flag);
+    QStringList listCalendarsByAccount(quint32 accountId);
 
 Q_SIGNALS:
     void syncStarted(SyncAccount *syncAcc, const QString &serviceName);

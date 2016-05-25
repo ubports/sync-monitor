@@ -110,8 +110,16 @@ QString SyncDBus::lastSuccessfulSyncDate(quint32 accountId, const QString &servi
     message.setDelayedReply(true);
 
     QString result = m_parent->lastSuccessfulSyncDate(accountId, service, source);
-    qDebug() << "Result" << result;
     QDBusMessage reply = message.createReply(QVariant::fromValue<QString>(result));
+    QDBusConnection::sessionBus().send(reply);
+    return result;
+}
+
+QStringList SyncDBus::listCalendarsByAccount(quint32 accountId, const QDBusMessage &message)
+{
+    message.setDelayedReply(true);
+    QStringList result = m_parent->listCalendarsByAccount(accountId);
+    QDBusMessage reply = message.createReply(QVariant::fromValue<QStringList>(result));
     QDBusConnection::sessionBus().send(reply);
     return result;
 }

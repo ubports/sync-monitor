@@ -17,6 +17,7 @@
  */
 
 #include "config.h"
+#include "sync-configure.h"
 #include "sync-daemon.h"
 #include "sync-account.h"
 #include "sync-queue.h"
@@ -339,7 +340,7 @@ QString SyncDaemon::lastSuccessfulSyncDate(quint32 accountId, const QString &ser
 {
     SyncAccount *acc = m_accounts.value(accountId, 0);
     if (acc) {
-        return acc->lastSuccessfulSyncDate(service, source, accountId);
+        return acc->lastSuccessfulSyncDate(service, source);
     } else {
         qWarning() << "Account not found:" << accountId;
     }
@@ -355,6 +356,27 @@ void SyncDaemon::setSyncOnMobileConnection(bool flag)
 {
     m_settings.setValue(SYNC_ON_MOBILE_CONFIG_KEY, flag);
     m_settings.sync();
+}
+
+QStringList SyncDaemon::listCalendarsByAccount(quint32 accountId)
+{
+    QStringList calendars;
+
+    QProcess *process = SyncConfigure::newFetchRemoteCalendarsFromCommand(accountId);
+    if (process->waitForFinished()) {
+        if (process->exitStatus() == QProcess::NormalExit) {
+            Q_FOREACH(const SyncDatabase &db, SyncConfigure::parseCalendars(process->readAll())) {
+                calendars << db.name;
+            }
+        } else {
+            qWarning() << "Fail to fech remote databases" << process->exitCode() << process->exitStatus();
+        }
+    } else {
+        qWarning() << "Fail to fetch remote databases for account " << accountId << " TIMEOUT";
+    }
+
+    process->deleteLater();
+    return calendars;
 }
 
 void SyncDaemon::addAccount(const AccountId &accountId, bool startSync)
@@ -476,7 +498,6 @@ void SyncDaemon::runAuthentication()
     QString serviceName = sender->property("SERVICE").value<QString>();
 
     QString appCommand = QString("syncmonitorhelper:///authenticate?id=%1&service=%2").arg(accountId).arg(serviceName);
-    qDebug() << "Run" << appCommand;
     url_dispatch_send(appCommand.toUtf8().constData(), NULL, NULL);
 }
 

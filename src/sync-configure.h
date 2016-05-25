@@ -43,9 +43,14 @@ public:
 
 
     static QString accountSessionName(Accounts::Account *account);
+    static QString formatSourceName(const QString &name);
     static void dumpMap(const QStringMultiMap &map);
     static void dumpMap(const QStringMap &map);
     static void removeAccountSourceConfig(Accounts::Account *account, const QString &sourceName);
+
+    // query calendars using command line
+    static QProcess *newFetchRemoteCalendarsFromCommand(quint32 accountId);
+    static QArrayOfDatabases parseCalendars(const QString &output);
 
 Q_SIGNALS:
     void done(const QStringList &services);
@@ -73,7 +78,6 @@ private:
     bool createSyncConfig(SyncEvolutionSessionProxy *session, const QString &configName, const QString &peerName, const QString &serviceName, const QString &localDbId);
     QString registerDatabase(SyncEvolutionSessionProxy *session, const QString &localDatabaseName, const QString &localDatabaseId);
 
-    static QString formatSourceName(const QString &name);
     static bool updateConfig(QStringMultiMap &config, const QString &source, const QString &key, const QString &value);
     static bool removeConfigDir(const QString &dirPath);
 };
