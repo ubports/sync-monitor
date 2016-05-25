@@ -225,16 +225,7 @@ QStringMap SyncAccount::filterSourceReport(const QStringMap &report,
 {
     bool found = false;
     QStringMap sourceReport;
-    QString fullSourceName = QString("%1_%2_%3")
-            .arg(serviceName)
-            .arg(accountId)
-            .arg(SyncConfigure::formatSourceName(sourceName));
-
-    // WORKAROUND: trunc source name to 30 chars
-    // Syncevolution only support source names with max 30 chars.
-    fullSourceName = (fullSourceName.size() > 30 ? fullSourceName.left(30) : fullSourceName);
-
-    const QString sourceKey = QString("source-%1").arg(QString(fullSourceName).replace("_", "__"));
+    const QString sourceKey = QString("source-%1").arg(QString(sourceName).replace("_", "__"));
     qDebug() << "Looking for sources report" << sourceKey;
 
     Q_FOREACH(const QString &key, report.keys()) {
@@ -570,8 +561,19 @@ QString SyncAccount::lastSuccessfulSyncDate(const QString &serviceName,
     }
 
     QString lastSyncDate;
-    QString sessionName = SyncConfigure::accountSessionName(m_account);
-    QStringMap report = lastReport(sessionName, serviceName, sourceName, true);
+    const QString sessionName = SyncConfigure::accountSessionName(m_account);
+
+    // build sync evolution source name based on service and account.
+    QString fullSourceName = QString("%1_%2_%3")
+            .arg(serviceName)
+            .arg(m_account->id())
+            .arg(SyncConfigure::formatSourceName(sourceName));
+
+    // WORKAROUND: trunc source name to 30 chars
+    // Syncevolution only support source names with max 30 chars.
+    fullSourceName = (fullSourceName.size() > 30 ? fullSourceName.left(30) : fullSourceName);
+
+    QStringMap report = lastReport(sessionName, serviceName, fullSourceName, true);
     if (report.contains("start")) {
         uint lastSync = report["start"].toUInt();
         lastSyncDate = QDateTime::fromTime_t(lastSync).toUTC().toString(Qt::ISODate);
