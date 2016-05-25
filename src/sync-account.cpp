@@ -727,9 +727,9 @@ void SyncAccount::onAccountConfigureError(const QStringList &services)
     m_config->deleteLater();
     m_config = 0;
 
-    // TODO: notify error
-    setState(SyncAccount::Invalid);
     qWarning() << "Fail to configure account" << m_account->displayName() << services;
+    setState(SyncAccount::Idle);
+    syncError("", _("Fail to configure account"));
 }
 
 void SyncAccount::setState(SyncAccount::AccountState state)

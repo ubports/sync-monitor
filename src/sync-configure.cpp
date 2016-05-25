@@ -107,6 +107,7 @@ QProcess *SyncConfigure::newFetchRemoteCalendarsFromCommand(quint32 accountId)
          << "backend=caldav"
          << QString("username=uoa:%1,google-caldav").arg(accountId)
          << "syncURL=https://apidata.googleusercontent.com/caldav/v2";
+    qDebug() << "command:" << args;
     QProcess *syncEvo = new QProcess;
     syncEvo->setProcessChannelMode(QProcess::MergedChannels);
     syncEvo->start("syncevolution", args);
@@ -163,9 +164,9 @@ QArrayOfDatabases SyncConfigure::parseCalendars(const QString &output)
 
 void SyncConfigure::fetchRemoteCalendarsProcessDone(int exitCode, QProcess::ExitStatus exitStatus)
 {
+    static uint retryCount = 0;
     QProcess *syncEvo = qobject_cast<QProcess*>(QObject::sender());
     QArrayOfDatabases databases;
-
 
     if (exitStatus == QProcess::NormalExit) {
         databases = parseCalendars(syncEvo->readAll());
@@ -173,14 +174,25 @@ void SyncConfigure::fetchRemoteCalendarsProcessDone(int exitCode, QProcess::Exit
         qWarning() << "Fail to query databases" << exitCode << exitStatus;
     }
 
+    syncEvo->deleteLater();
+
     if (!databases.isEmpty()) {
+        retryCount = 0;
         m_remoteDatabasesByService.insert(CALENDAR_SERVICE_NAME, databases);
         configurePeer(QStringList() << CALENDAR_SERVICE_NAME);
     } else {
-        error(QStringList() << CALENDAR_SERVICE_NAME);
+        qDebug() << "Remote databases returned empty";
+        // WORKAROUND: the fetch calendars fail sometimes with empty databases.
+        if (retryCount == 0) {
+            retryCount = 1;
+            qDebug() << "Retry";
+            QTimer::singleShot(1000, this, SLOT(fetchRemoteCalendarsFromCommand()));
+        } else {
+            retryCount = 0;
+            error(QStringList() << CALENDAR_SERVICE_NAME);
+        }
     }
 
-    syncEvo->deleteLater();
 }
 
 void SyncConfigure::fetchRemoteCalendarsSessionDone(const QArrayOfDatabases &databases)
