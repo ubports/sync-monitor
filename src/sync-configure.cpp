@@ -27,7 +27,7 @@
 using namespace Accounts;
 
 SyncConfigure::SyncConfigure(Account *account,
-                             QSettings *settings,
+                             const QSettings *settings,
                              QObject *parent)
     : QObject(parent),
       m_account(account),
@@ -237,8 +237,7 @@ void SyncConfigure::continuePeerConfig(SyncEvolutionSessionProxy *session, const
     if (configs.contains(peerConfigName)) {
         config = session->getConfig(peerConfigName, false);
     } else {
-        m_settings->beginGroup(GLOBAL_CONFIG_GROUP);
-        QString templateName = m_settings->value("template", "Google").toString();
+        QString templateName = m_settings->value(GLOBAL_CONFIG_GROUP"/template", "Google").toString();
         qDebug() << "Create New config with template" << templateName;
         config = session->getConfig(templateName, true);
         //FIXME: use hardcoded calendar service, we only support calendar for now

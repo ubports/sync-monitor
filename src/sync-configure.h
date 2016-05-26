@@ -34,7 +34,7 @@ class SyncConfigure : public QObject
     Q_OBJECT
 public:
     SyncConfigure(Accounts::Account *account,
-                  QSettings *settings,
+                  const QSettings *settings,
                   QObject *parent = 0);
     ~SyncConfigure();
 
@@ -65,7 +65,7 @@ private:
     Accounts::Account *m_account;
     QMap<QString, QArrayOfDatabases> m_remoteDatabasesByService;
     QMap<SyncEvolutionSessionProxy*, QStringList> m_peers;
-    QSettings *m_settings;
+    const QSettings *m_settings;
 
     void fetchRemoteCalendars();
     void fetchRemoteCalendarsFromSession(SyncEvolutionSessionProxy *session);

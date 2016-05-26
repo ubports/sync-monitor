@@ -322,6 +322,9 @@ QStringList SyncDaemon::enabledServices() const
     QSet<QString> services;
     QStringList available = availableServices();
     Q_FOREACH(SyncAccount *syncAcc, m_accounts) {
+        if (!syncAcc->enabled()) {
+            continue;
+        }
         Q_FOREACH(const QString &service, syncAcc->enabledServices()) {
             if (available.contains(service)) {
                 services << service;

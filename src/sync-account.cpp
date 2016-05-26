@@ -29,7 +29,7 @@ using namespace Accounts;
 
 
 SyncAccount::SyncAccount(Account *account,
-                         QSettings *settings,
+                         const QSettings *settings,
                          QObject *parent)
     : QObject(parent),
       m_config(0),
@@ -45,7 +45,7 @@ SyncAccount::SyncAccount(Account *account,
 
 SyncAccount::SyncAccount(Account *account,
                          const QString &service,
-                         QSettings *settings,
+                         const QSettings *settings,
                          QObject *parent)
     : QObject(parent),
       m_currentSession(0),

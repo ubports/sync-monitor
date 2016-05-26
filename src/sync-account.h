@@ -43,11 +43,11 @@ public:
     };
 
     SyncAccount(Accounts::Account *account,
-                QSettings *settings,
+                const QSettings *settings,
                 QObject *parent=0);
     SyncAccount(Accounts::Account *account,
                 const QString &service,
-                QSettings *settings,
+                const QSettings *settings,
                 QObject *parent);
     virtual ~SyncAccount();
 
@@ -97,7 +97,7 @@ private Q_SLOTS:
 private:
     Accounts::Account *m_account;
     SyncEvolutionSessionProxy *m_currentSession;
-    QSettings *m_settings;
+    const QSettings *m_settings;
     SyncConfigure *m_config;
     QStringList m_servicesToSync;
     QStringList m_sourcesOnSync;
