@@ -729,7 +729,12 @@ void SyncAccount::onAccountConfigureError(const QStringList &services)
 
     qWarning() << "Fail to configure account" << m_account->displayName() << services;
     setState(SyncAccount::Idle);
-    syncError("", _("Fail to configure account"));
+    Q_EMIT syncError("", _("Fail to configure account"));
+
+    // Send sync finish due the config error there is nothing to do
+    QMap<QString, QString> errorMap;
+    errorMap.insert("", _("Fail to configure account"));
+    Q_EMIT syncFinished("", errorMap);
 }
 
 void SyncAccount::setState(SyncAccount::AccountState state)

@@ -164,7 +164,6 @@ QArrayOfDatabases SyncConfigure::parseCalendars(const QString &output)
 
 void SyncConfigure::fetchRemoteCalendarsProcessDone(int exitCode, QProcess::ExitStatus exitStatus)
 {
-    static uint retryCount = 0;
     QProcess *syncEvo = qobject_cast<QProcess*>(QObject::sender());
     QArrayOfDatabases databases;
 
@@ -177,22 +176,12 @@ void SyncConfigure::fetchRemoteCalendarsProcessDone(int exitCode, QProcess::Exit
     syncEvo->deleteLater();
 
     if (!databases.isEmpty()) {
-        retryCount = 0;
         m_remoteDatabasesByService.insert(CALENDAR_SERVICE_NAME, databases);
         configurePeer(QStringList() << CALENDAR_SERVICE_NAME);
     } else {
         qDebug() << "Remote databases returned empty";
-        // WORKAROUND: the fetch calendars fail sometimes with empty databases.
-        if (retryCount == 0) {
-            retryCount = 1;
-            qDebug() << "Retry";
-            QTimer::singleShot(1000, this, SLOT(fetchRemoteCalendarsFromCommand()));
-        } else {
-            retryCount = 0;
-            error(QStringList() << CALENDAR_SERVICE_NAME);
-        }
+        error(QStringList() << CALENDAR_SERVICE_NAME);
     }
-
 }
 
 void SyncConfigure::fetchRemoteCalendarsSessionDone(const QArrayOfDatabases &databases)

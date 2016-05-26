@@ -525,7 +525,7 @@ void SyncDaemon::onAccountSourceSyncStarted(const QString &serviceName,
 void SyncDaemon::onAccountSyncError(const QString &serviceName, const QString &error)
 {
     Q_EMIT syncError(qobject_cast<SyncAccount*>(QObject::sender()), serviceName, error);
-    onAccountSourceSyncFinished(serviceName, "", false, error, "fast");
+    syncFinishedImpl();
 }
 
 void SyncDaemon::onAccountSourceSyncFinished(const QString &serviceName,
