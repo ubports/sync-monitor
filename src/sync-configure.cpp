@@ -104,9 +104,9 @@ QProcess *SyncConfigure::newFetchRemoteCalendarsFromCommand(quint32 accountId)
     // syncevolution --print-databases backend=caldav
     QStringList args;
     args << "--print-databases"
-         << "backend=caldav"
+         << "backend=CalDAV"
          << QString("username=uoa:%1,google-caldav").arg(accountId)
-         << "syncURL=https://apidata.googleusercontent.com/caldav/v2";
+         << "syncURL=https://apidata.googleusercontent.com/caldav/v2?SyncEvolution=Google";
     qDebug() << "command:" << args;
     QProcess *syncEvo = new QProcess;
     syncEvo->setProcessChannelMode(QProcess::MergedChannels);
@@ -244,6 +244,8 @@ void SyncConfigure::continuePeerConfig(SyncEvolutionSessionProxy *session, const
         config[""]["username"] = QString("uoa:%1,google-caldav").arg(m_account->id());
         config[""]["password"] = QString();
         config[""]["consumerReady"] = "0";
+        // Append "?SyncEvolution=Google" to tell syncevolution to enable all hacks necessary to work with google
+        config[""]["syncURL"] = "https://apidata.googleusercontent.com/caldav/v2?SyncEvolution=Google";
         //config[""]["dumpData"] = "0";
         //config[""]["printChanges"] = "0";
         config[""]["maxlogdirs"] = "2";
