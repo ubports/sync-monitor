@@ -26,7 +26,7 @@
 
 using namespace Accounts;
 
-
+#define REFRESH_FROM_REMOTE_SYNC "refresh-from-remote"
 
 SyncAccount::SyncAccount(Account *account,
                          const QSettings *settings,
@@ -315,7 +315,7 @@ QString SyncAccount::syncMode(const QString &serviceName,
              << "Is first sync" << *firstSync;
 
     if (*firstSync) {
-        return "refresh-from-remote";
+        return REFRESH_FROM_REMOTE_SYNC;
     }
     switch(lastStatus.toInt())
     {
@@ -646,15 +646,14 @@ void SyncAccount::onSessionStatusChanged(const QString &status, quint32 error, c
                  << "Status" << i.value().status
                  << "Mode" << i.value().mode;
 
+        const bool isFirstSync = (i.value().mode == REFRESH_FROM_REMOTE_SYNC);
         if (newStatus == "running") {
             if (m_sourcesOnSync.contains(sourceName)) {
                 // source already notified as running
                 continue;
             }
             m_sourcesOnSync << sourceName;
-            //TODO: check m_firstSync
-            Q_EMIT syncSourceStarted(serviceName, sourceName, m_firstSync);
-
+            Q_EMIT syncSourceStarted(serviceName, sourceName, isFirstSync);
 
         } else if (newStatus == "done") {
             if (!m_sourcesOnSync.contains(sourceName)) {
@@ -664,7 +663,7 @@ void SyncAccount::onSessionStatusChanged(const QString &status, quint32 error, c
             m_sourcesOnSync.removeOne(sourceName);
             m_currentSyncResults.insert(sourceName, newStatus);
 
-            Q_EMIT syncSourceFinished(serviceName, sourceName, m_firstSync, newStatus, "");
+            Q_EMIT syncSourceFinished(serviceName, sourceName, isFirstSync, newStatus, "");
         } else if ((status == "running;waiting") ||
                    (status == "idle")) {
             // ignore

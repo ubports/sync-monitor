@@ -112,7 +112,6 @@ private:
     // current sync information
     QString m_syncMode;
     QString m_syncServiceName;
-    bool m_firstSync;
 
     void configure();
     void continueSync();

@@ -291,7 +291,7 @@ void SyncConfigure::continuePeerConfig(SyncEvolutionSessionProxy *session, const
 
         // remove sources not in use anymore
         QStringList sourcesToRemove = config.keys();
-        qDebug() << "SOURCES TO REMOVE" << sourcesToRemove;
+        qDebug() << "Actual sources:" << sourcesToRemove;
 
         Q_FOREACH(const SyncDatabase &db, dbs) {
             if (db.name.isEmpty()) {
