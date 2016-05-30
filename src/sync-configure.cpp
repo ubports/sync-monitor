@@ -131,7 +131,7 @@ QArrayOfDatabases SyncConfigure::parseCalendars(const QString &output)
 
     QStringList lines = output.split("\n");
     while (lines.count() > 0) {
-        if (lines.first().startsWith("caldav:")) {
+        if (lines.first().toLower().startsWith("caldav:")) {
             lines.takeFirst();
             break;
         }
