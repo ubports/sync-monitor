@@ -190,8 +190,11 @@ void SyncDaemon::syncAll(const QString &serviceName, bool runNow, bool syncOnMob
     }
 }
 
-void SyncDaemon::syncAccount(quint32 accountId, const QString &service)
+void SyncDaemon::syncAccount(quint32 accountId, const QString &service, const QStringList &sources)
 {
+    //TODO: sync only requested sources
+    Q_UNUSED(sources);
+
     SyncAccount *acc = m_accounts.value(accountId);
     if (acc) {
         sync(acc, service, true, false);

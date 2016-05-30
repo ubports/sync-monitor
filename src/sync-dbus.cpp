@@ -57,9 +57,9 @@ void SyncDBus::sync(QStringList services)
     }
 }
 
-void SyncDBus::syncAccount(quint32 accountId, const QString &service)
+void SyncDBus::syncAccount(quint32 accountId, const QString &service, const QStringList &sources)
 {
-    m_parent->syncAccount(accountId, service);
+    m_parent->syncAccount(accountId, service, sources);
 }
 
 void SyncDBus::cancel(QStringList services)
