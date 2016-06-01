@@ -84,6 +84,18 @@ void EdsHelper::removeSource(const QString &serviceName, const QString &sourceId
     }
 }
 
+QString EdsHelper::sourceId(const QString &serviceName, const QString &sourceName, int accountId)
+{
+    if (serviceName == CONTACTS_SERVICE_NAME) {
+        return contactsSourceId(sourceName, accountId);
+    } else if (serviceName == CALENDAR_SERVICE_NAME) {
+        return organizerSourceId(sourceName, accountId);
+    } else {
+        qWarning() << "Service not supported:" << serviceName;
+        return QString();
+    }
+}
+
 void EdsHelper::freezeNotify()
 {
     m_freezed = true;
@@ -413,6 +425,25 @@ QMap<int, QStringList> EdsHelper::organizerSources()
     return result;
 }
 
+QString EdsHelper::contactsSourceId(const QString &sourceName, int accountId)
+{
+    qWarning() << "Not supported";
+    return QString();
+}
+
+QString EdsHelper::organizerSourceId(const QString &sourceName, int accountId)
+{
+    QList<QOrganizerCollection> collections = m_organizerEngine->collections();
+    Q_FOREACH(const QOrganizerCollection &collection, collections) {
+        if ((collection.metaData(QOrganizerCollection::KeyName).toString() == sourceName) &&
+            ((accountId == -1) || (collection.extendedMetaData(COLLECTION_ACCOUNT_ID_METADATA) == accountId))) {
+            return collection.id().toString();
+        }
+    }
+
+    return QString();
+}
+
 QString EdsHelper::createOrganizerSource(const QString &sourceName, int accountId)
 {
     if (!m_organizerEngine) {
@@ -420,12 +451,9 @@ QString EdsHelper::createOrganizerSource(const QString &sourceName, int accountI
         return QString();
     }
 
-    QList<QOrganizerCollection> result = m_organizerEngine->collections();
-    Q_FOREACH(const QOrganizerCollection &collection, result) {
-        if ((collection.metaData(QOrganizerCollection::KeyName).toString() == sourceName) &&
-            (collection.extendedMetaData(COLLECTION_ACCOUNT_ID_METADATA) == accountId)) {
-            return collection.id().toString();
-        }
+    QString sourceId = organizerSourceId(sourceName, accountId);
+    if (!sourceId.isEmpty()) {
+        return sourceId;
     }
 
     QOrganizerCollection collection;

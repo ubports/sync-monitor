@@ -164,7 +164,17 @@ void SyncConfigure::continuePeerConfig(SyncEvolutionSessionProxy *session, const
                 continue;
             }
             // local dabase
-            QString localDbId = eds.createSource(service, db.name, m_account->id()).split("::").last();
+            // WORKAROUND: Keep compatibility with old source
+            // check if a source with the same account name already exists
+            QString localDbId;
+            if (db.name == m_account->displayName()) {
+                localDbId = eds.sourceId(service, db.name, -1);
+            }
+            if (localDbId.isEmpty()) {
+                localDbId = eds.createSource(service, db.name, m_account->id()).split("::").last();
+            } else {
+                qDebug() << "Using legacy source:" << localDbId << db.name;
+            }
             qDebug() << "\tCheck for evolution source:" << localDbId;
 
             // check if source is already configured

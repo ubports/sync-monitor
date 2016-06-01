@@ -45,6 +45,7 @@ public:
     QString createSource(const QString &serviceName, const QString &sourceName, int accountId);
     void removeSource(const QString &serviceName, const QString &sourceName, int accountId);
     void removeSource(const QString &serviceName, const QString &sourceId);
+    QString sourceId(const QString &serviceName, const QString &sourceName, int accountId);
     void freezeNotify();
     void unfreezeNotify();
     void flush();
@@ -88,6 +89,9 @@ private:
 
     QMap<int, QStringList> contactsSources();
     QMap<int, QStringList> organizerSources();
+
+    QString contactsSourceId(const QString &sourceName, int accountId);
+    QString organizerSourceId(const QString &sourceName, int accountId);
 };
 
 #endif
