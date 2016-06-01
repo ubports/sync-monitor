@@ -17,6 +17,7 @@
  */
 
 #include "sync-configure.h"
+#include "sync-account.h"
 #include "syncevolution-server-proxy.h"
 #include "syncevolution-session-proxy.h"
 #include "eds-helper.h"
@@ -26,7 +27,7 @@
 
 using namespace Accounts;
 
-SyncConfigure::SyncConfigure(Account *account,
+SyncConfigure::SyncConfigure(SyncAccount *account,
                              const QSettings *settings,
                              QObject *parent)
     : QObject(parent),
@@ -58,152 +59,17 @@ void SyncConfigure::configure()
 
 void SyncConfigure::fetchRemoteCalendars()
 {
-    fetchRemoteCalendarsFromCommand();
-    return;
-
-    SyncEvolutionServerProxy *proxy = SyncEvolutionServerProxy::instance();
-
-    QString peerName("gcal_tmp");
-    SyncEvolutionSessionProxy *session = proxy->openSession(peerName, QStringList());
-
-    if (session->status() != "queueing") {
-        fetchRemoteCalendarsFromSession(session);
-    } else {
-        connect(session, &SyncEvolutionSessionProxy::statusChanged,
-                [this, session](const QString &status, uint errorNuber, QSyncStatusMap source) {
-            if (errorNuber != 0) {
-                qWarning() << "Fail to configure peer" << errorNuber;
-                session->destroy();
-                Q_EMIT error(QStringList(CALENDAR_SERVICE_NAME));
-            } else if (status != "queueing") {
-                fetchRemoteCalendarsFromSession(session);
-            }
-        });
-    }
-}
-
-void SyncConfigure::fetchRemoteCalendarsFromSession(SyncEvolutionSessionProxy *session)
-{
-    QStringMultiMap config = session->getConfig("Google", true);
-    config[""]["username"] = QString("uoa:%1,google-caldav").arg(m_account->id());
-    config[""]["password"] = QString();
-    config["source/calendar"]["backend"] = QString("caldav");
-    if (session->saveConfig(QString(), config, true)) {
-        connect(session, &SyncEvolutionSessionProxy::databasesReceived,
-                this, &SyncConfigure::fetchRemoteCalendarsSessionDone);
-        session->getDatabases(CALENDAR_SERVICE_NAME);
-        qDebug() << "Fetching remote calendars (wait...)";
-    } else {
-        session->destroy();
-        fetchRemoteCalendarsSessionDone(QArrayOfDatabases());
-    }
-}
-
-QProcess *SyncConfigure::newFetchRemoteCalendarsFromCommand(quint32 accountId)
-{
-    // syncevolution --print-databases backend=caldav
-    QStringList args;
-    args << "--print-databases"
-         << "backend=CalDAV"
-         << QString("username=uoa:%1,google-caldav").arg(accountId)
-         << "syncURL=https://apidata.googleusercontent.com/caldav/v2?SyncEvolution=Google";
-    qDebug() << "command:" << args;
-    QProcess *syncEvo = new QProcess;
-    syncEvo->setProcessChannelMode(QProcess::MergedChannels);
-    syncEvo->start("syncevolution", args);
-    return syncEvo;
-}
-
-void SyncConfigure::fetchRemoteCalendarsFromCommand()
-{
-    QProcess *syncEvo = newFetchRemoteCalendarsFromCommand(m_account->id());
-    connect(syncEvo, SIGNAL(finished(int,QProcess::ExitStatus)),
-            SLOT(fetchRemoteCalendarsProcessDone(int,QProcess::ExitStatus)));
-    qDebug() << "Fetching remote calendars (wait...)";
-}
-
-QArrayOfDatabases SyncConfigure::parseCalendars(const QString &output)
-{
-    QArrayOfDatabases databases;
-
-    if (output.isEmpty())
-        return databases;
-
-    QStringList lines = output.split("\n");
-    while (lines.count() > 0) {
-        if (lines.first().toLower().startsWith("caldav:")) {
-            lines.takeFirst();
-            break;
-        }
-        lines.takeFirst();
-    }
-
-    while (lines.count() > 0) {
-        QString line = lines.takeFirst();
-        if (line.isEmpty()) {
-            continue;
-        }
-
-        SyncDatabase db;
-        QStringList fields = line.split("(");
-        if (fields.count() == 2) {
-            db.name = fields.first().trimmed();
-            db.source = fields.at(1).split(")").first();
-            db.flag =fields.at(1).trimmed().endsWith("<default>");
-        } else {
-            qWarning() << "Fail to parse db output" << line;
-        }
-
-        qDebug() << "DB" << db.name << "source" << db.source << "flag" << db.flag;
-        databases << db;
-    }
-
-    return databases;
-}
-
-
-void SyncConfigure::fetchRemoteCalendarsProcessDone(int exitCode, QProcess::ExitStatus exitStatus)
-{
-    QProcess *syncEvo = qobject_cast<QProcess*>(QObject::sender());
-    QArrayOfDatabases databases;
-
-    if (exitStatus == QProcess::NormalExit) {
-        databases = parseCalendars(syncEvo->readAll());
-    } else {
-        qWarning() << "Fail to query databases" << exitCode << exitStatus;
-    }
-
-    syncEvo->deleteLater();
-
-    if (!databases.isEmpty()) {
-        m_remoteDatabasesByService.insert(CALENDAR_SERVICE_NAME, databases);
+    connect(m_account, &SyncAccount::remoteSourcesAvailable, [this] (const QArrayOfDatabases &sources) {
+        m_remoteDatabasesByService.insert(CALENDAR_SERVICE_NAME, sources);
         configurePeer(QStringList() << CALENDAR_SERVICE_NAME);
-    } else {
-        qDebug() << "Remote databases returned empty";
-        error(QStringList() << CALENDAR_SERVICE_NAME);
-    }
-}
-
-void SyncConfigure::fetchRemoteCalendarsSessionDone(const QArrayOfDatabases &databases)
-{
-    SyncEvolutionSessionProxy *session = qobject_cast<SyncEvolutionSessionProxy*>(QObject::sender());
-    if (session) {
-        session->destroy();
-    }
-
-    qDebug() << "Remote calendars received:";
-    Q_FOREACH(const SyncDatabase &db, databases) {
-        qDebug() << "Name" << db.name << "Source" << db.source << "flag" << db.flag;
-    }
-
-    m_remoteDatabasesByService.insert(CALENDAR_SERVICE_NAME, databases);
-    configurePeer(QStringList() << CALENDAR_SERVICE_NAME);
+    });
+    m_account->fetchRemoteSources("google-caldav");
 }
 
 void SyncConfigure::configurePeer(const QStringList &services)
 {
     SyncEvolutionServerProxy *proxy = SyncEvolutionServerProxy::instance();
-    QString peerName = accountSessionName(m_account);
+    QString peerName = accountSessionName(m_account->account());
     SyncEvolutionSessionProxy *session = proxy->openSession(peerName,
                                                             QStringList() << "all-configs");
 
@@ -229,7 +95,7 @@ void SyncConfigure::continuePeerConfig(SyncEvolutionSessionProxy *session, const
     SyncEvolutionServerProxy *proxy = SyncEvolutionServerProxy::instance();
     QStringList configs = proxy->configs();
 
-    QString peerName = accountSessionName(m_account);
+    QString peerName = accountSessionName(m_account->account());
     QString peerConfigName = QString("target-config@%1").arg(peerName);
 
     // config peer

@@ -14,6 +14,7 @@ add_definitions(-DQT_NO_KEYWORDS)
 pkg_check_modules(ACCOUNTS REQUIRED accounts-qt5>=1.10)
 pkg_check_modules(URLDISPATCHER REQUIRED url-dispatcher-1)
 pkg_check_modules(LIBNOTIFY libnotify)
+pkg_check_modules(LIBSIGNON REQUIRED libsignon-qt5)
 
 find_program(INTLTOOL_MERGE_EXECUTABLE intltool-merge)
 find_program(INTLTOOL_EXTRACT_EXECUTABLE intltool-extract)

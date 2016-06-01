@@ -364,25 +364,9 @@ void SyncDaemon::setSyncOnMobileConnection(bool flag)
     m_settings.sync();
 }
 
-QStringList SyncDaemon::listCalendarsByAccount(quint32 accountId)
+SyncAccount *SyncDaemon::accountById(quint32 accountId)
 {
-    QStringList calendars;
-
-    QProcess *process = SyncConfigure::newFetchRemoteCalendarsFromCommand(accountId);
-    if (process->waitForFinished()) {
-        if (process->exitStatus() == QProcess::NormalExit) {
-            Q_FOREACH(const SyncDatabase &db, SyncConfigure::parseCalendars(process->readAll())) {
-                calendars << db.name;
-            }
-        } else {
-            qWarning() << "Fail to fech remote databases" << process->exitCode() << process->exitStatus();
-        }
-    } else {
-        qWarning() << "Fail to fetch remote databases for account " << accountId << " TIMEOUT";
-    }
-
-    process->deleteLater();
-    return calendars;
+    return m_accounts.value(accountId);
 }
 
 void SyncDaemon::addAccount(const AccountId &accountId, bool startSync)

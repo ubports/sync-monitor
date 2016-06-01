@@ -24,7 +24,7 @@
 QDBusArgument &operator<<(QDBusArgument &argument, const SyncDatabase &d)
 {
     argument.beginStructure();
-    argument << d.name << d.source << d.flag;
+    argument << d.name << d.source << d.defaultCalendar << d.writable;
     argument.endStructure();
     return argument;
 }
@@ -33,7 +33,7 @@ QDBusArgument &operator<<(QDBusArgument &argument, const SyncDatabase &d)
 const QDBusArgument &operator>>(const QDBusArgument &argument, SyncDatabase &d)
 {
     argument.beginStructure();
-    argument >> d.name >> d.source >> d.flag;
+    argument >> d.name >> d.source >> d.defaultCalendar >> d.writable;
     argument.endStructure();
     return argument;
 }

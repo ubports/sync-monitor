@@ -17,10 +17,17 @@
  */
 
 #include "sync-account.h"
+#include "sync-auth.h"
 #include "sync-configure.h"
 #include "syncevolution-server-proxy.h"
 #include "syncevolution-session-proxy.h"
 #include "sync-i18n.h"
+
+#include <QtCore/QJsonDocument>
+#include <QtCore/QJsonObject>
+
+#include <QtNetwork/QNetworkRequest>
+#include <QtNetwork/QNetworkAccessManager>
 
 #include "config.h"
 
@@ -584,6 +591,11 @@ QString SyncAccount::lastSuccessfulSyncDate(const QString &serviceName,
     return lastSyncDate;
 }
 
+Account *SyncAccount::account() const
+{
+    return m_account;
+}
+
 void SyncAccount::onAccountEnabledChanged(const QString &serviceName, bool enabled)
 {
     // empty service name means that the hole account has been enabled/disabled
@@ -700,7 +712,7 @@ void SyncAccount::configure()
     }
 
     setState(SyncAccount::Configuring);
-    m_config = new SyncConfigure(m_account,
+    m_config = new SyncConfigure(this,
                                  m_settings,
                                  this);
     connect(m_config, &SyncConfigure::done,
@@ -823,4 +835,106 @@ QString SyncAccount::statusDescription(const QString &status)
     default:
         return _("Unknown status");
     }
+}
+
+
+void SyncAccount::fetchRemoteSources(const QString &serviceName)
+{
+    if (serviceName != "google-caldav") {
+        qWarning() << "Service not supported" << serviceName;
+        Q_EMIT remoteSourcesAvailable(QArrayOfDatabases());
+        return;
+    }
+
+    SyncAuth *auth = new SyncAuth(m_account->id(), serviceName, this);
+    connect(auth, SIGNAL(success()), SLOT(onAuthSucess()));
+    connect(auth, SIGNAL(fail()), SLOT(onAuthFailed()));
+    if (!auth->authenticate()) {
+        auth->deleteLater();
+        qWarning() << "fail to authenticate account!";
+    }
+}
+
+void SyncAccount::onAuthSucess()
+{
+    SyncAuth *auth = qobject_cast<SyncAuth*>(QObject::sender());
+    Q_ASSERT(auth);
+
+    QNetworkAccessManager *manager = new QNetworkAccessManager(this);
+    connect(manager, SIGNAL(finished(QNetworkReply*)),
+            this, SLOT(onReplyFinished(QNetworkReply*)));
+
+    QNetworkRequest req;
+    req.setUrl(QUrl("https://www.googleapis.com/calendar/v3/users/me/calendarList"));
+    req.setRawHeader(QByteArray("GData-Version"), QByteArray("3.0"));
+    req.setRawHeader(QByteArray("Authorization"), QByteArray("Bearer " + auth->token().toUtf8()));
+
+    manager->get(req);
+    auth->deleteLater();
+}
+
+void SyncAccount::onAuthFailed()
+{
+    SyncAuth *auth = qobject_cast<SyncAuth*>(QObject::sender());
+    Q_ASSERT(auth);
+    auth->deleteLater();
+
+    qWarning() << "Fail to authenticate";
+    Q_EMIT remoteSourcesAvailable(QArrayOfDatabases());
+}
+
+void SyncAccount::onReplyFinished(QNetworkReply *reply)
+{
+    static const QString calendarSyncUrl("https://apidata.googleusercontent.com:443/caldav/v2/%u/events/?SyncEvolution=Google");
+    QArrayOfDatabases dbs;
+    QNetworkAccessManager *manager = qobject_cast<QNetworkAccessManager*>(QObject::sender());
+    manager->deleteLater();
+    reply->deleteLater();
+
+    if (reply->error() != QNetworkReply::NoError) {
+        qWarning() << "Fail to fetch remote sources:" << reply->errorString();
+        Q_EMIT remoteSourcesAvailable(dbs);
+        return;
+    }
+
+    int responseCode = reply->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt();
+    if (responseCode != 200) {
+        qWarning() << "Fail to fetch remote sources response:" << responseCode;
+        Q_EMIT remoteSourcesAvailable(dbs);
+        return;
+    }
+
+    QByteArray data = reply->readAll();
+
+    // parse result
+    qDebug() << "Response data" << data;
+    QJsonParseError jError;
+    QJsonDocument doc = QJsonDocument::fromJson(data, &jError);
+    if (jError.error == QJsonParseError::NoError) {
+        QJsonObject body = doc.object();
+        if (body.value("kind").toString() == "calendar#calendarList") {
+            QJsonArray items = body.value("items").toArray();
+            Q_FOREACH(const QJsonValue &i, items) {
+                QJsonObject calendar = i.toObject();
+                if (calendar.value("kind").toString() == "calendar#calendarListEntry") {
+                    qDebug() << "Found db:"
+                             << calendar.value("summary")
+                             << calendar.value("id")
+                             << calendar.value("selected");
+
+                    if (calendar.value("selected").toBool()) {
+                        SyncDatabase db;
+
+                        db.name = calendar.value("summary").toString();
+                        db.source = QString(calendarSyncUrl).replace("%u", QUrl::toPercentEncoding(calendar.value("id").toString()));
+                        db.writable =  calendar.value("accessRole").toString() == "writer";
+                        db.defaultCalendar = calendar.value("primary").toBool();
+                        dbs << db;
+                    }
+                }
+            }
+        }
+    }
+
+    Q_EMIT remoteSourcesAvailable(dbs);
 }

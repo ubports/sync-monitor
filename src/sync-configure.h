@@ -27,13 +27,15 @@
 #include "dbustypes.h"
 
 
+
+class SyncAccount;
 class SyncEvolutionSessionProxy;
 
 class SyncConfigure : public QObject
 {
     Q_OBJECT
 public:
-    SyncConfigure(Accounts::Account *account,
+    SyncConfigure(SyncAccount *account,
                   const QSettings *settings,
                   QObject *parent = 0);
     ~SyncConfigure();
@@ -48,21 +50,12 @@ public:
     static void dumpMap(const QStringMap &map);
     static void removeAccountSourceConfig(Accounts::Account *account, const QString &sourceName);
 
-    // query calendars using command line
-    static QProcess *newFetchRemoteCalendarsFromCommand(quint32 accountId);
-    static QArrayOfDatabases parseCalendars(const QString &output);
-
 Q_SIGNALS:
     void done(const QStringList &services);
     void error(const QStringList &services);
 
-private Q_SLOTS:
-    void fetchRemoteCalendarsFromCommand();
-    void fetchRemoteCalendarsSessionDone(const QArrayOfDatabases &databases);
-    void fetchRemoteCalendarsProcessDone(int exitCode, QProcess::ExitStatus exitStatus);
-
 private:
-    Accounts::Account *m_account;
+    SyncAccount *m_account;
     QMap<QString, QArrayOfDatabases> m_remoteDatabasesByService;
     QMap<SyncEvolutionSessionProxy*, QStringList> m_peers;
     const QSettings *m_settings;

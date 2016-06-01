@@ -23,6 +23,8 @@
 #include <QtCore/QHash>
 #include <QtCore/QSettings>
 
+#include <QtNetwork/QNetworkReply>
+
 #include <Accounts/Account>
 
 #include "dbustypes.h"
@@ -71,6 +73,9 @@ public:
     bool retrySync() const;
     void setRetrySync(bool retry);
     QString lastSuccessfulSyncDate(const QString &serviceName, const QString &sourceName);
+    Accounts::Account *account() const;
+
+    void fetchRemoteSources(const QString &serviceName);
 
     static QString statusDescription(const QString &status);
 
@@ -86,6 +91,8 @@ Q_SIGNALS:
     void enableChanged(const QString &serviceName, bool enable);
     void configured(const QStringList &services);
 
+    void remoteSourcesAvailable(const QArrayOfDatabases &sources);
+
 private Q_SLOTS:
     void onAccountConfigured(const QStringList &services);
     void onAccountConfigureError(const QStringList &services);
@@ -93,6 +100,11 @@ private Q_SLOTS:
     void onAccountEnabledChanged(const QString &serviceName, bool enabled);
     void onSessionStatusChanged(const QString &status, quint32 error, const QSyncStatusMap &sources);
     void onSessionProgressChanged(int progress);
+
+    // calendar list
+    void onAuthSucess();
+    void onAuthFailed();
+    void onReplyFinished(QNetworkReply *reply);
 
 private:
     Accounts::Account *m_account;

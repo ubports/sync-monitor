@@ -117,10 +117,25 @@ QString SyncDBus::lastSuccessfulSyncDate(quint32 accountId, const QString &servi
 
 QStringList SyncDBus::listCalendarsByAccount(quint32 accountId, const QDBusMessage &message)
 {
+    QStringList result;
     message.setDelayedReply(true);
-    QStringList result = m_parent->listCalendarsByAccount(accountId);
-    QDBusMessage reply = message.createReply(QVariant::fromValue<QStringList>(result));
-    QDBusConnection::sessionBus().send(reply);
+    SyncAccount *acc = m_parent->accountById(accountId);
+    if (acc) {
+        connect(acc, &SyncAccount::remoteSourcesAvailable, [message] (const QArrayOfDatabases &sources) {
+            QStringList names;
+            Q_FOREACH(const SyncDatabase &db, sources) {
+                names << db.name;
+            }
+            QDBusMessage reply = message.createReply(QVariant::fromValue(names));
+            QDBusConnection::sessionBus().send(reply);
+        });
+        acc->fetchRemoteSources("google-caldav");
+    } else {
+        qWarning() << "Invalid account id" << accountId;
+        QDBusMessage reply = message.createReply(QVariant::fromValue(result));
+        QDBusConnection::sessionBus().send(reply);
+    }
+
     return result;
 }
 
