@@ -68,6 +68,8 @@ SyncDaemon::SyncDaemon()
     m_timeout->setInterval(DAEMON_SYNC_TIMEOUT);
     m_timeout->setSingleShot(true);
     connect(m_timeout, SIGNAL(timeout()), SLOT(continueSync()));
+
+     m_eds = new EdsHelper(this, "");
 }
 
 SyncDaemon::~SyncDaemon()
@@ -92,6 +94,23 @@ void SyncDaemon::setupAccounts()
         addAccount(accountId, false);
     }
 
+    // remove old sources, that the account does not exists anymore
+    qDebug() << "cleanup old sources...";
+    QMap<int, QStringList> sources  = m_eds->sources(CALENDAR_SERVICE_NAME);
+    Q_FOREACH(int key, sources.keys()) {
+        if (key == -1)
+            continue;
+
+        if (m_accounts.contains(key))
+            continue;
+
+        qDebug() << "Remove sources" << sources.value(key);
+        Q_FOREACH(const QString &source, sources[key]) {
+            m_eds->removeSource(CALENDAR_SERVICE_NAME, source);
+        }
+    }
+
+    qDebug() << "Remove old config...";
     QSettings settings;
     const QString configVersionKey("config/version");
     int configVersion = settings.value(configVersionKey, 0).toInt();
@@ -115,7 +134,7 @@ void SyncDaemon::setupAccounts()
 
 void SyncDaemon::setupTriggers()
 {
-    m_eds = new EdsHelper(this, "");
+
     connect(m_eds, &EdsHelper::dataChanged,
             this, &SyncDaemon::onDataChanged);
 }

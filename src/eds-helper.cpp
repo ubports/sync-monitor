@@ -160,6 +160,19 @@ void EdsHelper::setEnabled(bool enabled)
     }
 }
 
+QMap<int, QStringList> EdsHelper::sources(const QString &serviceName)
+{
+    if (serviceName == CONTACTS_SERVICE_NAME) {
+        return contactsSources();
+    }
+
+    if (serviceName == CALENDAR_SERVICE_NAME) {
+        return organizerSources();
+    }
+
+    return QMap<int, QStringList>();
+}
+
 void EdsHelper::contactChangedFilter(const QList<QContactId>& contactIds)
 {
     Q_ASSERT(m_contactEngine);
@@ -374,6 +387,30 @@ void EdsHelper::removeOrganizerSource(const QString &sourceId)
     } else {
         qDebug() << "Collection removed:" << id;
     }
+}
+
+QMap<int, QStringList> EdsHelper::contactsSources()
+{
+    qWarning() << "Not supported";
+    return QMap<int, QStringList>();
+}
+
+QMap<int, QStringList> EdsHelper::organizerSources()
+{
+    QMap<int, QStringList> result;
+    QList<QOrganizerCollection> collections = m_organizerEngine->collections();
+    Q_FOREACH(const QOrganizerCollection &collection, collections) {
+        bool ok = false;
+        int accountId = collection.extendedMetaData(COLLECTION_ACCOUNT_ID_METADATA).toInt(&ok);
+        if (!ok) {
+            accountId = -1;
+        }
+        QStringList sources  = result.value(accountId);
+        sources << collection.id().toString();
+        result.insert(accountId, sources);
+    }
+
+    return result;
 }
 
 QString EdsHelper::createOrganizerSource(const QString &sourceName, int accountId)

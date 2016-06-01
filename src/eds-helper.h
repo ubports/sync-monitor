@@ -49,6 +49,7 @@ public:
     void unfreezeNotify();
     void flush();
     void setEnabled(bool enabled);
+    QMap<int, QStringList> sources(const QString &serviceName);
 
 Q_SIGNALS:
     void dataChanged(const QString &serviceName, const QString &sourceName);
@@ -84,6 +85,9 @@ private:
     void removeContactsSource(const QString &sourceName);
 
     void removeOrganizerSource(const QString &sourceId);
+
+    QMap<int, QStringList> contactsSources();
+    QMap<int, QStringList> organizerSources();
 };
 
 #endif
