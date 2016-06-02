@@ -54,16 +54,27 @@ QString SyncConfigure::accountSessionName(Account *account)
 
 void SyncConfigure::configure()
 {
+    m_remoteDatabasesByService.clear();
     fetchRemoteCalendars();
 }
 
 void SyncConfigure::fetchRemoteCalendars()
 {
-    connect(m_account, &SyncAccount::remoteSourcesAvailable, [this] (const QArrayOfDatabases &sources) {
-        m_remoteDatabasesByService.insert(CALENDAR_SERVICE_NAME, sources);
-        configurePeer(QStringList() << CALENDAR_SERVICE_NAME);
-    });
+    connect(m_account, SIGNAL(remoteSourcesAvailable(QArrayOfDatabases)),
+            SLOT(onRemoteSourcesAvailable(QArrayOfDatabases)));
     m_account->fetchRemoteSources("google-caldav");
+}
+
+void SyncConfigure::onRemoteSourcesAvailable(const QArrayOfDatabases &sources)
+{
+    m_account->disconnect(this);
+    if (sources.isEmpty()) {
+        qWarning() << "Account with empty sources!";
+        Q_EMIT error(QStringList() << CALENDAR_SERVICE_NAME);
+        return;
+    }
+    m_remoteDatabasesByService.insert(CALENDAR_SERVICE_NAME, sources);
+    configurePeer(QStringList() << CALENDAR_SERVICE_NAME);
 }
 
 void SyncConfigure::configurePeer(const QStringList &services)

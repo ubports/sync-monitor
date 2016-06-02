@@ -242,7 +242,7 @@ void SyncDaemon::continueSync()
 
         Q_FOREACH(const SyncJob &j, m_syncQueue->jobs()) {
             if (j.account() && j.account()->retrySync()) {
-                qDebug() << "Push account to later sync3";
+                qDebug() << "Push account to later sync";
                 m_offlineQueue->push(j);
             }
         }

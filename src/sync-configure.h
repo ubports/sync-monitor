@@ -54,6 +54,9 @@ Q_SIGNALS:
     void done(const QStringList &services);
     void error(const QStringList &services);
 
+private Q_SLOTS:
+    void onRemoteSourcesAvailable(const QArrayOfDatabases &sources);
+
 private:
     SyncAccount *m_account;
     QMap<QString, QArrayOfDatabases> m_remoteDatabasesByService;

@@ -847,6 +847,7 @@ void SyncAccount::fetchRemoteSources(const QString &serviceName)
     if (!auth->authenticate()) {
         auth->deleteLater();
         qWarning() << "fail to authenticate account!";
+        Q_EMIT remoteSourcesAvailable(QArrayOfDatabases());
     }
 }
 
