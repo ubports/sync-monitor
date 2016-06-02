@@ -116,7 +116,7 @@ void SyncDaemon::setupAccounts()
     int configVersion = settings.value(configVersionKey, 0).toInt();
     if (configVersion < 1) {
         Q_FOREACH(const SyncAccount *acc, m_accounts.values()) {
-            qDebug() << "Try to remove old account config" << acc->displayName();
+            qDebug() << "\tTry to remove old account config" << acc->displayName();
             acc->removeOldConfig();
         }
         settings.setValue(configVersionKey, 1);

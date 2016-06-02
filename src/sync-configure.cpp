@@ -286,9 +286,8 @@ void SyncConfigure::continuePeerConfig(SyncEvolutionSessionProxy *session, const
             changed = true;
         }
     }
-
-
-    qDebug() << "\tREmote dbs" << sourceToDatabase.keys();
+    qDebug() << "\t----------------------------------------------------Local config done!";
+    qDebug() << "\tRemote dbs" << sourceToDatabase.keys();
 
     // remove local configs and databases
     Q_FOREACH(const QString &service, services.toSet()) {

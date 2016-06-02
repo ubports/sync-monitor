@@ -120,7 +120,7 @@ void SyncAuth::onSessionResponse(const SignOn::SessionData &sessionData)
     m_session.data()->deleteLater();
 
     m_token = sessionData.getProperty(QStringLiteral("AccessToken")).toString();
-    qDebug() << "Authenticated !!!" << m_token;
+    qDebug() << "Authenticated !!!";
 
     Q_EMIT tokenChanged();
     Q_EMIT success();

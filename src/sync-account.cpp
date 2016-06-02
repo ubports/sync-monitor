@@ -311,12 +311,11 @@ QString SyncAccount::syncMode(const QString &serviceName,
                               const QString &sourceName,
                               bool *firstSync) const
 {
-    qDebug() << "Check source report state" << serviceName << sourceName;
     const QString sessionName = SyncConfigure::accountSessionName(m_account);
     QString lastSyncMode = "two-way";
     QString lastStatus = lastSyncStatus(sessionName, serviceName, sourceName);
     *firstSync = lastStatus.isEmpty();
-    qDebug() << "Service" << serviceName
+    qDebug() << "\tService" << serviceName
              << "source" << sourceName
              << "Last status" << lastStatus
              << "Is first sync" << *firstSync;
@@ -389,7 +388,7 @@ QString SyncAccount::lastSyncStatus(const QString &sessionName,
         lastStatus = lastReport.value("status", "");
     } else {
         QString statusMessage = statusDescription(lastStatus);
-        qDebug() << QString("Last report start date: %1, Status: %2 Message: %3")
+        qDebug() <<  "\t" << QString("Last report start date: %1, Status: %2 Message: %3")
                     .arg(QDateTime::fromTime_t(lastReport.value("start", "0").toUInt()).toString(Qt::SystemLocaleShortDate))
                     .arg(lastStatus)
                     .arg(statusMessage.isEmpty() ? "OK" : statusMessage);
@@ -465,12 +464,12 @@ void SyncAccount::removeOldConfig() const
     QDir configDir(configPath);
     if (configDir.exists()) {
         if (configDir.removeRecursively()) {
-            qDebug() << "Config dir removed" << configPath;
+            qDebug() << "\tConfig dir removed" << configPath;
         } else {
-            qWarning() << "Fail to remove config dir" << configPath;
+            qWarning() << "\tFail to remove config dir" << configPath;
         }
     } else {
-        qDebug() << "Old config dir not found" << configDir.absolutePath();
+        qDebug() << "\tOld config dir not found" << configDir.absolutePath();
     }
 
     // remove 'default/source/<service>_uoa_<account-id>
@@ -483,12 +482,12 @@ void SyncAccount::removeOldConfig() const
     configDir = QDir(configPath);
     if (configDir.exists()) {
         if (configDir.removeRecursively()) {
-            qDebug() << "source dir removed" << configPath;
+            qDebug() << "\tsource dir removed" << configPath;
         } else {
-            qWarning() << "Fail to remove source dir" << configPath;
+            qWarning() << "\tFail to remove source dir" << configPath;
         }
     } else {
-        qDebug() << "Old config dir not found" << configDir.absolutePath();
+        qDebug() << "\tOld config dir not found" << configDir.absolutePath();
     }
 
     // remove 'default/peers/<provider>-<service>-<account-id>
@@ -502,12 +501,12 @@ void SyncAccount::removeOldConfig() const
     configDir = QDir(configPath);
     if (configDir.exists()) {
         if (configDir.removeRecursively()) {
-            qDebug() << "peer dir removed" << configPath;
+            qDebug() << "\tpeer dir removed" << configPath;
         } else {
-            qWarning() << "Fail to remove peer dir" << configPath;
+            qWarning() << "\tFail to remove peer dir" << configPath;
         }
     } else {
-        qDebug() << "Old config dir not found" << configDir.absolutePath();
+        qDebug() << "\tOld config dir not found" << configDir.absolutePath();
     }
 }
 
@@ -643,17 +642,13 @@ void SyncAccount::onSessionStatusChanged(const QString &status, quint32 error, c
         QString newStatus = i.value().status;
         QString sourceName = i.key();
 
-        qDebug() << "Source Name" << sourceName;
-        qDebug() << "status" << newStatus;
-        qDebug() << "ServiceName" << serviceName;
         serviceName = sourceName.split("_").first();
-
         if (newStatus == "idle") {
             // skip idle sources
             continue;
         }
 
-        qDebug() << "\t" << sourceName
+        qDebug() << "\tSource:" << sourceName
                  << "Error:" << i.value().error
                  << "Status" << i.value().status
                  << "Mode" << i.value().mode;
@@ -691,7 +686,7 @@ void SyncAccount::onSessionStatusChanged(const QString &status, quint32 error, c
 
         Q_EMIT syncFinished(serviceName, m_currentSyncResults);
         m_currentSyncResults.clear();
-        qDebug() << "Sync finished++++++++++++++++++++++++++++";
+        qDebug() << "------------------------------------------------------------Sync finished";
     }
 }
 
@@ -907,7 +902,6 @@ void SyncAccount::onReplyFinished(QNetworkReply *reply)
     QByteArray data = reply->readAll();
 
     // parse result
-    qDebug() << "Response data" << data;
     QJsonParseError jError;
     QJsonDocument doc = QJsonDocument::fromJson(data, &jError);
     if (jError.error == QJsonParseError::NoError) {
