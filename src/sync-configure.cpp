@@ -123,9 +123,10 @@ void SyncConfigure::continuePeerConfig(SyncEvolutionSessionProxy *session, const
         config[""]["consumerReady"] = "0";
         // Append "?SyncEvolution=Google" to tell syncevolution to enable all hacks necessary to work with google
         config[""]["syncURL"] = "https://apidata.googleusercontent.com/caldav/v2?SyncEvolution=Google";
-        //config[""]["dumpData"] = "0";
-        //config[""]["printChanges"] = "0";
+        config[""]["dumpData"] = "0";
+        config[""]["printChanges"] = "0";
         config[""]["maxlogdirs"] = "2";
+        config[""]["loglevel"] = "1";
     }
 
     static QMap<QString, QString> templates;
@@ -329,9 +330,9 @@ void SyncConfigure::continuePeerConfig(SyncEvolutionSessionProxy *session, const
         config[""]["syncURL"] = QString("local://@%1").arg(peerName);
         config[""]["username"] = QString();
         config[""]["password"] = QString();
-        config[""]["loglevel"] = "4";
-        //config[""]["dumpData"] = "0";
-        //config[""]["printChanges"] = "0";
+        config[""]["loglevel"] = "1";
+        config[""]["dumpData"] = "0";
+        config[""]["printChanges"] = "0";
         config[""]["maxlogdirs"] = "2";
         if (!session->saveConfig(peerName, config)) {
             qWarning() << "Fail to save sync config" << peerName;
