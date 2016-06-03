@@ -163,18 +163,31 @@ bool SyncAccount::prepareSession(const QString &session)
     }
 }
 
-QStringList SyncAccount::sources(const QString &serviceName) const
+QList<SourceData> SyncAccount::sources(const QString &serviceName) const
 {
+    QList<SourceData> sources;
+
     if (!m_currentSession) {
-        return QStringList();
+        return sources;
     }
 
-    QStringList sources;
     QStringMultiMap config = m_currentSession->getConfig("@default", false);
     QString sourcePrefix = QString("source/%1_%2_").arg(serviceName).arg(m_account->id());
     Q_FOREACH(const QString &key, config.keys()) {
         if (key.startsWith(sourcePrefix)) {
-            sources << key.split("/").last();
+            const QString sourceName = key.split("/").last();
+            bool writable = true;
+            Q_FOREACH(const SyncDatabase &db, m_remoteSources) {
+                // build sync evolution source name based on service and account.
+                QString dbSourceName = SyncConfigure::formatSourceName(serviceName,
+                                                                       m_account->id(),
+                                                                       db.name);
+                if (dbSourceName == sourceName) {
+                    writable = db.writable;
+                    break;
+                }
+            }
+            sources << qMakePair(sourceName, writable);
         }
     }
 
@@ -198,10 +211,14 @@ void SyncAccount::continueSync()
             Q_EMIT syncFinished(service,  QMap<QString, QString>());
         } else {
             qDebug() << "Will prepare to sync" << service;
-            Q_FOREACH(const QString &source, sources(service)) {
+            Q_FOREACH(const SourceData &source, sources(service)) {
                 bool firstSync = false;
-                QString mode = syncMode(service, source, &firstSync);
-                syncFlags.insert(source, mode);
+                // read-only sources aways sync with "refresh-from-server"
+                QString mode = "refresh-from-server";
+                if (source.second) {
+                    mode = syncMode(service, source.first, &firstSync);
+                }
+                syncFlags.insert(source.first, mode);
                 qDebug() << "Source sync" << source << mode;
             }
         }
@@ -209,6 +226,7 @@ void SyncAccount::continueSync()
 
     if (!syncFlags.isEmpty()) {
         qDebug() << "Will sync with flags" << syncFlags;
+        m_syncTime.restart();
         m_currentSession->sync("none", syncFlags);
     } else {
         setState(SyncAccount::Idle);
@@ -233,8 +251,6 @@ QStringMap SyncAccount::filterSourceReport(const QStringMap &report,
     bool found = false;
     QStringMap sourceReport;
     const QString sourceKey = QString("source-%1").arg(QString(sourceName).replace("_", "__"));
-    qDebug() << "Looking for sources report" << sourceKey;
-
     Q_FOREACH(const QString &key, report.keys()) {
         if (key.startsWith(sourceKey)) {
             sourceReport.insert(key, report[key]);
@@ -570,15 +586,7 @@ QString SyncAccount::lastSuccessfulSyncDate(const QString &serviceName,
     const QString sessionName = SyncConfigure::accountSessionName(m_account);
 
     // build sync evolution source name based on service and account.
-    QString fullSourceName = QString("%1_%2_%3")
-            .arg(serviceName)
-            .arg(m_account->id())
-            .arg(SyncConfigure::formatSourceName(sourceName));
-
-    // WORKAROUND: trunc source name to 30 chars
-    // Syncevolution only support source names with max 30 chars.
-    fullSourceName = (fullSourceName.size() > 30 ? fullSourceName.left(30) : fullSourceName);
-
+    QString fullSourceName = SyncConfigure::formatSourceName(serviceName, m_account->id(), sourceName);
     QStringMap report = lastReport(sessionName, serviceName, fullSourceName, true);
     if (report.contains("start")) {
         uint lastSync = report["start"].toUInt();
@@ -686,13 +694,13 @@ void SyncAccount::onSessionStatusChanged(const QString &status, quint32 error, c
 
         Q_EMIT syncFinished(serviceName, m_currentSyncResults);
         m_currentSyncResults.clear();
-        qDebug() << "------------------------------------------------------------Sync finished";
+        qDebug() << "---------------------------------------------------------Sync finished:" << m_syncTime.elapsed() / 1000 << "secs";
     }
 }
 
 void SyncAccount::onSessionProgressChanged(int progress)
 {
-    qDebug() << "Progress" << progress;
+    qDebug() << "Progress" << progress << "elapsed:" << m_syncTime.elapsed() / 1000 << "secs";
 }
 
 // configure syncevolution with the necessary information for sync
@@ -841,13 +849,15 @@ void SyncAccount::fetchRemoteSources(const QString &serviceName)
         return;
     }
 
+    m_remoteSources.clear();
+
     SyncAuth *auth = new SyncAuth(m_account->id(), serviceName, this);
     connect(auth, SIGNAL(success()), SLOT(onAuthSucess()));
     connect(auth, SIGNAL(fail()), SLOT(onAuthFailed()));
     if (!auth->authenticate()) {
         auth->deleteLater();
         qWarning() << "fail to authenticate account!";
-        Q_EMIT remoteSourcesAvailable(QArrayOfDatabases());
+        Q_EMIT remoteSourcesAvailable(m_remoteSources);
     }
 }
 
@@ -876,28 +886,33 @@ void SyncAccount::onAuthFailed()
     auth->deleteLater();
 
     qWarning() << "Fail to authenticate";
-    Q_EMIT remoteSourcesAvailable(QArrayOfDatabases());
+    Q_EMIT remoteSourcesAvailable(m_remoteSources);
 }
 
 void SyncAccount::onReplyFinished(QNetworkReply *reply)
 {
+    static QStringList writableRoles;
     static const QString calendarSyncUrl("https://apidata.googleusercontent.com:443/caldav/v2/%u/events/?SyncEvolution=Google");
-    QArrayOfDatabases dbs;
     QNetworkAccessManager *manager = qobject_cast<QNetworkAccessManager*>(QObject::sender());
     manager->deleteLater();
     reply->deleteLater();
 
     if (reply->error() != QNetworkReply::NoError) {
         qWarning() << "Fail to fetch remote sources:" << reply->errorString();
-        Q_EMIT remoteSourcesAvailable(dbs);
+        Q_EMIT remoteSourcesAvailable(m_remoteSources);
         return;
     }
 
     int responseCode = reply->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt();
     if (responseCode != 200) {
         qWarning() << "Fail to fetch remote sources response:" << responseCode;
-        Q_EMIT remoteSourcesAvailable(dbs);
+        Q_EMIT remoteSourcesAvailable(m_remoteSources);
         return;
+    }
+
+    if (writableRoles.isEmpty()) {
+        writableRoles << "writer"
+                      << "owner";
     }
 
     QByteArray data = reply->readAll();
@@ -913,23 +928,24 @@ void SyncAccount::onReplyFinished(QNetworkReply *reply)
                 QJsonObject calendar = i.toObject();
                 if (calendar.value("kind").toString() == "calendar#calendarListEntry") {
                     qDebug() << "Found db:"
-                             << calendar.value("summary")
-                             << calendar.value("id")
-                             << calendar.value("selected");
+                             << "\n\tSummary:" << calendar.value("summary").toString()
+                             << "\n\tID:" << calendar.value("id").toString()
+                             << "\n\tSelected:" << calendar.value("selected").toBool()
+                             << "\n\tAccessRole:" << calendar.value("accessRole").toString();
 
                     if (calendar.value("selected").toBool()) {
                         SyncDatabase db;
 
                         db.name = calendar.value("summary").toString();
                         db.source = QString(calendarSyncUrl).replace("%u", QUrl::toPercentEncoding(calendar.value("id").toString()));
-                        db.writable =  calendar.value("accessRole").toString() == "writer";
+                        db.writable =  writableRoles.contains(calendar.value("accessRole").toString());
                         db.defaultCalendar = calendar.value("primary").toBool();
-                        dbs << db;
+                        m_remoteSources << db;
                     }
                 }
             }
         }
     }
 
-    Q_EMIT remoteSourcesAvailable(dbs);
+    Q_EMIT remoteSourcesAvailable(m_remoteSources);
 }

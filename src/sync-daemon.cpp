@@ -68,8 +68,6 @@ SyncDaemon::SyncDaemon()
     m_timeout->setInterval(DAEMON_SYNC_TIMEOUT);
     m_timeout->setSingleShot(true);
     connect(m_timeout, SIGNAL(timeout()), SLOT(continueSync()));
-
-     m_eds = new EdsHelper(this, "");
 }
 
 SyncDaemon::~SyncDaemon()
@@ -92,22 +90,6 @@ void SyncDaemon::setupAccounts()
     m_manager = new Manager(this);
     Q_FOREACH(const AccountId &accountId, m_manager->accountList()) {
         addAccount(accountId, false);
-    }
-
-    // remove old sources, that the account does not exists anymore
-    qDebug() << "cleanup old sources...";
-    QMap<int, QStringList> sources  = m_eds->sources(CALENDAR_SERVICE_NAME);
-    Q_FOREACH(int key, sources.keys()) {
-        if (key == -1)
-            continue;
-
-        if (m_accounts.contains(key))
-            continue;
-
-        qDebug() << "Remove sources" << sources.value(key);
-        Q_FOREACH(const QString &source, sources[key]) {
-            m_eds->removeSource(CALENDAR_SERVICE_NAME, source);
-        }
     }
 
     qDebug() << "Remove old config...";
@@ -134,7 +116,7 @@ void SyncDaemon::setupAccounts()
 
 void SyncDaemon::setupTriggers()
 {
-
+    m_eds = new EdsHelper(this, "");
     connect(m_eds, &EdsHelper::dataChanged,
             this, &SyncDaemon::onDataChanged);
 }
@@ -309,7 +291,6 @@ void SyncDaemon::syncFinishedImpl()
     m_currentServiceName.clear();
     m_syncing = false;
     Q_EMIT done();
-    qDebug() << "All syncs finished";
 }
 
 void SyncDaemon::run()
@@ -474,7 +455,8 @@ void SyncDaemon::removeAccount(const AccountId &accountId)
     SyncAccount *syncAcc = m_accounts.take(accountId);
     if (syncAcc) {
         cancel(syncAcc);
-        m_eds->removeSource("", "", accountId);
+        // Remove legacy source if necessary
+        m_eds->removeSource("", syncAcc->displayName(), 0);
     }
     Q_EMIT accountsChanged();
 }

@@ -15,7 +15,9 @@
 #include "config.h"
 
 #define CHANGE_TIMEOUT      3000
-#define COLLECTION_ACCOUNT_ID_METADATA  "collection-account-id"
+#define COLLECTION_READONLY_METADATA        "collection-readonly"
+#define COLLECTION_SYNC_READONLY_METADATA   "collection-sync-readonly"
+#define COLLECTION_ACCOUNT_ID_METADATA      "collection-account-id"
 
 using namespace QtOrganizer;
 using namespace QtContacts;

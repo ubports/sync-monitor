@@ -22,6 +22,8 @@
 #include <QtCore/QObject>
 #include <QtCore/QHash>
 #include <QtCore/QSettings>
+#include <QtCore/QPair>
+#include <QtCore/QString>
 
 #include <QtNetwork/QNetworkReply>
 
@@ -31,6 +33,8 @@
 
 class SyncEvolutionSessionProxy;
 class SyncConfigure;
+
+typedef QPair<QString, bool> SourceData;
 
 class SyncAccount : public QObject
 {
@@ -114,12 +118,14 @@ private:
     QStringList m_servicesToSync;
     QStringList m_sourcesOnSync;
     QMap<QString, QString> m_currentSyncResults;
+    QElapsedTimer m_syncTime;
 
     QMap<QString, bool> m_availabeServices;
     AccountState m_state;
     QList<QMetaObject::Connection> m_sessionConnections;
     uint m_lastError;
     bool m_retrySync;
+    QArrayOfDatabases m_remoteSources;
 
     // current sync information
     QString m_syncMode;
@@ -139,7 +145,7 @@ private:
     void attachSession(SyncEvolutionSessionProxy *session);
     void releaseSession();
 
-    QStringList sources(const QString &serviceName) const;
+    QList<SourceData> sources(const QString &serviceName) const;
     QStringMap filterSourceReport(const QStringMap &report, const QString &serviceName, uint accountId, const QString &sourceName) const;
 };
 

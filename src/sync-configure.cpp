@@ -209,14 +209,7 @@ void SyncConfigure::continuePeerConfig(SyncEvolutionSessionProxy *session, const
             }
 
             // remote database
-            QString sourceName = QString("%1_%2")
-                    .arg(sourcePrefix)
-                    .arg(formatSourceName(db.name));
-
-            // WORKAROUND: trunc source name to 30 chars
-            // Syncevolution only support source names with max 30 chars.
-            sourceName = (sourceName.size() > 30 ? sourceName.left(30) : sourceName);
-
+            QString sourceName = formatSourceName(service, m_account->id(), db.name);
             QString fullSourceName = QString("source/%1").arg(sourceName);
             qDebug() << "\tCreate syncevolution source" << fullSourceName;
             if (config.contains(fullSourceName)) {
@@ -353,7 +346,7 @@ void SyncConfigure::continuePeerConfig(SyncEvolutionSessionProxy *session, const
     Q_EMIT done(services);
 }
 
-QString SyncConfigure::formatSourceName(const QString &name)
+QString SyncConfigure::normalizeDBName(const QString &name)
 {
     QString sourceName;
     for(int i=0; i < name.length(); i++) {
@@ -362,6 +355,19 @@ QString SyncConfigure::formatSourceName(const QString &name)
         }
     }
     return sourceName.toLower();
+}
+
+QString SyncConfigure::formatSourceName(const QString &serviceName, uint accountId, const QString &dbName)
+{
+    // build sync evolution source name based on service and account.
+    QString fullSourceName = QString("%1_%2_%3")
+            .arg(serviceName)
+            .arg(accountId)
+            .arg(SyncConfigure::normalizeDBName(dbName));
+
+    // WORKAROUND: trunc source name to 30 chars
+    // Syncevolution only support source names with max 30 chars.
+    return (fullSourceName.size() > 30 ? fullSourceName.left(30) : fullSourceName);
 }
 
 void SyncConfigure::removeAccountSourceConfig(Account *account, const QString &sourceName)
