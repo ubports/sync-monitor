@@ -32,6 +32,8 @@ struct SyncDatabase
     QString source;
     bool defaultCalendar;
     bool writable;
+    QString color;
+    QString title;
 };
 Q_DECLARE_METATYPE ( SyncDatabase )
 

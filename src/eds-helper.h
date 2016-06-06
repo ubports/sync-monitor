@@ -42,7 +42,7 @@ public:
               const QString &contactManager = "galera",
               const QString &organizerManager = "eds");
     ~EdsHelper();
-    QString createSource(const QString &serviceName, const QString &sourceName, int accountId);
+    QString createSource(const QString &serviceName, const QString &sourceName, const QString &sourceColor, int accountId);
     void removeSource(const QString &serviceName, const QString &sourceName, int accountId);
     void removeSource(const QString &serviceName, const QString &sourceId);
     QString sourceId(const QString &serviceName, const QString &sourceName, int accountId);
@@ -79,7 +79,7 @@ private:
     QSet<QtContacts::QContactId> m_pendingContacts;
     QSet<QString> m_pendingCalendars;
 
-    QString createOrganizerSource(const QString &sourceName, int accountId);
+    QString createOrganizerSource(const QString &sourceName, const QString &sourceColor, int accountId);
     QString createContactsSource(const QString &sourceName);
 
     void removeOrganizerSource(const QString &sourceName, int accountId);

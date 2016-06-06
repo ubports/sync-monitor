@@ -183,7 +183,7 @@ void SyncConfigure::continuePeerConfig(SyncEvolutionSessionProxy *session, const
                 localDbId = eds.sourceId(service, db.name, -1);
             }
             if (localDbId.isEmpty()) {
-                localDbId = eds.createSource(service, db.name, m_account->id()).split("::").last();
+                localDbId = eds.createSource(service, db.name, db.color, m_account->id()).split("::").last();
             } else {
                  qDebug() << "Using legacy source:" << localDbId << db.name;
             }

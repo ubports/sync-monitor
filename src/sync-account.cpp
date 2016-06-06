@@ -940,6 +940,8 @@ void SyncAccount::onReplyFinished(QNetworkReply *reply)
                         db.source = QString(calendarSyncUrl).replace("%u", QUrl::toPercentEncoding(calendar.value("id").toString()));
                         db.writable =  writableRoles.contains(calendar.value("accessRole").toString());
                         db.defaultCalendar = calendar.value("primary").toBool();
+                        db.title = calendar.value("summaryOverride").toString();
+                        db.color = calendar.value("backgroundColor").toString();
                         m_remoteSources << db;
                     }
                 }

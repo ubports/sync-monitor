@@ -51,12 +51,15 @@ EdsHelper::~EdsHelper()
     delete m_organizerEngine;
 }
 
-QString EdsHelper::createSource(const QString &serviceName, const QString &sourceName, int accountId)
+QString EdsHelper::createSource(const QString &serviceName,
+                                const QString &sourceName,
+                                const QString &sourceColor,
+                                int accountId)
 {
     if (serviceName == CONTACTS_SERVICE_NAME) {
         return createContactsSource(sourceName);
     } else if (serviceName == CALENDAR_SERVICE_NAME) {
-        return createOrganizerSource(sourceName, accountId);
+        return createOrganizerSource(sourceName, sourceColor, accountId);
     } else {
         qWarning() << "Service not supported:" << serviceName;
         return QString();
@@ -446,7 +449,9 @@ QString EdsHelper::organizerSourceId(const QString &sourceName, int accountId)
     return QString();
 }
 
-QString EdsHelper::createOrganizerSource(const QString &sourceName, int accountId)
+QString EdsHelper::createOrganizerSource(const QString &sourceName,
+                                         const QString &sourceColor,
+                                         int accountId)
 {
     if (!m_organizerEngine) {
         qWarning() << "Request to create an organizer source with a null organize engine";
@@ -460,6 +465,9 @@ QString EdsHelper::createOrganizerSource(const QString &sourceName, int accountI
 
     QOrganizerCollection collection;
     collection.setMetaData(QOrganizerCollection::KeyName, sourceName);
+    if (!sourceColor.isEmpty()) {
+        collection.setMetaData(QOrganizerCollection::KeyColor, sourceColor);
+    }
     collection.setExtendedMetaData(COLLECTION_ACCOUNT_ID_METADATA, accountId);
     collection.setExtendedMetaData("collection-selected", true);
     if (!m_organizerEngine->saveCollection(&collection)) {
