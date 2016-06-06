@@ -185,8 +185,10 @@ void SyncConfigure::continuePeerConfig(SyncEvolutionSessionProxy *session, const
             if (localDbId.isEmpty()) {
                 localDbId = eds.createSource(service, db.name, m_account->id()).split("::").last();
             } else {
-                qDebug() << "Using legacy source:" << localDbId << db.name;
+                 qDebug() << "Using legacy source:" << localDbId << db.name;
             }
+            // remove qorgnizer prefix: "qtorganizer:eds::"
+            localDbId = localDbId.split(":").last();
             qDebug() << "\tCheck for evolution source:" << localDbId;
 
             // check if source is already configured

@@ -80,9 +80,10 @@ private Q_SLOTS:
     void runAuthentication();
 
 
+    void onAccountSyncStart();
+    void onAccountSyncFinished(const QString &serviceName, const QMap<QString, QString> &statusList);
     void onAccountSourceSyncStarted(const QString &serviceName, const QString &source, bool firstSync);
     void onAccountSourceSyncFinished(const QString &serviceName, const QString &sourceName, const bool firstSync, const QString &status, const QString &mode);
-    void onAccountSyncFinished(const QString &serviceName, const QMap<QString, QString> &statusList);
     void onAccountSyncError(const QString &serviceName, const QString &error);
     void onAccountEnableChanged(const QString &serviceName, bool enabled);
     void onDataChanged(const QString &serviceName, const QString &sourceName);

@@ -241,6 +241,7 @@ void SyncDaemon::continueSync()
     // freeze notifications during the sync, to save some CPU
     m_eds->freezeNotify();
 
+    SyncAccount *oldAccount = m_currentAccount;
     // sync the next service on the queue
     if (!m_aboutToQuit && job.isValid()) {
         m_currentServiceName = job.serviceName();
@@ -250,6 +251,10 @@ void SyncDaemon::continueSync()
     }
 
     if (m_currentAccount) {
+        // New Account to sync
+        if (oldAccount != m_currentAccount) {
+
+        }
         // remove sync reqeust from offline queue
         m_offlineQueue->remove(m_currentAccount, m_currentServiceName);
         m_currentAccount->sync(m_currentServiceName);
@@ -380,6 +385,8 @@ void SyncDaemon::addAccount(const AccountId &accountId, bool startSync)
                                                m_provider->settings(acc->providerName()),
                                                this);
         m_accounts.insert(accountId, syncAcc);
+        connect(syncAcc, SIGNAL(syncStarted()),
+                         SLOT(onAccountSyncStart()));
         connect(syncAcc, SIGNAL(syncSourceStarted(QString,QString,bool)),
                          SLOT(onAccountSourceSyncStarted(QString, QString, bool)));
         connect(syncAcc, SIGNAL(syncSourceFinished(QString,QString,bool,QString,QString)),
@@ -492,19 +499,21 @@ void SyncDaemon::runAuthentication()
     url_dispatch_send(appCommand.toUtf8().constData(), NULL, NULL);
 }
 
+void SyncDaemon::onAccountSyncStart()
+{
+    SyncAccount *acc = qobject_cast<SyncAccount*>(QObject::sender());
+    NotifyMessage *notify = new NotifyMessage(true, this);
+    notify->show(_("Synchronization"),
+                 QString(_("Start sync:  %1")).arg(acc->displayName()),
+                 acc->iconName(CALENDAR_SERVICE_NAME));
+}
+
+
 void SyncDaemon::onAccountSourceSyncStarted(const QString &serviceName,
                                             const QString &sourceName,
                                             bool firstSync)
 {
     SyncAccount *acc = qobject_cast<SyncAccount*>(QObject::sender());
-    if (firstSync) {
-        NotifyMessage *notify = new NotifyMessage(true, this);
-        notify->show(_("Synchronization"),
-                     QString(_("Start sync:  %1 (%2)"))
-                         .arg(acc->displayName())
-                         .arg(sourceName.split("_").last()),
-                     acc->iconName(serviceName));
-    }
     m_syncElapsedTime.restart();
     qDebug() << QString("[%3] Start sync:  %1 (%2)")
                 .arg(acc->displayName())
@@ -529,15 +538,6 @@ void SyncDaemon::onAccountSourceSyncFinished(const QString &serviceName,
 
     SyncAccount *acc = qobject_cast<SyncAccount*>(QObject::sender());
     QString errorMessage = SyncAccount::statusDescription(status);
-
-    if (firstSync && errorMessage.isEmpty()) {
-        NotifyMessage *notify = new NotifyMessage(true, this);
-        notify->show(_("Synchronization"),
-                     QString(_("Sync done: %1 (%2)"))
-                         .arg(acc->displayName())
-                         .arg(sourceName.split("_").last()),
-                     acc->iconName(serviceName));
-    }
 
     qDebug() << QString("[%6] Sync done: %1 (%2) Status: %3 Error: %4 Duration: %5s")
                 .arg(acc->displayName())
@@ -574,6 +574,7 @@ void SyncDaemon::onAccountSyncFinished(const QString &serviceName,
 
     // check if we are going re-sync due a know problem
     uint errorCode = 0;
+    bool fail = false;
     Q_FOREACH(const QString &status, statusList.values()) {
         QString errorMessage = SyncAccount::statusDescription(status);
         errorCode = status.toUInt();
@@ -587,6 +588,7 @@ void SyncDaemon::onAccountSyncFinished(const QString &serviceName,
             errorCode = 0;
             break;
         } else if (!errorMessage.isEmpty()) {
+            fail = true;
             NotifyMessage *notify = new NotifyMessage(true, this);
             notify->show(_("Synchronization"),
                          QString(_("Fail to sync %1 (%2).\n%3"))
@@ -596,6 +598,13 @@ void SyncDaemon::onAccountSyncFinished(const QString &serviceName,
                          acc->iconName(serviceName));
             break;
         }
+    }
+
+    if (!fail) {
+        NotifyMessage *notify = new NotifyMessage(true, this);
+        notify->show(_("Synchronization"),
+                     QString(_("Sync done: %1")).arg(acc->displayName()),
+                     acc->iconName(serviceName));
     }
 
     acc->setLastError(errorCode);
