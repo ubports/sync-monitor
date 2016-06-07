@@ -516,7 +516,7 @@ void SyncDaemon::onAccountSyncStart()
     SyncAccount *acc = qobject_cast<SyncAccount*>(QObject::sender());
     NotifyMessage *notify = new NotifyMessage(true, this);
     notify->show(_("Synchronization"),
-                 QString(_("Start sync:  %1")).arg(acc->displayName()),
+                 QString(_("Start sync: %1 (Calendar)")).arg(acc->displayName()),
                  acc->iconName(CALENDAR_SERVICE_NAME));
 }
 
@@ -587,7 +587,8 @@ void SyncDaemon::onAccountSyncFinished(const QString &serviceName,
     // check if we are going re-sync due a know problem
     uint errorCode = 0;
     bool fail = false;
-    Q_FOREACH(const QString &status, statusList.values()) {
+    Q_FOREACH(const QString &source, statusList.keys()) {
+        const QString status = statusList.value(source);
         QString errorMessage = SyncAccount::statusDescription(status);
         errorCode = status.toUInt();
 
@@ -603,20 +604,23 @@ void SyncDaemon::onAccountSyncFinished(const QString &serviceName,
             fail = true;
             NotifyMessage *notify = new NotifyMessage(true, this);
             notify->show(_("Synchronization"),
-                         QString(_("Fail to sync %1 (%2).\n%3"))
+                         QString(_("Fail to sync calendar %1 from account %2.\n%3"))
+                             .arg(source)
                              .arg(acc->displayName())
-                             .arg(serviceName)
                              .arg(errorMessage),
-                         acc->iconName(serviceName));
+                         acc->iconName(CALENDAR_SERVICE_NAME));
             break;
         }
     }
 
     if (!fail) {
-        NotifyMessage *notify = new NotifyMessage(true, this);
-        notify->show(_("Synchronization"),
-                     QString(_("Sync done: %1")).arg(acc->displayName()),
-                     acc->iconName(serviceName));
+        // avoid to show sync done message for disabled accounts.
+        if (acc->enabledServices().contains(serviceName)) {
+            NotifyMessage *notify = new NotifyMessage(true, this);
+            notify->show(_("Synchronization"),
+                         QString(_("Sync done: %1 (Calendar)")).arg(acc->displayName()),
+                         acc->iconName(CALENDAR_SERVICE_NAME));
+        }
     }
 
     acc->setLastError(errorCode);
