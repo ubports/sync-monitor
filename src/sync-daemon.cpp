@@ -470,7 +470,7 @@ void SyncDaemon::onAccountSyncStarted(const QString &serviceName, bool firstSync
     if (firstSync) {
         NotifyMessage *notify = new NotifyMessage(true, this);
         notify->show(_("Synchronization"),
-                     QString(_("Start calendar sync for account: %1"))
+                     QString(_("Start sync: %1 (Calendar)"))
                          .arg(acc->displayName()),
                      acc->iconName(serviceName));
     }
@@ -500,7 +500,7 @@ void SyncDaemon::onAccountSyncFinished(const QString &serviceName, const bool fi
     if (firstSync && errorMessage.isEmpty()) {
         NotifyMessage *notify = new NotifyMessage(true, this);
         notify->show(_("Synchronization"),
-                     QString(_("Calendar synced for account: %1"))
+                     QString(_("Sync done: %1 (Calendar)"))
                          .arg(acc->displayName()),
                      acc->iconName(serviceName));
     }

@@ -646,7 +646,7 @@ QString SyncAccount::statusDescription(const QString &status)
         return _("Fail to connect with the server");
     case 20046:
     case 20047:
-        return _("Server not found");
+        return _( "Server not found");
     default:
         return _("Unknown status");
     }
