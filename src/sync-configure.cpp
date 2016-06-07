@@ -142,10 +142,6 @@ void SyncConfigure::continuePeerConfig(SyncEvolutionSessionProxy *session, const
     QMap<QString, QPair<QString, bool> > sourceToDatabase;
 
     Q_FOREACH(const QString &service, services.toSet()) {
-        const QString sourcePrefix = QString("%1_%2")
-                .arg(service)
-                .arg(m_account->id());
-
         qDebug() << "Configure source for service" << service << "Account" << m_account->id();
         QString templateSource = templates.value(service, "");
         if (templateSource.isEmpty()) {
@@ -180,10 +176,19 @@ void SyncConfigure::continuePeerConfig(SyncEvolutionSessionProxy *session, const
             // check if a source with the same account name already exists
             QString localDbId;
             if (db.name == m_account->displayName()) {
-                localDbId = eds.sourceId(service, db.name, -1);
+                localDbId = eds.sourceIdByName(db.source, 0);
             }
+            // check if there is a source for this remote url already
             if (localDbId.isEmpty()) {
-                localDbId = eds.createSource(service, db.name, db.color, m_account->id()).split("::").last();
+                localDbId = eds.sourceIdByRemoteUrl(db.source, m_account->id());
+            }
+            // create new source if not found
+            if (localDbId.isEmpty()) {
+                QString title = db.title.isEmpty() ? db.name : db.title;
+                localDbId = eds.createSource(title,
+                                             db.color,
+                                             db.source,
+                                             m_account->id());
             } else {
                  qDebug() << "Using legacy source:" << localDbId << db.name;
             }
@@ -307,7 +312,7 @@ void SyncConfigure::continuePeerConfig(SyncEvolutionSessionProxy *session, const
                     if (!database.isEmpty()) {
                         qDebug() << "Remove local config and database" << source << config[source].value("database");
                         config.remove(source);
-                        eds.removeSource(service, "qtorganizer:eds::" + database);
+                        eds.removeSource("qtorganizer:eds::" + database);
                     }
                 }
             }

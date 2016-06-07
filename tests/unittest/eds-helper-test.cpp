@@ -42,7 +42,7 @@ private Q_SLOTS:
     void testCreateACalendarEvent()
     {
         EdsHelperMock mock;
-        QSignalSpy spy(&mock, SIGNAL(dataChanged(QString,QString)));
+        QSignalSpy spy(&mock, SIGNAL(dataChanged(QString)));
         QOrganizerEvent ev;
 
         ev.setDescription("test");
@@ -52,18 +52,16 @@ private Q_SLOTS:
 
         mock.organizerEngine()->saveItem(&ev);
 
-        // check if the signal dataChanged was fired with contacts
         QTRY_COMPARE(spy.count(), 1);
         QList<QVariant> args = spy.takeFirst();
-        QCOMPARE(args[0].toString(), QStringLiteral(CALENDAR_SERVICE_NAME));
-        QCOMPARE(args[1].toString(), QStringLiteral("Default Collection"));
+        QCOMPARE(args[0].toString(), ev.collectionId().toString());
     }
 
     void testFreezeNotify()
     {
         EdsHelperMock mock;
         mock.freezeNotify();
-        QSignalSpy spy(&mock, SIGNAL(dataChanged(QString,QString)));
+        QSignalSpy spy(&mock, SIGNAL(dataChanged(QString)));
 
         // create a event
         QOrganizerEvent ev;
@@ -81,8 +79,7 @@ private Q_SLOTS:
         QTRY_COMPARE(spy.count(), 1);
 
         QList<QVariant> args = spy.takeFirst();
-        QCOMPARE(args[0].toString(), QStringLiteral(CALENDAR_SERVICE_NAME));
-        QCOMPARE(args[1].toString(), QStringLiteral("Default Collection"));
+        QCOMPARE(args[0].toString(), ev.collectionId().toString());
     }
 };
 

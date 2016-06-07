@@ -36,7 +36,7 @@ class EdsHelperMock : public EdsHelper
     Q_OBJECT
 public:
     EdsHelperMock(QObject *parent = 0)
-        : EdsHelper(parent, "memory", "memory")
+        : EdsHelper(parent, "memory")
     {
         setEnabled(true);
     }

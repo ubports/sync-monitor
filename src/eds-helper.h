@@ -38,34 +38,31 @@ class EdsHelper : public QObject
 {
     Q_OBJECT
 public:
-    EdsHelper(QObject *parent = 0,
-              const QString &contactManager = "galera",
-              const QString &organizerManager = "eds");
+    EdsHelper(QObject *parent = 0, const QString &organizerManager = "eds");
     ~EdsHelper();
-    QString createSource(const QString &serviceName, const QString &sourceName, const QString &sourceColor, int accountId);
-    void removeSource(const QString &serviceName, const QString &sourceName, int accountId);
-    void removeSource(const QString &serviceName, const QString &sourceId);
-    QString sourceId(const QString &serviceName, const QString &sourceName, int accountId);
+    QString createSource(const QString &sourceName,
+                         const QString &sourceColor,
+                         const QString &sourceRemoteUrl,
+                         int accountId);
+    void removeSource(const QString &sourceId);
+    QString sourceIdByName(const QString &sourceName, uint account);
+    QString sourceIdByRemoteUrl(const QString &sourceName, uint account);
+    QPair<uint, QString> sourceAccountAndNameFromId(const QString &sourceId);
+
     void freezeNotify();
     void unfreezeNotify();
     void flush();
     void setEnabled(bool enabled);
-    QMap<int, QStringList> sources(const QString &serviceName);
+    QMap<int, QStringList> sources();
 
 Q_SIGNALS:
-    void dataChanged(const QString &serviceName, const QString &sourceName);
+    void dataChanged(const QString &sourceId);
 
 private Q_SLOTS:
-    void contactChangedFilter(const QList<QContactId>& contactIds);
-    void contactChanged(const QString &sourceName = QString());
-    void contactDataChanged();
     void calendarChanged(const QList<QOrganizerItemId> &itemIds);
-    void contactFetchStateChanged(QContactAbstractRequest::State newState);
-    void calendarCollectionsChanged();
 
 protected:
     QtOrganizer::QOrganizerManager *m_organizerEngine;
-    QtContacts::QContactManager *m_contactEngine;
 
     virtual QString getCollectionIdFromItemId(const QtOrganizer::QOrganizerItemId &itemId) const;
 
@@ -73,25 +70,8 @@ private:
     QTimer m_timeoutTimer;
     bool m_freezed;
 
-    // cache calendar collections
-    QList<QtOrganizer::QOrganizerCollection> m_calendarCollections;
-
-    QSet<QtContacts::QContactId> m_pendingContacts;
+    // late notify
     QSet<QString> m_pendingCalendars;
-
-    QString createOrganizerSource(const QString &sourceName, const QString &sourceColor, int accountId);
-    QString createContactsSource(const QString &sourceName);
-
-    void removeOrganizerSource(const QString &sourceName, int accountId);
-    void removeContactsSource(const QString &sourceName);
-
-    void removeOrganizerSource(const QString &sourceId);
-
-    QMap<int, QStringList> contactsSources();
-    QMap<int, QStringList> organizerSources();
-
-    QString contactsSourceId(const QString &sourceName, int accountId);
-    QString organizerSourceId(const QString &sourceName, int accountId);
 };
 
 #endif

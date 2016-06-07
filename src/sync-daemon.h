@@ -86,7 +86,7 @@ private Q_SLOTS:
     void onAccountSourceSyncFinished(const QString &serviceName, const QString &sourceName, const bool firstSync, const QString &status, const QString &mode);
     void onAccountSyncError(const QString &serviceName, const QString &error);
     void onAccountEnableChanged(const QString &serviceName, bool enabled);
-    void onDataChanged(const QString &serviceName, const QString &sourceName);
+    void onDataChanged(const QString &sourceId);
     void onClientAttached();
 
     void onOnlineStatusChanged(SyncNetwork::NetworkState state);

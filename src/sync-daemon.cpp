@@ -116,19 +116,28 @@ void SyncDaemon::setupAccounts()
 
 void SyncDaemon::setupTriggers()
 {
-    m_eds = new EdsHelper(this, "");
+    m_eds = new EdsHelper(this);
     connect(m_eds, &EdsHelper::dataChanged,
             this, &SyncDaemon::onDataChanged);
 }
 
-void SyncDaemon::onDataChanged(const QString &serviceName, const QString &sourceName)
+void SyncDaemon::onDataChanged(const QString &sourceId)
 {
-    if (sourceName.isEmpty()) {
-        syncAll(serviceName, false, false);
+    if (sourceId.isEmpty()) {
+        syncAll(CALENDAR_SERVICE_NAME, false, false);
     } else {
+        QPair<uint, QString> accountAndName = m_eds->sourceAccountAndNameFromId(sourceId);
         Q_FOREACH(SyncAccount *acc, m_accounts.values()) {
-            if (acc->displayName() == sourceName) {
-                sync(acc, serviceName, false, false);
+
+            // LEGACY: sources has the same display name
+            if ((accountAndName.first == 0) && (acc->displayName() == accountAndName.second)) {
+                sync(acc, CALENDAR_SERVICE_NAME, false, false);
+                return;
+            }
+
+            //TODO: sync only the changed source
+            if ((accountAndName.first == acc->id())) {
+                sync(acc, CALENDAR_SERVICE_NAME, false, false);
                 return;
             }
         }
@@ -463,7 +472,10 @@ void SyncDaemon::removeAccount(const AccountId &accountId)
     if (syncAcc) {
         cancel(syncAcc);
         // Remove legacy source if necessary
-        m_eds->removeSource("", syncAcc->displayName(), 0);
+        QString sourceId = m_eds->sourceIdByName(syncAcc->displayName(), 0);
+        if (!sourceId.isEmpty()) {
+            m_eds->removeSource(sourceId);
+        }
     }
     Q_EMIT accountsChanged();
 }
