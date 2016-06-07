@@ -131,7 +131,6 @@ void SyncConfigure::continuePeerConfig(SyncEvolutionSessionProxy *session, const
 
     static QMap<QString, QString> templates;
     if (templates.isEmpty()) {
-        //templates.insert(CONTACTS_SERVICE_NAME, QString("source/addressbook"));
         templates.insert(CALENDAR_SERVICE_NAME, QString("source/calendar"));
     }
 

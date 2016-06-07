@@ -615,7 +615,7 @@ void SyncDaemon::onAccountSyncFinished(const QString &serviceName,
 
     if (!fail) {
         // avoid to show sync done message for disabled accounts.
-        if (acc->enabledServices().contains(serviceName)) {
+        if (acc->enabled() && acc->enabledServices().contains(CALENDAR_SERVICE_NAME)) {
             NotifyMessage *notify = new NotifyMessage(true, this);
             notify->show(_("Synchronization"),
                          QString(_("Sync done: %1 (Calendar)")).arg(acc->displayName()),
