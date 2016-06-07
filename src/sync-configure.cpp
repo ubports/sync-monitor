@@ -229,6 +229,7 @@ void SyncConfigure::continuePeerConfig(SyncEvolutionSessionProxy *session, const
                 QStringMap sourceConfig(configTemplate);
                 sourceConfig["backend"] = "CalDav";
                 sourceConfig["database"] = db.source;
+                sourceConfig["syncInterval"] = "90";
                 config[fullSourceName] = sourceConfig;
 
                 sourceToDatabase.insert(fullSourceName, qMakePair(localDbId, true));
