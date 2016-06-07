@@ -470,13 +470,12 @@ void SyncDaemon::onAccountSyncStarted(const QString &serviceName, bool firstSync
     if (firstSync) {
         NotifyMessage *notify = new NotifyMessage(true, this);
         notify->show(_("Synchronization"),
-                     QString(_("Start sync:  %1 (%2)"))
-                         .arg(acc->displayName())
-                         .arg(serviceName),
+                     QString(_("Start calendar sync for account: %1"))
+                         .arg(acc->displayName()),
                      acc->iconName(serviceName));
     }
     m_syncElapsedTime.restart();
-    qDebug() << QString("[%3] Start sync:  %1 (%2)")
+    qDebug() << QString("[%3] Start sync: %1 (%2)")
                 .arg(acc->displayName())
                 .arg(serviceName)
                 .arg(QDateTime::currentDateTime().toString(Qt::SystemLocaleShortDate));
@@ -501,9 +500,8 @@ void SyncDaemon::onAccountSyncFinished(const QString &serviceName, const bool fi
     if (firstSync && errorMessage.isEmpty()) {
         NotifyMessage *notify = new NotifyMessage(true, this);
         notify->show(_("Synchronization"),
-                     QString(_("Sync done: %1 (%2)"))
-                         .arg(acc->displayName())
-                         .arg(serviceName),
+                     QString(_("Calendar synced for account: %1"))
+                         .arg(acc->displayName()),
                      acc->iconName(serviceName));
     }
 
@@ -541,9 +539,11 @@ void SyncDaemon::onAccountSyncFinished(const QString &serviceName, const bool fi
     } else if (!errorMessage.isEmpty()) {
         NotifyMessage *notify = new NotifyMessage(true, this);
         notify->show(_("Synchronization"),
-                     QString(_("Fail to sync %1 (%2).\n%3"))
+                     // FIXME: Use same account name as calendar name for now. This will be fixed
+                     // on multiple calendar sync branch
+                     QString(_("Fail to sync calendar %1 from account %2.\n%3"))
                          .arg(acc->displayName())
-                         .arg(serviceName)
+                         .arg(acc->displayName())
                          .arg(errorMessage),
                      acc->iconName(serviceName));
     }
