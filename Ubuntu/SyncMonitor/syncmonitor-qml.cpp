@@ -48,20 +48,22 @@
 
 SyncMonitorQml::SyncMonitorQml(QObject *parent)
     : QObject(parent),
-      m_iface(0)
+      m_iface(0),
+      m_watcher(0)
 {
 }
 
 SyncMonitorQml::~SyncMonitorQml()
 {
+    if (m_watcher) {
+        delete m_watcher;
+        m_watcher = 0;
+    }
     if (m_iface) {
         m_iface->call("detach");
-        delete m_iface;
-        m_iface = 0;
+        disconnectFromServer();
     }
 }
-
-
 
 /*!
   Specifies the current sync monitor state
@@ -102,19 +104,13 @@ void SyncMonitorQml::classBegin()
 
 void SyncMonitorQml::componentComplete()
 {
-    m_iface = new QDBusInterface(SYNCMONITOR_DBUS_SERVICE_NAME,
-                                 SYNCMONITOR_DBUS_OBJECT_PATH,
-                                 SYNCMONITOR_DBUS_INTERFACE);
-    if (m_iface->lastError().isValid()) {
-        qWarning() << "Fail to connect with sync monitor:" << m_iface->lastError();
-        return;
-    }
-
-    connect(m_iface, SIGNAL(stateChanged()), SIGNAL(stateChanged()));
-    connect(m_iface, SIGNAL(enabledServicesChanged()), SIGNAL(enabledServicesChanged()));
-    m_iface->call("attach");
-    Q_EMIT stateChanged();
-    Q_EMIT enabledServicesChanged();
+    connectToServer();
+    m_watcher = new QDBusServiceWatcher(QString(SYNCMONITOR_DBUS_SERVICE_NAME),
+                                        QDBusConnection::sessionBus(),
+                                        QDBusServiceWatcher::WatchForOwnerChange,
+                                        this);
+    connect(m_watcher, SIGNAL(serviceRegistered(QString)), SLOT(connectToServer()));
+    connect(m_watcher, SIGNAL(serviceUnregistered(QString)), SLOT(disconnectFromServer()));
 }
 
 /*!
@@ -143,4 +139,36 @@ void SyncMonitorQml::cancel(const QStringList &services)
 bool SyncMonitorQml::serviceIsEnabled(const QString &service)
 {
     return enabledServices().contains(service);
+}
+
+void SyncMonitorQml::connectToServer()
+{
+    if (m_iface) {
+        delete m_iface;
+    }
+
+    m_iface = new QDBusInterface(SYNCMONITOR_DBUS_SERVICE_NAME,
+                                 SYNCMONITOR_DBUS_OBJECT_PATH,
+                                 SYNCMONITOR_DBUS_INTERFACE);
+    if (m_iface->lastError().isValid()) {
+        qWarning() << "Fail to connect with sync monitor:" << m_iface->lastError();
+        delete m_iface;
+        m_iface = 0;
+    } else {
+        connect(m_iface, SIGNAL(stateChanged()), SIGNAL(stateChanged()));
+        connect(m_iface, SIGNAL(enabledServicesChanged()), SIGNAL(enabledServicesChanged()));
+        m_iface->call("attach");
+        Q_EMIT enabledServicesChanged();
+    }
+    Q_EMIT stateChanged();
+}
+
+void SyncMonitorQml::disconnectFromServer()
+{
+    if (m_iface) {
+        delete m_iface;
+        m_iface = 0;
+    }
+    Q_EMIT enabledServicesChanged();
+    Q_EMIT stateChanged();
 }

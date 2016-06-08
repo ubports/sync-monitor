@@ -22,6 +22,7 @@
 #include <QObject>
 #include <QQmlParserStatus>
 #include <QDBusInterface>
+#include <QDBusServiceWatcher>
 
 class SyncMonitorQml : public QObject, public QQmlParserStatus
 {
@@ -52,8 +53,12 @@ public Q_SLOTS:
     void cancel(const QStringList &services);
     bool serviceIsEnabled(const QString &service);
 
+    void connectToServer();
+    void disconnectFromServer();
+
 private:
     QDBusInterface *m_iface;
+    QDBusServiceWatcher *m_watcher;
 };
 
 #endif
