@@ -25,6 +25,8 @@
 
 #include "config.h"
 
+#define ACCOUNT_SYNC_INTERVAL   "30"
+
 using namespace Accounts;
 
 SyncConfigure::SyncConfigure(SyncAccount *account,
@@ -228,7 +230,7 @@ void SyncConfigure::continuePeerConfig(SyncEvolutionSessionProxy *session, const
                 QStringMap sourceConfig(configTemplate);
                 sourceConfig["backend"] = "CalDav";
                 sourceConfig["database"] = db.source;
-                sourceConfig["syncInterval"] = "90";
+                sourceConfig["syncInterval"] = ACCOUNT_SYNC_INTERVAL;
                 config[fullSourceName] = sourceConfig;
 
                 sourceToDatabase.insert(fullSourceName, qMakePair(localDbId, true));
@@ -294,6 +296,7 @@ void SyncConfigure::continuePeerConfig(SyncEvolutionSessionProxy *session, const
 
             config[configName].insert("backend", QString("evolution-%1").arg(serviceName));
             config[configName].insert("database", i.value().first);
+            config[configName].insert("syncInterval", ACCOUNT_SYNC_INTERVAL);
             qDebug() << "\tCreate local source for[" << configName << "] = " << i.value().first;
             changed = true;
         }
