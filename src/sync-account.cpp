@@ -213,8 +213,8 @@ void SyncAccount::continueSync()
             qDebug() << "Will prepare to sync" << service;
             Q_FOREACH(const SourceData &source, sources(service)) {
                 bool firstSync = false;
-                // read-only sources aways sync with "refresh-from-server"
-                QString mode = "refresh-from-server";
+                // read-only sources aways sync with "refresh-from-remote"
+                QString mode(REFRESH_FROM_REMOTE_SYNC);
                 if (source.second) {
                     mode = syncMode(service, source.first, &firstSync);
                 }
