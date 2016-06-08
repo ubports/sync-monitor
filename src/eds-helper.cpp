@@ -48,6 +48,7 @@ EdsHelper::~EdsHelper()
 QString EdsHelper::createSource(const QString &sourceName,
                                 const QString &sourceColor,
                                 const QString &sourceRemoteUrl,
+                                bool writable,
                                 int accountId)
 {
     if (!m_organizerEngine) {
@@ -66,6 +67,7 @@ QString EdsHelper::createSource(const QString &sourceName,
     collection.setExtendedMetaData(COLLECTION_REMOTE_URL_METADATA, sourceRemoteUrl);
     collection.setExtendedMetaData(COLLECTION_ACCOUNT_ID_METADATA, accountId);
     collection.setExtendedMetaData(COLLECTION_SELECTED_METADATA, true);
+    collection.setExtendedMetaData(COLLECTION_SYNC_READONLY_METADATA, !writable);
 
     if (!m_organizerEngine->saveCollection(&collection)) {
         qWarning() << "Fail to create collection" << sourceName;
@@ -120,7 +122,7 @@ QString EdsHelper::sourceIdByRemoteUrl(const QString &url, uint account)
 QPair<uint, QString> EdsHelper::sourceAccountAndNameFromId(const QString &sourceId)
 {
     QPair<uint, QString> result;
-    QOrganizerCollectionId id = QOrganizerCollectionId::fromString("qtorganizer:eds::" + sourceId);
+    QOrganizerCollectionId id = QOrganizerCollectionId::fromString(sourceId);
     QOrganizerCollection collection = m_organizerEngine->collection(id);
     if (collection.id().isNull()) {
         qWarning() << "Collection not found:" << sourceId;
@@ -206,6 +208,11 @@ QString EdsHelper::getCollectionIdFromItemId(const QOrganizerItemId &itemId) con
 void EdsHelper::calendarChanged(const QList<QOrganizerItemId> &itemIds)
 {
     Q_ASSERT(m_organizerEngine);
+
+    if (m_timeoutTimer.isActive()) {
+        // ignore changes just after sync
+        return;
+    }
 
     QSet<QString> uniqueColletions;
 

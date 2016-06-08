@@ -42,7 +42,7 @@ public:
     ~EdsHelper();
     QString createSource(const QString &sourceName,
                          const QString &sourceColor,
-                         const QString &sourceRemoteUrl,
+                         const QString &sourceRemoteUrl, bool writable,
                          int accountId);
     void removeSource(const QString &sourceId);
     QString sourceIdByName(const QString &sourceName, uint account);
