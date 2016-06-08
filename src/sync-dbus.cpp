@@ -107,9 +107,10 @@ void SyncDBus::detach()
 
 QString SyncDBus::lastSuccessfulSyncDate(quint32 accountId, const QString &service, const QString &source, const QDBusMessage &message)
 {
+    Q_UNUSED(service);
     message.setDelayedReply(true);
 
-    QString result = m_parent->lastSuccessfulSyncDate(accountId, service, source);
+    QString result = m_parent->lastSuccessfulSyncDate(accountId, source);
     QDBusMessage reply = message.createReply(QVariant::fromValue<QString>(result));
     QDBusConnection::sessionBus().send(reply);
     return result;

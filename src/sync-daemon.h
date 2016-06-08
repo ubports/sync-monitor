@@ -49,7 +49,7 @@ public:
     QStringList availableServices() const;
     QStringList enabledServices() const;
     bool isOnline() const;
-    QString lastSuccessfulSyncDate(quint32 accountId, const QString &service, const QString &source);
+    QString lastSuccessfulSyncDate(quint32 accountId, const QString &calendar);
     bool syncOnMobileConnection() const;
     void setSyncOnMobileConnection(bool flag);
 
@@ -118,6 +118,9 @@ private:
     void sync(bool runNow);
     bool registerService();
     void syncFinishedImpl();
+
+    void saveSyncResult(uint accountId, const QString &sourceName, const QString &result, const QString &date);
+    QString loadSyncResult(uint accountId, const QString &sourceName);
 };
 
 #endif

@@ -76,7 +76,6 @@ public:
     QString serviceId(const QString &serviceName) const;
     bool retrySync() const;
     void setRetrySync(bool retry);
-    QString lastSuccessfulSyncDate(const QString &serviceName, const QString &sourceName);
     Accounts::Account *account() const;
 
     void fetchRemoteSources(const QString &serviceName);
@@ -135,18 +134,19 @@ private:
     void continueSync();
 
     void setState(AccountState state);
-    QStringMap lastReport(const QString &sessionName, const QString &serviceName, const QString &sourceName, bool onlySuccessful = false) const;
     QString syncMode(const QString &serviceName, const QString &sourceName, bool *firstSync) const;
-    QString lastSyncStatus(const QString &sessionName, const QString &serviceName, const QString &sourceName) const;
     bool syncService(const QString &serviceName);
     void setupServices();
-    void dumpReport(const QStringMap &report) const;
+
+    // session control
     bool prepareSession(const QString &session = QString::null);
     void attachSession(SyncEvolutionSessionProxy *session);
     void releaseSession();
 
     QList<SourceData> sources(const QString &serviceName) const;
     QStringMap filterSourceReport(const QStringMap &report, const QString &serviceName, uint accountId, const QString &sourceName) const;
+
+    QString lastSyncStatus(const QString &sourceName) const;
 };
 
 #endif

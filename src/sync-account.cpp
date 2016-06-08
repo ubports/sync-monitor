@@ -90,13 +90,6 @@ void SyncAccount::setupServices()
     }
 }
 
-void SyncAccount::dumpReport(const QStringMap &report) const
-{
-    Q_FOREACH(const QString &key, report.keys()) {
-        qDebug() << "\t" << key << ":" << report[key];
-    }
-}
-
 void SyncAccount::setup()
 {
     setupServices();
@@ -194,6 +187,14 @@ QList<SourceData> SyncAccount::sources(const QString &serviceName) const
     return sources;
 }
 
+QString SyncAccount::lastSyncStatus(const QString &sourceName) const
+{
+    const QString logKey = QString(ACCOUNT_LOG_GROUP_FORMAT).arg(m_account->id()).arg(sourceName);
+    QSettings settings;
+
+    return settings.value(logKey + ACCOUNT_LOG_LAST_SYNC_RESULT).toString();
+}
+
 void SyncAccount::continueSync()
 {
     setState(SyncAccount::AboutToSync);
@@ -243,95 +244,14 @@ SyncAccount::AccountState SyncAccount::state() const
     return m_state;
 }
 
-QStringMap SyncAccount::filterSourceReport(const QStringMap &report,
-                                           const QString &serviceName,
-                                           const uint accountId,
-                                           const QString &sourceName) const
-{
-    bool found = false;
-    QStringMap sourceReport;
-    const QString sourceKey = QString("source-%1").arg(QString(sourceName).replace("_", "__"));
-    Q_FOREACH(const QString &key, report.keys()) {
-        if (key.startsWith(sourceKey)) {
-            sourceReport.insert(key, report[key]);
-            found = true;
-        }
-    }
-
-    if (sourceReport.value(QString("%1-mode").arg(sourceKey)) == "disabled") {
-        sourceReport.clear();;
-    }
-
-    return sourceReport;
-}
-
-QStringMap SyncAccount::lastReport(const QString &sessionName,
-                                   const QString &serviceName,
-                                   const QString &sourceName,
-                                   bool onlySuccessful) const
-{
-    static QStringList okStatus;
-
-    if (okStatus.isEmpty()) {
-        okStatus << "0"
-                 << "200"
-                 << "204"
-                 << "207";
-    }
-    const uint pageSize = 100;
-    uint index = 0;
-
-    SyncEvolutionServerProxy *proxy = SyncEvolutionServerProxy::instance();
-    QArrayOfStringMap reports = proxy->reports(sessionName, index, pageSize);
-//    qDebug() << "REPORT(lastReport)========================================";
-//    Q_FOREACH(const QStringMap &map, reports) {
-//        SyncConfigure::dumpMap(map);
-//        qDebug() << "++++++++++++++++++++++++++++++++++++++++++++++++++++++";
-//    }
-//    qDebug() << "==========================================================";
-    if (reports.isEmpty()) {
-        return QStringMap();
-    } else if (serviceName.isEmpty()) {
-        return reports.value(0);
-    }
-
-    index += pageSize;
-    while (true) {
-        Q_FOREACH(const QStringMap &report, reports) {
-            if (report.value("peer") == sessionName) {
-                QStringMap sourceReport = filterSourceReport(report, serviceName, m_account->id(), sourceName);
-                if (!sourceReport.isEmpty()) {
-                    if (onlySuccessful) {
-                        QString status = report.value("status", "");
-                        if (okStatus.contains(status)) {
-                            return report;
-                        }
-                    } else {
-                        return report;
-                    }
-                }
-            }
-        }
-
-        if (reports.size() != pageSize)
-            break;
-
-        reports = m_currentSession->reports(index, pageSize);
-        index += pageSize;
-    }
-
-    return QStringMap();
-}
-
 QString SyncAccount::syncMode(const QString &serviceName,
                               const QString &sourceName,
                               bool *firstSync) const
 {
-    const QString sessionName = SyncConfigure::accountSessionName(m_account);
+    const QString lastStatus = lastSyncStatus(sourceName);
     QString lastSyncMode = "two-way";
-    QString lastStatus = lastSyncStatus(sessionName, serviceName, sourceName);
     *firstSync = lastStatus.isEmpty();
-    qDebug() << "\tService" << serviceName
+    qDebug() << "\tAccount" << m_account->displayName()
              << "source" << sourceName
              << "Last status" << lastStatus
              << "Is first sync" << *firstSync;
@@ -341,9 +261,6 @@ QString SyncAccount::syncMode(const QString &serviceName,
     }
     switch(lastStatus.toInt())
     {
-    case 22000:
-        // "Fail to run \"two-way\" sync";
-        return "slow";
     case 0:
     case 200:
     case 204:
@@ -384,33 +301,11 @@ QString SyncAccount::syncMode(const QString &serviceName,
     case 20046:
     case 20047:
         // "Server not found";
+    case 22000:
+        // "Fail to run \"two-way\" sync";
     default:
-        return lastSyncMode;
+        return "slow";
     }
-}
-
-QString SyncAccount::lastSyncStatus(const QString &sessionName,
-                                    const QString &serviceName,
-                                    const QString &sourceName) const
-{
-    QStringMap lastReport = this->lastReport(sessionName, serviceName, sourceName);
-
-//    qDebug() << "REPORT(lastSyncStatus)====================================" << sourceName;
-//    SyncConfigure::dumpMap(lastReport);
-//    qDebug() << "==========================================================";
-
-    QString lastStatus;
-    if (!lastReport.isEmpty()) {
-        lastStatus = lastReport.value("status", "");
-    } else {
-        QString statusMessage = statusDescription(lastStatus);
-        qDebug() <<  "\t" << QString("Last report start date: %1, Status: %2 Message: %3")
-                    .arg(QDateTime::fromTime_t(lastReport.value("start", "0").toUInt()).toString(Qt::SystemLocaleShortDate))
-                    .arg(lastStatus)
-                    .arg(statusMessage.isEmpty() ? "OK" : statusMessage);
-    }
-
-    return lastStatus;
 }
 
 bool SyncAccount::enabled() const
@@ -574,30 +469,6 @@ void SyncAccount::setRetrySync(bool retry)
     m_retrySync = retry;
 }
 
-QString SyncAccount::lastSuccessfulSyncDate(const QString &serviceName,
-                                            const QString &sourceName)
-{
-    if (m_currentSession) {
-        qWarning() << "Sync in progress can not load log right now";
-        return QDateTime::currentDateTime().toUTC().toString(Qt::ISODate);
-    }
-
-    QString lastSyncDate;
-    const QString sessionName = SyncConfigure::accountSessionName(m_account);
-
-    // build sync evolution source name based on service and account.
-    QString fullSourceName = SyncConfigure::formatSourceName(serviceName, m_account->id(), sourceName);
-    QStringMap report = lastReport(sessionName, serviceName, fullSourceName, true);
-    if (report.contains("start")) {
-        uint lastSync = report["start"].toUInt();
-        lastSyncDate = QDateTime::fromTime_t(lastSync).toUTC().toString(Qt::ISODate);
-    } else {
-        qDebug() << "START keyword not found in report" << report;
-    }
-
-    return lastSyncDate;
-}
-
 Account *SyncAccount::account() const
 {
     return m_account;
@@ -668,7 +539,7 @@ void SyncAccount::onSessionStatusChanged(const QString &status, quint32 error, c
                 continue;
             }
             m_sourcesOnSync << sourceName;
-            Q_EMIT syncSourceStarted(serviceName, sourceName, isFirstSync);
+            Q_EMIT syncSourceStarted(serviceName, newStatus, isFirstSync);
 
         } else if (newStatus == "done") {
             if (!m_sourcesOnSync.contains(sourceName)) {
@@ -676,7 +547,7 @@ void SyncAccount::onSessionStatusChanged(const QString &status, quint32 error, c
             }
 
             m_sourcesOnSync.removeOne(sourceName);
-            m_currentSyncResults.insert(sourceName, newStatus);
+            m_currentSyncResults.insert(sourceName, QString::number(i.value().error));
 
             Q_EMIT syncSourceFinished(serviceName, sourceName, isFirstSync, newStatus, "");
         } else if ((status == "running;waiting") ||

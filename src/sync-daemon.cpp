@@ -42,6 +42,7 @@ using namespace Accounts;
 #define SYNC_MONITOR_ICON_PATH      "/usr/share/icons/ubuntu-mobile/actions/scalable/reload.svg"
 #define SYNC_ON_MOBILE_CONFIG_KEY   "sync-on-mobile-connection"
 
+
 SyncDaemon::SyncDaemon()
     : QObject(0),
       m_manager(0),
@@ -307,6 +308,39 @@ void SyncDaemon::syncFinishedImpl()
     Q_EMIT done();
 }
 
+void SyncDaemon::saveSyncResult(uint accountId, const QString &sourceName, const QString &result, const QString &date)
+{    static QStringList okStatus;
+
+     if (okStatus.isEmpty()) {
+         okStatus << "0"
+                  << "200"
+                  << "204"
+                  << "207";
+     }
+
+    const QString logKey = QString(ACCOUNT_LOG_GROUP_FORMAT).arg(accountId).arg(sourceName);
+    m_settings.setValue(logKey + ACCOUNT_LOG_LAST_SYNC_RESULT, result);
+    m_settings.setValue(logKey + ACCOUNT_LOG_LAST_SYNC_DATE, date);
+    if (okStatus.contains(result)) {
+        m_settings.setValue(logKey + ACCOUNT_LOG_LAST_SUCCESSFUL_DATE, date);
+    }
+    m_settings.sync();
+}
+
+QString SyncDaemon::loadSyncResult(uint accountId, const QString &sourceName)
+{
+    const QString logKey = QString(ACCOUNT_LOG_GROUP_FORMAT).arg(accountId).arg(sourceName);
+    return m_settings.value(logKey + ACCOUNT_LOG_LAST_SYNC_RESULT).toString();
+}
+
+QString SyncDaemon::lastSuccessfulSyncDate(quint32 accountId, const QString &calendar)
+{
+    const QString sourceName = SyncConfigure::formatSourceName(CALENDAR_SERVICE_NAME, accountId, calendar);
+    const QString configKey = QString(ACCOUNT_LOG_GROUP_FORMAT).arg(accountId).arg(sourceName);
+
+    return m_settings.value(configKey + ACCOUNT_LOG_LAST_SUCCESSFUL_DATE).toString();
+}
+
 void SyncDaemon::run()
 {
     setupAccounts();
@@ -354,17 +388,6 @@ QStringList SyncDaemon::enabledServices() const
 bool SyncDaemon::isOnline() const
 {
     return m_networkStatus->state() != SyncNetwork::NetworkOffline;
-}
-
-QString SyncDaemon::lastSuccessfulSyncDate(quint32 accountId, const QString &service, const QString &source)
-{
-    SyncAccount *acc = m_accounts.value(accountId, 0);
-    if (acc) {
-        return acc->lastSuccessfulSyncDate(service, source);
-    } else {
-        qWarning() << "Account not found:" << accountId;
-    }
-    return QString();
 }
 
 bool SyncDaemon::syncOnMobileConnection() const
@@ -591,6 +614,8 @@ void SyncDaemon::onAccountSyncFinished(const QString &serviceName,
         const QString status = statusList.value(source);
         QString errorMessage = SyncAccount::statusDescription(status);
         errorCode = status.toUInt();
+
+        saveSyncResult((uint) acc->id(), source, status, QDateTime::currentDateTime().toString(Qt::ISODate));
 
         if ((acc->lastError() == 0) && !errorMessage.isEmpty() && whiteListStatus.contains(status)) {
             // white list error retry the sync
