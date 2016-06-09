@@ -105,9 +105,8 @@ void SyncDBus::detach()
     Q_EMIT clientDeattached(m_clientCount);
 }
 
-QString SyncDBus::lastSuccessfulSyncDate(quint32 accountId, const QString &service, const QString &source, const QDBusMessage &message)
+QString SyncDBus::lastSuccessfulSyncDate(quint32 accountId, const QString &source, const QDBusMessage &message)
 {
-    Q_UNUSED(service);
     message.setDelayedReply(true);
 
     QString result = m_parent->lastSuccessfulSyncDate(accountId, source);

@@ -73,7 +73,6 @@ class SyncDBus : public QDBusAbstractAdaptor
 "    <method name=\"lastSuccessfulSyncDate\">\n"
 "      <arg direction=\"in\" type=\"u\"/>\n"
 "      <arg direction=\"in\" type=\"s\"/>\n"
-"      <arg direction=\"in\" type=\"s\"/>\n"
 "      <arg direction=\"out\" type=\"s\" name=\"date\"/>\n"
 "    </method>\n"
 "    <method name=\"cancel\">\n"
@@ -81,6 +80,9 @@ class SyncDBus : public QDBusAbstractAdaptor
 "    </method>\n"
 "    <method name=\"attach\"/>\n"
 "    <method name=\"detach\"/>\n"
+"    <method name=\"state\" >\n"
+"      <arg direction=\"out\" type=\"s\"/>\n"
+"    </method>\n"
 "  </interface>\n"
         "")
     Q_PROPERTY(QString state READ state NOTIFY stateChanged)
@@ -105,7 +107,7 @@ Q_SIGNALS:
 public Q_SLOTS:
     void sync(QStringList service);
     void syncAccount(quint32 accountId, const QString &service, const QStringList &sources);
-    QString lastSuccessfulSyncDate(quint32 accountId, const QString &service, const QString &source, const QDBusMessage &message);
+    QString lastSuccessfulSyncDate(quint32 accountId, const QString &source, const QDBusMessage &message);
     QStringList listCalendarsByAccount(quint32 accountId, const QDBusMessage &message);
     void cancel(QStringList services);
     QString state() const;

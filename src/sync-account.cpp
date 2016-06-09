@@ -249,7 +249,6 @@ QString SyncAccount::syncMode(const QString &serviceName,
                               bool *firstSync) const
 {
     const QString lastStatus = lastSyncStatus(sourceName);
-    QString lastSyncMode = "two-way";
     *firstSync = lastStatus.isEmpty();
     qDebug() << "\tAccount" << m_account->displayName()
              << "source" << sourceName
