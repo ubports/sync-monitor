@@ -121,6 +121,7 @@ private:
 
     void saveSyncResult(uint accountId, const QString &sourceName, const QString &result, const QString &date);
     QString loadSyncResult(uint accountId, const QString &sourceName);
+    bool isFirstSync(uint accountId);
 };
 
 #endif
