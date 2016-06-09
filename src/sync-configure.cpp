@@ -182,17 +182,18 @@ void SyncConfigure::continuePeerConfig(SyncEvolutionSessionProxy *session, const
             // check if there is a source for this remote url already
             if (localDbId.isEmpty()) {
                 localDbId = eds.sourceIdByRemoteUrl(db.source, m_account->id());
+            } else {
+                qDebug() << "Using legacy source:" << localDbId << db.name;
             }
             // create new source if not found
             if (localDbId.isEmpty()) {
                 QString title = db.title.isEmpty() ? db.name : db.title;
+                qDebug() << "Create new EDS source for:" << title;
                 localDbId = eds.createSource(title,
                                              db.color,
                                              db.source,
                                              db.writable,
                                              m_account->id());
-            } else {
-                 qDebug() << "Using legacy source:" << localDbId << db.name;
             }
             // remove qorgnizer prefix: "qtorganizer:eds::"
             localDbId = localDbId.split(":").last();
@@ -245,7 +246,7 @@ void SyncConfigure::continuePeerConfig(SyncEvolutionSessionProxy *session, const
                 continue;
 
             if (sourceName.startsWith(fullSourcePrefix)) {
-                qDebug() << "Remove source not in use:" << sourceName;
+                qDebug() << "\tRemove source not in use:" << sourceName;
                 // remove config
                 config.remove(sourceName);
                 changed = true;
@@ -259,7 +260,7 @@ void SyncConfigure::continuePeerConfig(SyncEvolutionSessionProxy *session, const
             qWarning() << "Fail to save account client config";
             Q_EMIT error(services);
         } else {
-            qDebug() << "Peer created" << peerName;
+            qDebug() << "\tPeer Saved" << peerName;
         }
     }
 
@@ -323,24 +324,34 @@ void SyncConfigure::continuePeerConfig(SyncEvolutionSessionProxy *session, const
         }
     }
 
-    if (changed && !session->saveConfig("@default", config)) {
-        qWarning() << "Fail to save @default config";
+    if (changed) {
+        if (!session->saveConfig("@default", config)) {
+            qWarning() << "Fail to save @default config";
+        } else {
+            qDebug() << "Local config saved!";
+        }
     }
 
     // create sync config
     if (!session->hasConfig(peerName)) {
         qDebug() << "Create peer config on default config" << peerName;
         config = session->getConfig("SyncEvolution_Client", true);
-        config[""]["syncURL"] = QString("local://@%1").arg(peerName);
-        config[""]["username"] = QString();
-        config[""]["password"] = QString();
-        config[""]["loglevel"] = "1";
-        config[""]["dumpData"] = "0";
-        config[""]["printChanges"] = "0";
-        config[""]["maxlogdirs"] = "2";
-        if (!session->saveConfig(peerName, config)) {
-            qWarning() << "Fail to save sync config" << peerName;
-        }
+    } else {
+        qDebug() << "Update peer config";
+        config = session->getConfig(peerName, false);
+    }
+
+    config[""]["syncURL"] = QString("local://@%1").arg(peerName);
+    config[""]["username"] = QString();
+    config[""]["password"] = QString();
+    config[""]["loglevel"] = "1";
+    config[""]["dumpData"] = "0";
+    config[""]["printChanges"] = "0";
+    config[""]["maxlogdirs"] = "2";
+    if (!session->saveConfig(peerName, config)) {
+        qWarning() << "Fail to save sync config" << peerName;
+    } else {
+        qDebug() << "Local peer saved!";
     }
 
     session->destroy();
