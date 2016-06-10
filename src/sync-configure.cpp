@@ -177,7 +177,7 @@ void SyncConfigure::continuePeerConfig(SyncEvolutionSessionProxy *session, const
             // check if a source with the same account name already exists
             QString localDbId;
             if (db.name == m_account->displayName()) {
-                localDbId = eds.sourceIdByName(db.source, 0);
+                localDbId = eds.sourceIdByName(db.name, 0);
             }
             // check if there is a source for this remote url already
             if (localDbId.isEmpty()) {
