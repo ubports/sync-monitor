@@ -267,6 +267,7 @@ void SyncDaemon::continueSync()
         }
         // remove sync reqeust from offline queue
         m_offlineQueue->remove(m_currentAccount, m_currentServiceName);
+        Q_EMIT syncAboutToStart();
         m_currentAccount->sync(m_currentServiceName);
     } else {
         syncFinishedImpl();
