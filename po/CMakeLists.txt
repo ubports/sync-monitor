@@ -12,18 +12,11 @@ file(GLOB PO_FILES *.po)
 file(GLOB_RECURSE I18N_SRCS RELATIVE ${CMAKE_SOURCE_DIR}
     ${CMAKE_SOURCE_DIR}/src/*.cpp
 )
-file(GLOB_RECURSE I18N_XMLS RELATIVE ${CMAKE_CURRENT_BINARY_DIR}
-    ${CMAKE_SOURCE_DIR}/accounts/applications/*.in
-)
 file(GLOB_RECURSE I18N_QMLS RELATIVE ${CMAKE_SOURCE_DIR}
     ${sync-monitor-helper_SOURCE_DIR}/*.qml
 )
 
 string(REPLACE "${CMAKE_SOURCE_DIR}/" "" RELATIVE_BUILD_DIR ${CMAKE_CURRENT_BINARY_DIR})
-foreach(XML_FILE ${I18N_XMLS})
-    get_filename_component(XML_BASE_NAME ${XML_FILE} NAME)
-    list(APPEND I18N_SRCS "${RELATIVE_BUILD_DIR}/tmp/${XML_BASE_NAME}.h")
-endforeach(XML_FILE)
 
 foreach(PO_FILE ${PO_FILES})
     get_filename_component(LANG ${PO_FILE} NAME_WE)
@@ -38,8 +31,6 @@ find_program(XGETTEXT_EXECUTABLE xgettext)
 if(XGETTEXT_EXECUTABLE)
     add_custom_target(${POT_FILE})
     add_custom_command(TARGET ${POT_FILE}
-        COMMAND ${INTLTOOL_EXTRACT_EXECUTABLE}
-                -l --type=gettext/xml ${I18N_XMLS}
         COMMAND ${XGETTEXT_EXECUTABLE} -o ${POT_FILE}
                 --c++ --qt --add-comments=TRANSLATORS
                 --keyword=_ --keyword=N_
