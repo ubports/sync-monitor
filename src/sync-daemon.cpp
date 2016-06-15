@@ -566,7 +566,7 @@ void SyncDaemon::onAccountSourceSyncStarted(const QString &serviceName,
 {
     SyncAccount *acc = qobject_cast<SyncAccount*>(QObject::sender());
     m_syncElapsedTime.restart();
-    qDebug() << QString("[%3] Start sync:  %1 (%2)")
+    qDebug() << QString("[%3] Start sync: %1 (%2)")
                 .arg(acc->displayName())
                 .arg(serviceName + "/" + sourceName)
                 .arg(QDateTime::currentDateTime().toString(Qt::SystemLocaleShortDate));
@@ -586,6 +586,7 @@ void SyncDaemon::onAccountSourceSyncFinished(const QString &serviceName,
                                              const QString &mode)
 {
     Q_UNUSED(mode);
+    Q_UNUSED(firstSync);
 
     SyncAccount *acc = qobject_cast<SyncAccount*>(QObject::sender());
     QString errorMessage = SyncAccount::statusDescription(status);
