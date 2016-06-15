@@ -48,6 +48,12 @@ public:
         Invalid
     };
 
+    enum SourceState {
+        SourceSyncStarting = 0,
+        SourceSyncRunning,
+        SourceSyncDone
+    };
+
     SyncAccount(Accounts::Account *account,
                 const QSettings *settings,
                 QObject *parent=0);
@@ -115,7 +121,7 @@ private:
     const QSettings *m_settings;
     SyncConfigure *m_config;
     QStringList m_servicesToSync;
-    QStringList m_sourcesOnSync;
+    QMap<QString, SyncAccount::SourceState> m_sourcesOnSync;
     QMap<QString, QString> m_currentSyncResults;
     QElapsedTimer m_syncTime;
 

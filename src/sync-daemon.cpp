@@ -640,7 +640,9 @@ void SyncDaemon::onAccountSyncFinished(const QString &serviceName,
         }
 
         if ((acc->lastError() == 0) && !errorMessage.isEmpty() && whiteListStatus.contains(status)) {
+            fail = true;
             // white list error retry the sync
+            qDebug() << "Trying a second sync due error:" << errorMessage;
             m_syncQueue->push(acc, serviceName, false);
             break;
         } else if (status.endsWith("403")){
