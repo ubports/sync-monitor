@@ -349,10 +349,36 @@ QString SyncDaemon::lastSuccessfulSyncDate(quint32 accountId, const QString &cal
     return m_settings.value(configKey + ACCOUNT_LOG_LAST_SUCCESSFUL_DATE).toString();
 }
 
+void SyncDaemon::cleanupLogs()
+{
+    QList<int> accountIds;
+    Q_FOREACH(const SyncAccount *acc, m_accounts) {
+        accountIds << acc->id();
+    }
+
+    Q_FOREACH(const QString &group, m_settings.childGroups()) {
+        QString strId = group.split("_").value(1, "");
+        if (strId.isEmpty())
+            continue;
+
+        bool ok = true;
+        int id = strId.toInt(&ok);
+        if (!ok)
+            continue;
+
+        if (!accountIds.contains(id)) {
+            qDebug() << "Clean log entry" << group << "from account:" << id;
+            m_settings.remove(group);
+        }
+    }
+    m_settings.sync();
+}
+
 void SyncDaemon::run()
 {
     setupAccounts();
     setupTriggers();
+    cleanupLogs();
 
     // export dbus interface
     registerService();
