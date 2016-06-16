@@ -124,6 +124,7 @@ void SyncAccount::sync(const QString &serviceName)
     switch(m_state) {
     case SyncAccount::Idle:
         qDebug() << "Sync requested service:" << m_account->displayName() << serviceName;
+        m_servicesToSync.clear();
         if (serviceName.isEmpty()) {
             m_servicesToSync  = m_settings->childGroups();
         } else {
@@ -515,15 +516,12 @@ void SyncAccount::onSessionStatusChanged(const QString &status, quint32 error, c
 
     qDebug() << "Session status changed with sources" << sources.keys();
 
-    QString serviceName;
-
     for(QSyncStatusMap::const_iterator i = sources.begin();
         i != sources.end();
         i++) {
         QString newStatus = i.value().status;
         QString sourceName = i.key();
 
-        serviceName = sourceName.split("_").first();
         if (newStatus == "idle") {
             // skip idle sources
             continue;
@@ -538,14 +536,14 @@ void SyncAccount::onSessionStatusChanged(const QString &status, quint32 error, c
         if (newStatus == "running") {
             if (m_sourcesOnSync.value(sourceName) == SyncAccount::SourceSyncStarting) {
                 m_sourcesOnSync[sourceName] = SyncAccount::SourceSyncRunning;
-                Q_EMIT syncSourceStarted(serviceName, newStatus, isFirstSync);
+                Q_EMIT syncSourceStarted(CALENDAR_SERVICE_NAME, newStatus, isFirstSync);
             }
 
         } else if (newStatus == "done") {
             if (m_sourcesOnSync.value(sourceName) == SyncAccount::SourceSyncRunning) {
                 m_sourcesOnSync[sourceName] = SyncAccount::SourceSyncDone;
                 m_currentSyncResults.insert(sourceName, QString::number(i.value().error));
-                Q_EMIT syncSourceFinished(serviceName, sourceName, isFirstSync, newStatus, "");
+                Q_EMIT syncSourceFinished(CALENDAR_SERVICE_NAME, sourceName, isFirstSync, newStatus, "");
             }
         } else if ((status == "running;waiting") ||
                    (status == "idle")) {
@@ -579,7 +577,7 @@ void SyncAccount::onSessionStatusChanged(const QString &status, quint32 error, c
             setState(SyncAccount::Idle);
             releaseSession();
 
-            Q_EMIT syncFinished(serviceName, m_currentSyncResults);
+            Q_EMIT syncFinished(CALENDAR_SERVICE_NAME, m_currentSyncResults);
             m_currentSyncResults.clear();
             qDebug() << "---------------------------------------------------------Sync finished:" << m_syncTime.elapsed() / 1000 << "secs";
         }

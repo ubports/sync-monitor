@@ -643,7 +643,7 @@ void SyncDaemon::onAccountSyncFinished(const QString &serviceName,
             fail = true;
             // white list error retry the sync
             qDebug() << "Trying a second sync due error:" << errorMessage;
-            m_syncQueue->push(acc, serviceName, false);
+            m_syncQueue->push(acc, CALENDAR_SERVICE_NAME, false);
             break;
         } else if (status.endsWith("403")){
             authenticateAccount(acc, serviceName);
