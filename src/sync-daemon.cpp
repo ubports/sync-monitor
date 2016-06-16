@@ -645,12 +645,9 @@ void SyncDaemon::onAccountSyncFinished(const QString &serviceName,
             qDebug() << "Trying a second sync due error:" << errorMessage;
             m_syncQueue->push(acc, CALENDAR_SERVICE_NAME, false);
             break;
-        } else if (status.endsWith("403")){
-            authenticateAccount(acc, serviceName);
-            errorCode = 0;
-            break;
         } else if (!errorMessage.isEmpty()) {
             fail = true;
+            errorCode = 0;
             NotifyMessage *notify = new NotifyMessage(true, this);
             notify->show(_("Synchronization"),
                          QString(_("Fail to sync calendar %1 from account %2.\n%3"))
