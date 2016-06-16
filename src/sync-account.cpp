@@ -622,18 +622,18 @@ void SyncAccount::onAccountConfigured(const QStringList &services)
     continueSync();
 }
 
-void SyncAccount::onAccountConfigureError(const QStringList &services)
+void SyncAccount::onAccountConfigureError(int error)
 {
     m_config->deleteLater();
     m_config = 0;
 
-    qWarning() << "Fail to configure account" << m_account->displayName() << services;
+    qWarning() << "Fail to configure account" << m_account->displayName() << error;
     setState(SyncAccount::Idle);
-    Q_EMIT syncError("", _("Fail to configure account"));
+    Q_EMIT syncError("", QString::number(error));
 
     // Send sync finish due the config error there is nothing to do
     QMap<QString, QString> errorMap;
-    errorMap.insert("", _("Fail to configure account"));
+    errorMap.insert("", QString::number(error));
     Q_EMIT syncFinished("", errorMap);
 }
 
@@ -677,6 +677,8 @@ QString SyncAccount::statusDescription(const QString &status)
 
     switch(status.toInt())
     {
+    case -1:
+        return _("Fail to configure account");
     case 0:
     case 200:
     case 204:
@@ -731,7 +733,7 @@ void SyncAccount::fetchRemoteSources(const QString &serviceName)
 {
     if (serviceName != "google-caldav") {
         qWarning() << "Service not supported" << serviceName;
-        Q_EMIT remoteSourcesAvailable(QArrayOfDatabases());
+        Q_EMIT remoteSourcesAvailable(QArrayOfDatabases(), -1);
         return;
     }
 
@@ -743,7 +745,7 @@ void SyncAccount::fetchRemoteSources(const QString &serviceName)
     if (!auth->authenticate()) {
         auth->deleteLater();
         qWarning() << "fail to authenticate account!";
-        Q_EMIT remoteSourcesAvailable(m_remoteSources);
+        Q_EMIT remoteSourcesAvailable(m_remoteSources, 304);
     }
 }
 
@@ -772,7 +774,7 @@ void SyncAccount::onAuthFailed()
     auth->deleteLater();
 
     qWarning() << "Fail to authenticate";
-    Q_EMIT remoteSourcesAvailable(m_remoteSources);
+    Q_EMIT remoteSourcesAvailable(m_remoteSources, 403);
 }
 
 void SyncAccount::onReplyFinished(QNetworkReply *reply)
@@ -785,14 +787,14 @@ void SyncAccount::onReplyFinished(QNetworkReply *reply)
 
     if (reply->error() != QNetworkReply::NoError) {
         qWarning() << "Fail to fetch remote sources:" << reply->errorString();
-        Q_EMIT remoteSourcesAvailable(m_remoteSources);
+        Q_EMIT remoteSourcesAvailable(m_remoteSources, reply->error() == QNetworkReply::AuthenticationRequiredError ? 403 : 20007);
         return;
     }
 
     int responseCode = reply->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt();
     if (responseCode != 200) {
         qWarning() << "Fail to fetch remote sources response:" << responseCode;
-        Q_EMIT remoteSourcesAvailable(m_remoteSources);
+        Q_EMIT remoteSourcesAvailable(m_remoteSources, 20007);
         return;
     }
 
@@ -835,5 +837,5 @@ void SyncAccount::onReplyFinished(QNetworkReply *reply)
         }
     }
 
-    Q_EMIT remoteSourcesAvailable(m_remoteSources);
+    Q_EMIT remoteSourcesAvailable(m_remoteSources, 0);
 }

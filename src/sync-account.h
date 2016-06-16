@@ -100,11 +100,11 @@ Q_SIGNALS:
     void enableChanged(const QString &serviceName, bool enable);
     void configured(const QStringList &services);
 
-    void remoteSourcesAvailable(const QArrayOfDatabases &sources);
+    void remoteSourcesAvailable(const QArrayOfDatabases &sources, int error);
 
 private Q_SLOTS:
     void onAccountConfigured(const QStringList &services);
-    void onAccountConfigureError(const QStringList &services);
+    void onAccountConfigureError(int error);
 
     void onAccountEnabledChanged(const QString &serviceName, bool enabled);
     void onSessionStatusChanged(const QString &status, quint32 error, const QSyncStatusMap &sources);

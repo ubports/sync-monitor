@@ -121,7 +121,7 @@ QStringList SyncDBus::listCalendarsByAccount(quint32 accountId, const QDBusMessa
     message.setDelayedReply(true);
     SyncAccount *acc = m_parent->accountById(accountId);
     if (acc) {
-        connect(acc, &SyncAccount::remoteSourcesAvailable, [message] (const QArrayOfDatabases &sources) {
+        connect(acc, &SyncAccount::remoteSourcesAvailable, [message] (const QArrayOfDatabases &sources, int error) {
             QStringList names;
             Q_FOREACH(const SyncDatabase &db, sources) {
                 names << db.name;

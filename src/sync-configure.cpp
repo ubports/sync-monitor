@@ -62,17 +62,17 @@ void SyncConfigure::configure()
 
 void SyncConfigure::fetchRemoteCalendars()
 {
-    connect(m_account, SIGNAL(remoteSourcesAvailable(QArrayOfDatabases)),
-            SLOT(onRemoteSourcesAvailable(QArrayOfDatabases)));
+    connect(m_account, SIGNAL(remoteSourcesAvailable(QArrayOfDatabases,int)),
+            SLOT(onRemoteSourcesAvailable(QArrayOfDatabases, int)));
     m_account->fetchRemoteSources("google-caldav");
 }
 
-void SyncConfigure::onRemoteSourcesAvailable(const QArrayOfDatabases &sources)
+void SyncConfigure::onRemoteSourcesAvailable(const QArrayOfDatabases &sources, int error)
 {
     m_account->disconnect(this);
     if (sources.isEmpty()) {
-        qWarning() << "Account with empty sources!";
-        Q_EMIT error(QStringList() << CALENDAR_SERVICE_NAME);
+        qWarning() << "Account with empty sources!:" << error;
+        Q_EMIT SyncConfigure::error(error);
         return;
     }
     m_remoteDatabasesByService.insert(CALENDAR_SERVICE_NAME, sources);
@@ -94,7 +94,7 @@ void SyncConfigure::configurePeer(const QStringList &services)
             if (errorNuber != 0) {
                 qWarning() << "Fail to configure peer" << errorNuber;
                 session->destroy();
-                Q_EMIT error(services);
+                Q_EMIT error(-1);
             } else if (status != "queueing") {
                 continuePeerConfig(session, services);
             }
@@ -258,7 +258,7 @@ void SyncConfigure::continuePeerConfig(SyncEvolutionSessionProxy *session, const
         bool result = session->saveConfig(peerConfigName, config);
         if (!result) {
             qWarning() << "Fail to save account client config";
-            Q_EMIT error(services);
+            Q_EMIT error(-1);
         } else {
             qDebug() << "\tPeer Saved" << peerName;
         }
