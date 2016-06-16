@@ -34,7 +34,7 @@ SyncAuth::SyncAuth(uint accountId, const QString &serviceName, QObject *parent)
       m_serviceName(serviceName),
       m_accountManager(new Manager(this))
 {
-    m_account = Account::fromId(m_accountManager, accountId, this);
+    m_account.reset(Account::fromId(m_accountManager.data(), accountId));
 }
 
 QString SyncAuth::token() const
@@ -64,7 +64,7 @@ bool SyncAuth::authenticate()
     }
     m_account->selectService(srv);
 
-    Accounts::AccountService *accSrv = new Accounts::AccountService(m_account, srv);
+    Accounts::AccountService *accSrv = new Accounts::AccountService(m_account.data(), srv);
     if (!accSrv) {
         qWarning() << QString("error: Account %1 has no valid account service")
                       .arg(m_account->displayName());
@@ -82,7 +82,7 @@ bool SyncAuth::authenticate()
 
     QVariantMap signonSessionData;
     AuthData authData = authData = accSrv->authData();
-    m_identity = SignOn::Identity::existingIdentity(authData.credentialsId());
+    m_identity.reset(SignOn::Identity::existingIdentity(authData.credentialsId()));
     if (!m_identity) {
         qWarning() << QString("error: Account %1 has no valid credentials")
                 .arg(m_account->displayName());
@@ -109,7 +109,7 @@ bool SyncAuth::authenticate()
 
 auth_error:
     accSrv->deleteLater();
-    m_session.data()->deleteLater();
+    m_session.clear();
     return false;
 }
 
@@ -117,7 +117,7 @@ void SyncAuth::onSessionResponse(const SignOn::SessionData &sessionData)
 {
     Q_ASSERT(m_session);
     m_session->disconnect(this);
-    m_session.data()->deleteLater();
+    m_session.clear();
 
     m_token = sessionData.getProperty(QStringLiteral("AccessToken")).toString();
     qDebug() << "Authenticated !!!";
@@ -130,7 +130,7 @@ void SyncAuth::onError(const SignOn::Error &error)
 {
     Q_ASSERT(m_session);
     m_session->disconnect(this);
-    m_session.data()->deleteLater();
+    m_session.clear();
 
     qWarning() << "Fail to authenticate:" << error.message();
 
