@@ -438,7 +438,8 @@ void SyncDaemon::addAccount(const AccountId &accountId, bool startSync)
         connect(syncAcc, SIGNAL(syncError(QString,QString)),
                          SLOT(onAccountSyncError(QString, QString)));
 
-        if (startSync) {
+        bool accountEnabled = syncAcc->enabled() && syncAcc->enabledServices().contains(CALENDAR_SERVICE_NAME);
+        if (startSync && accountEnabled) {
             sync(syncAcc, QString(), true, true);
         }
         Q_EMIT accountsChanged();
