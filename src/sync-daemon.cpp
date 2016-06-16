@@ -251,7 +251,6 @@ void SyncDaemon::continueSync()
     // freeze notifications during the sync, to save some CPU
     m_eds->freezeNotify();
 
-    SyncAccount *oldAccount = m_currentAccount;
     // sync the next service on the queue
     if (!m_aboutToQuit && job.isValid()) {
         m_currentServiceName = job.serviceName();
@@ -261,10 +260,6 @@ void SyncDaemon::continueSync()
     }
 
     if (m_currentAccount) {
-        // New Account to sync
-        if (oldAccount != m_currentAccount) {
-
-        }
         // remove sync reqeust from offline queue
         m_offlineQueue->remove(m_currentAccount, m_currentServiceName);
         Q_EMIT syncAboutToStart();
