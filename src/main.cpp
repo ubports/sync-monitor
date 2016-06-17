@@ -33,10 +33,9 @@ void syncMessageOutput(QtMsgType type,
                                  const QMessageLogContext &context,
                                  const QString &message)
 {
-    printf("[%s %s:%d] %s\n",
+    printf("[%s] %s\n",
            qPrintable(QDateTime::currentDateTime().toString(Qt::SystemLocaleShortDate)),
-           qPrintable(QFileInfo(context.file).fileName()),
-           context.line, qPrintable(message));
+           qPrintable(message));
 }
 
 int main(int argc, char** argv)
