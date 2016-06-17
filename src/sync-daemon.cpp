@@ -573,7 +573,7 @@ void SyncDaemon::onAccountSyncStart()
 {
     SyncAccount *acc = qobject_cast<SyncAccount*>(QObject::sender());
     // notification only appears on first sync
-    if (isFirstSync(acc->id())) {
+    if (isFirstSync(acc->id()) && (acc->lastError() == 0)) {
         NotifyMessage *notify = new NotifyMessage(true, this);
         notify->show(_("Synchronization"),
                      QString(_("Start sync: %1 (Calendar)")).arg(acc->displayName()),
@@ -656,13 +656,11 @@ void SyncDaemon::onAccountSyncFinished(const QString &serviceName,
         const QString status = statusList.value(source);
         QString errorMessage = SyncAccount::statusDescription(status);
         errorCode = status.toUInt();
-
-        if (accountEnabled) {
-            saveSyncResult((uint) acc->id(), source, status, QDateTime::currentDateTime().toString(Qt::ISODate));
-        }
+        bool saveLog = accountEnabled;
 
         if ((acc->lastError() == 0) && !errorMessage.isEmpty() && whiteListStatus.contains(status)) {
             fail = true;
+            saveLog = false;
             // white list error retry the sync
             qDebug() << "Trying a second sync due error:" << errorMessage;
             m_syncQueue->push(acc, CALENDAR_SERVICE_NAME, false);
@@ -679,9 +677,14 @@ void SyncDaemon::onAccountSyncFinished(const QString &serviceName,
                          acc->iconName(CALENDAR_SERVICE_NAME));
             break;
         }
+
+        if (saveLog && !source.isEmpty()) {
+            saveSyncResult((uint) acc->id(), source, status, QDateTime::currentDateTime().toString(Qt::ISODate));
+        }
     }
 
     if (!fail) {
+        errorCode = 0;
         // avoid to show sync done message for disabled accounts.
         if (accountEnabled && firstSync) {
             NotifyMessage *notify = new NotifyMessage(true, this);
