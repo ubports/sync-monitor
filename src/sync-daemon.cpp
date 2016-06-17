@@ -323,6 +323,13 @@ void SyncDaemon::saveSyncResult(uint accountId, const QString &sourceName, const
     m_settings.sync();
 }
 
+void SyncDaemon::clearResultForSource(uint accountId, const QString &sourceName)
+{
+    const QString logKey = QString(ACCOUNT_LOG_GROUP_FORMAT).arg(accountId).arg(sourceName);
+    m_settings.remove(logKey);
+    m_settings.sync();
+}
+
 QString SyncDaemon::loadSyncResult(uint accountId, const QString &sourceName)
 {
     const QString logKey = QString(ACCOUNT_LOG_GROUP_FORMAT).arg(accountId).arg(sourceName);
@@ -463,6 +470,8 @@ void SyncDaemon::addAccount(const AccountId &accountId, bool startSync)
                          SLOT(onAccountEnableChanged(QString, bool)));
         connect(syncAcc, SIGNAL(syncError(QString,QString)),
                          SLOT(onAccountSyncError(QString, QString)));
+        connect(syncAcc, SIGNAL(sourceRemoved(QString)),
+                         SLOT(onAccountSourceRemoved(QString)));
 
         bool accountEnabled = syncAcc->enabled() && syncAcc->enabledServices().contains(CALENDAR_SERVICE_NAME);
         if (startSync && accountEnabled) {
@@ -710,6 +719,12 @@ void SyncDaemon::onAccountEnableChanged(const QString &serviceName, bool enabled
         cancel(acc, serviceName);
     }
     Q_EMIT accountsChanged();
+}
+
+void SyncDaemon::onAccountSourceRemoved(const QString &source)
+{
+    SyncAccount *acc = qobject_cast<SyncAccount*>(QObject::sender());
+    clearResultForSource(acc->id(), source.mid(source.indexOf("/") + 1));
 }
 
 void SyncDaemon::quit()

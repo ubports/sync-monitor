@@ -54,6 +54,7 @@ public:
 Q_SIGNALS:
     void done(const QStringList &services);
     void error(int error);
+    void sourceRemoved(const QString &sourceName);
 
 private Q_SLOTS:
     void onRemoteSourcesAvailable(const QArrayOfDatabases &sources, int error);

@@ -604,6 +604,8 @@ void SyncAccount::configure()
     m_config = new SyncConfigure(this,
                                  m_settings,
                                  this);
+    connect(m_config, &SyncConfigure::sourceRemoved,
+            this, &SyncAccount::sourceRemoved);
     connect(m_config, &SyncConfigure::done,
             this, &SyncAccount::onAccountConfigured);
     connect(m_config, &SyncConfigure::error,

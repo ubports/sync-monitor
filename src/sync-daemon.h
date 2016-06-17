@@ -86,6 +86,7 @@ private Q_SLOTS:
     void onAccountSourceSyncFinished(const QString &serviceName, const QString &sourceName, const bool firstSync, const QString &status, const QString &mode);
     void onAccountSyncError(const QString &serviceName, const QString &error);
     void onAccountEnableChanged(const QString &serviceName, bool enabled);
+    void onAccountSourceRemoved(const QString &source);
     void onDataChanged(const QString &sourceId);
     void onClientAttached();
 
@@ -120,6 +121,7 @@ private:
     void syncFinishedImpl();
 
     void saveSyncResult(uint accountId, const QString &sourceName, const QString &result, const QString &date);
+    void clearResultForSource(uint accountId, const QString &sourceName);
     QString loadSyncResult(uint accountId, const QString &sourceName);
     bool isFirstSync(uint accountId);
     void cleanupLogs();

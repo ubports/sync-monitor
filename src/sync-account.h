@@ -99,6 +99,7 @@ Q_SIGNALS:
 
     void enableChanged(const QString &serviceName, bool enable);
     void configured(const QStringList &services);
+    void sourceRemoved(const QString &sourceName);
 
     void remoteSourcesAvailable(const QArrayOfDatabases &sources, int error);
 

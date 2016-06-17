@@ -141,6 +141,7 @@ void SyncConfigure::continuePeerConfig(SyncEvolutionSessionProxy *session, const
     bool changed = false;
     // Map [source-name] as key [dbId, inUse] as value
     QMap<QString, QPair<QString, bool> > sourceToDatabase;
+    QStringList removedSources;
 
     Q_FOREACH(const QString &service, services.toSet()) {
         qDebug() << "Configure source for service" << service << "Account" << m_account->id();
@@ -249,6 +250,7 @@ void SyncConfigure::continuePeerConfig(SyncEvolutionSessionProxy *session, const
                 qDebug() << "\tRemove source not in use:" << sourceName;
                 // remove config
                 config.remove(sourceName);
+                removedSources << sourceName;
                 changed = true;
             }
         }
@@ -316,8 +318,9 @@ void SyncConfigure::continuePeerConfig(SyncEvolutionSessionProxy *session, const
                     QString database = config[source].value("database");
                     if (!database.isEmpty()) {
                         qDebug() << "Remove local config and database" << source << config[source].value("database");
-                        config.remove(source);
+                        Q_EMIT sourceRemoved(source);
                         eds.removeSource("qtorganizer:eds::" + database);
+                        changed = true;
                     }
                 }
             }
@@ -357,13 +360,11 @@ void SyncConfigure::continuePeerConfig(SyncEvolutionSessionProxy *session, const
     session->destroy();
     SyncEvolutionServerProxy::destroy();
 
-#if 0
     // remove sources dir when necessary
-    Q_FOREACH(const QString &key, sourcesRemoved) {
+    Q_FOREACH(const QString &key, removedSources) {
         QString sourceName = key.mid(key.indexOf('/') + 1);
-        removeAccountSourceConfig(m_account, sourceName);
+        removeAccountSourceConfig(m_account->account(), sourceName);
     }
-#endif
 
     Q_EMIT done(services);
 }
@@ -394,6 +395,7 @@ QString SyncConfigure::formatSourceName(const QString &serviceName, uint account
 
 void SyncConfigure::removeAccountSourceConfig(Account *account, const QString &sourceName)
 {
+    //./default/sources/<source-name>
     QString configPath = QString("%1/default/sources/%2")
             .arg(QStandardPaths::locate(QStandardPaths::ConfigLocation,
                                         QStringLiteral("syncevolution"),
@@ -401,6 +403,7 @@ void SyncConfigure::removeAccountSourceConfig(Account *account, const QString &s
             .arg(sourceName);
     removeConfigDir(configPath);
 
+    //./default/peers/<provider>-<account-id>/sources/<source-name>
     configPath = QString("%1/default/peers/%2-%3/sources/%4")
             .arg(QStandardPaths::locate(QStandardPaths::ConfigLocation,
                                         QStringLiteral("syncevolution"),
@@ -409,6 +412,27 @@ void SyncConfigure::removeAccountSourceConfig(Account *account, const QString &s
             .arg(account->id())
             .arg(sourceName);
     removeConfigDir(configPath);
+
+    // ./<provider>-<account-id>/peers/target-config/sources/<source-name>
+    configPath = QString("%1/%2-%3/peers/target-config/sources/%4")
+            .arg(QStandardPaths::locate(QStandardPaths::ConfigLocation,
+                                        QStringLiteral("syncevolution"),
+                                        QStandardPaths::LocateDirectory))
+            .arg(account->providerName())
+            .arg(account->id())
+            .arg(sourceName);
+    removeConfigDir(configPath);
+
+    // ./<provider>-<account-id>/sources/<source-name>
+    configPath = QString("%1/%2-%3/sources/%4")
+            .arg(QStandardPaths::locate(QStandardPaths::ConfigLocation,
+                                        QStringLiteral("syncevolution"),
+                                        QStandardPaths::LocateDirectory))
+            .arg(account->providerName())
+            .arg(account->id())
+            .arg(sourceName);
+    removeConfigDir(configPath);
+
 }
 
 bool SyncConfigure::removeConfigDir(const QString &dirPath)
