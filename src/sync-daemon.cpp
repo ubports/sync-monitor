@@ -226,19 +226,23 @@ void SyncDaemon::continueSync()
 {
     SyncJob newJob = m_syncQueue->popNext();
     SyncNetwork::NetworkState netState = m_networkStatus->state();
-    bool continueSync = newJob.isValid() &&
-                        ((netState == SyncNetwork::NetworkOnline) ||
-                         (netState != SyncNetwork::NetworkOffline && newJob.runOnPayedConnection()));
+    const bool isOnLine = (netState == SyncNetwork::NetworkOnline) ||
+                          (netState != SyncNetwork::NetworkOffline && newJob.runOnPayedConnection());
+    const bool continueSync = newJob.isValid() && isOnLine;
     if (!continueSync) {
-        qDebug() << "Device is offline we will skip the sync.";
-        Q_FOREACH(const SyncJob &j, m_syncQueue->jobs()) {
-            if (j.account() && j.account()->retrySync()) {
-                qDebug() << "Push account to later sync";
-                m_offlineQueue->push(j);
+        if (!isOnLine) {
+            qDebug() << "Device is offline we will skip the sync.";
+            Q_FOREACH(const SyncJob &j, m_syncQueue->jobs()) {
+                if (j.account() && j.account()->retrySync()) {
+                    qDebug() << "Push account to later sync";
+                    m_offlineQueue->push(j);
+                }
             }
+            m_syncQueue->clear();
+        } else {
+            Q_ASSERT(m_syncQueue->count() == 0);
+            qDebug() << "No more job to sync.";
         }
-
-        m_syncQueue->clear();
         syncFinishedImpl();
         return;
     }
