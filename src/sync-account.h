@@ -48,6 +48,12 @@ public:
         Invalid
     };
 
+    enum SourceState {
+        SourceSyncStarting = 0,
+        SourceSyncRunning,
+        SourceSyncDone
+    };
+
     SyncAccount(Accounts::Account *account,
                 const QSettings *settings,
                 QObject *parent=0);
@@ -77,6 +83,7 @@ public:
     bool retrySync() const;
     void setRetrySync(bool retry);
     Accounts::Account *account() const;
+    QDateTime lastSyncTime() const;
 
     void fetchRemoteSources(const QString &serviceName);
 
@@ -93,12 +100,13 @@ Q_SIGNALS:
 
     void enableChanged(const QString &serviceName, bool enable);
     void configured(const QStringList &services);
+    void sourceRemoved(const QString &sourceName);
 
-    void remoteSourcesAvailable(const QArrayOfDatabases &sources);
+    void remoteSourcesAvailable(const QArrayOfDatabases &sources, int error);
 
 private Q_SLOTS:
     void onAccountConfigured(const QStringList &services);
-    void onAccountConfigureError(const QStringList &services);
+    void onAccountConfigureError(int error);
 
     void onAccountEnabledChanged(const QString &serviceName, bool enabled);
     void onSessionStatusChanged(const QString &status, quint32 error, const QSyncStatusMap &sources);
@@ -111,11 +119,12 @@ private Q_SLOTS:
 
 private:
     Accounts::Account *m_account;
+    QDateTime m_startSyncTime;
     SyncEvolutionSessionProxy *m_currentSession;
     const QSettings *m_settings;
     SyncConfigure *m_config;
     QStringList m_sourcesToSync;
-    QStringList m_sourcesOnSync;
+    QMap<QString, SyncAccount::SourceState> m_sourcesOnSync;
     QMap<QString, QString> m_currentSyncResults;
     QElapsedTimer m_syncTime;
 

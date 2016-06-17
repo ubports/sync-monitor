@@ -29,6 +29,15 @@ namespace C {
 
 #include "config.h"
 
+void syncMessageOutput(QtMsgType type,
+                                 const QMessageLogContext &context,
+                                 const QString &message)
+{
+    printf("[%s] %s\n",
+           qPrintable(QDateTime::currentDateTime().toString(Qt::SystemLocaleShortDate)),
+           qPrintable(message));
+}
+
 int main(int argc, char** argv)
 {
     // register all syncevolution dbus types
@@ -38,8 +47,7 @@ int main(int argc, char** argv)
     app.setOrganizationName("Canonical");
     app.setOrganizationDomain("canonical.com");
     app.setApplicationName("sync-monitor");
-    app.setOrganizationName("canonical");
-    app.setOrganizationDomain("canonical.com");
+    qInstallMessageHandler(syncMessageOutput);
 
     setlocale(LC_ALL, "");
     C::bindtextdomain(GETTEXT_PACKAGE, GETTEXT_LOCALEDIR);

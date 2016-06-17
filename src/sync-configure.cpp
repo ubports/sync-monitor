@@ -62,17 +62,17 @@ void SyncConfigure::configure()
 
 void SyncConfigure::fetchRemoteCalendars()
 {
-    connect(m_account, SIGNAL(remoteSourcesAvailable(QArrayOfDatabases)),
-            SLOT(onRemoteSourcesAvailable(QArrayOfDatabases)));
+    connect(m_account, SIGNAL(remoteSourcesAvailable(QArrayOfDatabases,int)),
+            SLOT(onRemoteSourcesAvailable(QArrayOfDatabases, int)));
     m_account->fetchRemoteSources("google-caldav");
 }
 
-void SyncConfigure::onRemoteSourcesAvailable(const QArrayOfDatabases &sources)
+void SyncConfigure::onRemoteSourcesAvailable(const QArrayOfDatabases &sources, int error)
 {
     m_account->disconnect(this);
     if (sources.isEmpty()) {
-        qWarning() << "Account with empty sources!";
-        Q_EMIT error(QStringList() << CALENDAR_SERVICE_NAME);
+        qWarning() << "Account with empty sources!:" << error;
+        Q_EMIT SyncConfigure::error(error);
         return;
     }
     m_remoteDatabasesByService.insert(CALENDAR_SERVICE_NAME, sources);
@@ -94,7 +94,7 @@ void SyncConfigure::configurePeer(const QStringList &services)
             if (errorNuber != 0) {
                 qWarning() << "Fail to configure peer" << errorNuber;
                 session->destroy();
-                Q_EMIT error(services);
+                Q_EMIT error(-1);
             } else if (status != "queueing") {
                 continuePeerConfig(session, services);
             }
@@ -141,6 +141,7 @@ void SyncConfigure::continuePeerConfig(SyncEvolutionSessionProxy *session, const
     bool changed = false;
     // Map [source-name] as key [dbId, inUse] as value
     QMap<QString, QPair<QString, bool> > sourceToDatabase;
+    QStringList removedSources;
 
     Q_FOREACH(const QString &service, services.toSet()) {
         qDebug() << "Configure source for service" << service << "Account" << m_account->id();
@@ -177,22 +178,23 @@ void SyncConfigure::continuePeerConfig(SyncEvolutionSessionProxy *session, const
             // check if a source with the same account name already exists
             QString localDbId;
             if (db.name == m_account->displayName()) {
-                localDbId = eds.sourceIdByName(db.source, 0);
+                localDbId = eds.sourceIdByName(db.name, 0);
             }
             // check if there is a source for this remote url already
             if (localDbId.isEmpty()) {
                 localDbId = eds.sourceIdByRemoteUrl(db.source, m_account->id());
+            } else {
+                qDebug() << "Using legacy source:" << localDbId << db.name;
             }
             // create new source if not found
             if (localDbId.isEmpty()) {
                 QString title = db.title.isEmpty() ? db.name : db.title;
+                qDebug() << "Create new EDS source for:" << title;
                 localDbId = eds.createSource(title,
                                              db.color,
                                              db.source,
                                              db.writable,
                                              m_account->id());
-            } else {
-                 qDebug() << "Using legacy source:" << localDbId << db.name;
             }
             // remove qorgnizer prefix: "qtorganizer:eds::"
             localDbId = localDbId.split(":").last();
@@ -245,9 +247,10 @@ void SyncConfigure::continuePeerConfig(SyncEvolutionSessionProxy *session, const
                 continue;
 
             if (sourceName.startsWith(fullSourcePrefix)) {
-                qDebug() << "Remove source not in use:" << sourceName;
+                qDebug() << "\tRemove source not in use:" << sourceName;
                 // remove config
                 config.remove(sourceName);
+                removedSources << sourceName;
                 changed = true;
             }
         }
@@ -257,9 +260,9 @@ void SyncConfigure::continuePeerConfig(SyncEvolutionSessionProxy *session, const
         bool result = session->saveConfig(peerConfigName, config);
         if (!result) {
             qWarning() << "Fail to save account client config";
-            Q_EMIT error(services);
+            Q_EMIT error(-1);
         } else {
-            qDebug() << "Peer created" << peerName;
+            qDebug() << "\tPeer Saved" << peerName;
         }
     }
 
@@ -315,44 +318,53 @@ void SyncConfigure::continuePeerConfig(SyncEvolutionSessionProxy *session, const
                     QString database = config[source].value("database");
                     if (!database.isEmpty()) {
                         qDebug() << "Remove local config and database" << source << config[source].value("database");
-                        config.remove(source);
+                        Q_EMIT sourceRemoved(source);
                         eds.removeSource("qtorganizer:eds::" + database);
+                        changed = true;
                     }
                 }
             }
         }
     }
 
-    if (changed && !session->saveConfig("@default", config)) {
-        qWarning() << "Fail to save @default config";
+    if (changed) {
+        if (!session->saveConfig("@default", config)) {
+            qWarning() << "Fail to save @default config";
+        } else {
+            qDebug() << "Local config saved!";
+        }
     }
 
     // create sync config
     if (!session->hasConfig(peerName)) {
         qDebug() << "Create peer config on default config" << peerName;
         config = session->getConfig("SyncEvolution_Client", true);
-        config[""]["syncURL"] = QString("local://@%1").arg(peerName);
-        config[""]["username"] = QString();
-        config[""]["password"] = QString();
-        config[""]["loglevel"] = "1";
-        config[""]["dumpData"] = "0";
-        config[""]["printChanges"] = "0";
-        config[""]["maxlogdirs"] = "2";
-        if (!session->saveConfig(peerName, config)) {
-            qWarning() << "Fail to save sync config" << peerName;
-        }
+    } else {
+        qDebug() << "Update peer config";
+        config = session->getConfig(peerName, false);
+    }
+
+    config[""]["syncURL"] = QString("local://@%1").arg(peerName);
+    config[""]["username"] = QString();
+    config[""]["password"] = QString();
+    config[""]["loglevel"] = "1";
+    config[""]["dumpData"] = "0";
+    config[""]["printChanges"] = "0";
+    config[""]["maxlogdirs"] = "2";
+    if (!session->saveConfig(peerName, config)) {
+        qWarning() << "Fail to save sync config" << peerName;
+    } else {
+        qDebug() << "Local peer saved!";
     }
 
     session->destroy();
     SyncEvolutionServerProxy::destroy();
 
-#if 0
     // remove sources dir when necessary
-    Q_FOREACH(const QString &key, sourcesRemoved) {
+    Q_FOREACH(const QString &key, removedSources) {
         QString sourceName = key.mid(key.indexOf('/') + 1);
-        removeAccountSourceConfig(m_account, sourceName);
+        removeAccountSourceConfig(m_account->account(), sourceName);
     }
-#endif
 
     Q_EMIT done(services);
 }
@@ -383,6 +395,7 @@ QString SyncConfigure::formatSourceName(const QString &serviceName, uint account
 
 void SyncConfigure::removeAccountSourceConfig(Account *account, const QString &sourceName)
 {
+    //./default/sources/<source-name>
     QString configPath = QString("%1/default/sources/%2")
             .arg(QStandardPaths::locate(QStandardPaths::ConfigLocation,
                                         QStringLiteral("syncevolution"),
@@ -390,6 +403,7 @@ void SyncConfigure::removeAccountSourceConfig(Account *account, const QString &s
             .arg(sourceName);
     removeConfigDir(configPath);
 
+    //./default/peers/<provider>-<account-id>/sources/<source-name>
     configPath = QString("%1/default/peers/%2-%3/sources/%4")
             .arg(QStandardPaths::locate(QStandardPaths::ConfigLocation,
                                         QStringLiteral("syncevolution"),
@@ -398,6 +412,27 @@ void SyncConfigure::removeAccountSourceConfig(Account *account, const QString &s
             .arg(account->id())
             .arg(sourceName);
     removeConfigDir(configPath);
+
+    // ./<provider>-<account-id>/peers/target-config/sources/<source-name>
+    configPath = QString("%1/%2-%3/peers/target-config/sources/%4")
+            .arg(QStandardPaths::locate(QStandardPaths::ConfigLocation,
+                                        QStringLiteral("syncevolution"),
+                                        QStandardPaths::LocateDirectory))
+            .arg(account->providerName())
+            .arg(account->id())
+            .arg(sourceName);
+    removeConfigDir(configPath);
+
+    // ./<provider>-<account-id>/sources/<source-name>
+    configPath = QString("%1/%2-%3/sources/%4")
+            .arg(QStandardPaths::locate(QStandardPaths::ConfigLocation,
+                                        QStringLiteral("syncevolution"),
+                                        QStandardPaths::LocateDirectory))
+            .arg(account->providerName())
+            .arg(account->id())
+            .arg(sourceName);
+    removeConfigDir(configPath);
+
 }
 
 bool SyncConfigure::removeConfigDir(const QString &dirPath)

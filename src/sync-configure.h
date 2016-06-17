@@ -53,10 +53,11 @@ public:
 
 Q_SIGNALS:
     void done(const QStringList &services);
-    void error(const QStringList &services);
+    void error(int error);
+    void sourceRemoved(const QString &sourceName);
 
 private Q_SLOTS:
-    void onRemoteSourcesAvailable(const QArrayOfDatabases &sources);
+    void onRemoteSourcesAvailable(const QArrayOfDatabases &sources, int error);
 
 private:
     SyncAccount *m_account;

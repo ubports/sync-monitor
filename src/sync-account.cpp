@@ -123,8 +123,10 @@ void SyncAccount::sync(const QStringList &sources)
 {
     switch(m_state) {
     case SyncAccount::Idle:
-        qDebug() << "Sync requested service:" << m_account->displayName() << sources;
+        qDebug() << "Sync requested:" << m_account->displayName() << sources;
+        m_sourcesToSync.clear();
         m_sourcesToSync << sources;
+        m_startSyncTime = QDateTime::currentDateTime();
         configure();
         break;
     default:
@@ -206,7 +208,7 @@ void SyncAccount::continueSync()
         qDebug() << "Calendar Service disabled for account:" << m_account->id() << ". Skip sync!";
         Q_EMIT syncFinished(CALENDAR_SERVICE_NAME,  QMap<QString, QString>());
     } else {
-        qDebug() << "Will prepare to sync:" << m_account->id();
+        qDebug() << "Will prepare to sync:" << m_account->id() << m_sourcesToSync;
         Q_FOREACH(const SourceData &source, sources()) {
             if (m_sourcesToSync.isEmpty() || m_sourcesToSync.contains(source.first)) {
                 bool firstSync = false;
@@ -216,9 +218,7 @@ void SyncAccount::continueSync()
                     mode = syncMode(CALENDAR_SERVICE_NAME, source.first, &firstSync);
                 }
                 syncFlags.insert(source.first, mode);
-                qDebug() << "Source sync" << source << mode;
-            } else {
-                qDebug() << "Do not sync source" << source << ". Not in the list!";
+                m_sourcesOnSync.insert(source.first, SyncAccount::SourceSyncStarting);
             }
         }
     }
@@ -228,6 +228,7 @@ void SyncAccount::continueSync()
         m_syncTime.restart();
         m_currentSession->sync("none", syncFlags);
     } else {
+        qDebug() << "Nothing to sync!";
         setState(SyncAccount::Idle);
     }
 }
@@ -471,6 +472,11 @@ Account *SyncAccount::account() const
     return m_account;
 }
 
+QDateTime SyncAccount::lastSyncTime() const
+{
+    return m_startSyncTime;
+}
+
 void SyncAccount::onAccountEnabledChanged(const QString &serviceName, bool enabled)
 {
     // empty service name means that the hole account has been enabled/disabled
@@ -510,15 +516,12 @@ void SyncAccount::onSessionStatusChanged(const QString &status, quint32 error, c
         }
     }
 
-    QString serviceName;
-
     for(QSyncStatusMap::const_iterator i = sources.begin();
         i != sources.end();
         i++) {
         QString newStatus = i.value().status;
         QString sourceName = i.key();
 
-        serviceName = sourceName.split("_").first();
         if (newStatus == "idle") {
             // skip idle sources
             continue;
@@ -531,22 +534,17 @@ void SyncAccount::onSessionStatusChanged(const QString &status, quint32 error, c
 
         const bool isFirstSync = (i.value().mode == REFRESH_FROM_REMOTE_SYNC);
         if (newStatus == "running") {
-            if (m_sourcesOnSync.contains(sourceName)) {
-                // source already notified as running
-                continue;
+            if (m_sourcesOnSync.value(sourceName) == SyncAccount::SourceSyncStarting) {
+                m_sourcesOnSync[sourceName] = SyncAccount::SourceSyncRunning;
+                Q_EMIT syncSourceStarted(CALENDAR_SERVICE_NAME, newStatus, isFirstSync);
             }
-            m_sourcesOnSync << sourceName;
-            Q_EMIT syncSourceStarted(serviceName, newStatus, isFirstSync);
 
         } else if (newStatus == "done") {
-            if (!m_sourcesOnSync.contains(sourceName)) {
-                continue;
+            if (m_sourcesOnSync.value(sourceName) == SyncAccount::SourceSyncRunning) {
+                m_sourcesOnSync[sourceName] = SyncAccount::SourceSyncDone;
+                m_currentSyncResults.insert(sourceName, QString::number(i.value().error));
+                Q_EMIT syncSourceFinished(CALENDAR_SERVICE_NAME, sourceName, isFirstSync, newStatus, "");
             }
-
-            m_sourcesOnSync.removeOne(sourceName);
-            m_currentSyncResults.insert(sourceName, QString::number(i.value().error));
-
-            Q_EMIT syncSourceFinished(serviceName, sourceName, isFirstSync, newStatus, "");
         } else if ((status == "running;waiting") ||
                    (status == "idle")) {
             // ignore
@@ -555,14 +553,34 @@ void SyncAccount::onSessionStatusChanged(const QString &status, quint32 error, c
         }
     }
 
-    if (m_sourcesOnSync.isEmpty() && (status == "done")) {
-        m_sourcesToSync.clear();
-        setState(SyncAccount::Idle);
-        releaseSession();
+    if (status == "done") {
+        bool done = true;
+        Q_FOREACH(const QString &source, m_sourcesOnSync.keys()) {
+            if (m_sourcesOnSync[source] != SyncAccount::SourceSyncDone) {
+                done = false;
+                qWarning() << "Sync status changed to done. But source still syncing" << source;
+            }
+        }
 
-        Q_EMIT syncFinished(serviceName, m_currentSyncResults);
-        m_currentSyncResults.clear();
-        qDebug() << "---------------------------------------------------------Sync finished:" << m_syncTime.elapsed() / 1000 << "secs";
+        if (error != 0) {
+            QString errorMessage = statusDescription(QString::number(error));
+            qWarning() << "Sync Error" << error << errorMessage;
+            Q_EMIT syncError(CALENDAR_SERVICE_NAME, errorMessage);
+            m_currentSyncResults.insert("", QString::number(error));
+            // fail to sync, notify sync finished
+            done = true;
+        }
+
+        if (done) {
+            m_sourcesOnSync.clear();
+            m_sourcesToSync.clear();
+            setState(SyncAccount::Idle);
+            releaseSession();
+
+            Q_EMIT syncFinished(CALENDAR_SERVICE_NAME, m_currentSyncResults);
+            m_currentSyncResults.clear();
+            qDebug() << "---------------------------------------------------------Sync finished:" << m_syncTime.elapsed() / 1000 << "secs";
+        }
     }
 }
 
@@ -586,6 +604,8 @@ void SyncAccount::configure()
     m_config = new SyncConfigure(this,
                                  m_settings,
                                  this);
+    connect(m_config, &SyncConfigure::sourceRemoved,
+            this, &SyncAccount::sourceRemoved);
     connect(m_config, &SyncConfigure::done,
             this, &SyncAccount::onAccountConfigured);
     connect(m_config, &SyncConfigure::error,
@@ -604,18 +624,18 @@ void SyncAccount::onAccountConfigured(const QStringList &services)
     continueSync();
 }
 
-void SyncAccount::onAccountConfigureError(const QStringList &services)
+void SyncAccount::onAccountConfigureError(int error)
 {
     m_config->deleteLater();
     m_config = 0;
 
-    qWarning() << "Fail to configure account" << m_account->displayName() << services;
+    qWarning() << "Fail to configure account" << m_account->displayName() << error;
     setState(SyncAccount::Idle);
-    Q_EMIT syncError("", _("Fail to configure account"));
+    Q_EMIT syncError("", QString::number(error));
 
     // Send sync finish due the config error there is nothing to do
     QMap<QString, QString> errorMap;
-    errorMap.insert("", _("Fail to configure account"));
+    errorMap.insert("", QString::number(error));
     Q_EMIT syncFinished("", errorMap);
 }
 
@@ -659,6 +679,8 @@ QString SyncAccount::statusDescription(const QString &status)
 
     switch(status.toInt())
     {
+    case -1:
+        return _("Fail to configure account");
     case 0:
     case 200:
     case 204:
@@ -713,7 +735,7 @@ void SyncAccount::fetchRemoteSources(const QString &serviceName)
 {
     if (serviceName != "google-caldav") {
         qWarning() << "Service not supported" << serviceName;
-        Q_EMIT remoteSourcesAvailable(QArrayOfDatabases());
+        Q_EMIT remoteSourcesAvailable(QArrayOfDatabases(), -1);
         return;
     }
 
@@ -725,7 +747,7 @@ void SyncAccount::fetchRemoteSources(const QString &serviceName)
     if (!auth->authenticate()) {
         auth->deleteLater();
         qWarning() << "fail to authenticate account!";
-        Q_EMIT remoteSourcesAvailable(m_remoteSources);
+        Q_EMIT remoteSourcesAvailable(m_remoteSources, 304);
     }
 }
 
@@ -754,7 +776,7 @@ void SyncAccount::onAuthFailed()
     auth->deleteLater();
 
     qWarning() << "Fail to authenticate";
-    Q_EMIT remoteSourcesAvailable(m_remoteSources);
+    Q_EMIT remoteSourcesAvailable(m_remoteSources, 403);
 }
 
 void SyncAccount::onReplyFinished(QNetworkReply *reply)
@@ -767,14 +789,14 @@ void SyncAccount::onReplyFinished(QNetworkReply *reply)
 
     if (reply->error() != QNetworkReply::NoError) {
         qWarning() << "Fail to fetch remote sources:" << reply->errorString();
-        Q_EMIT remoteSourcesAvailable(m_remoteSources);
+        Q_EMIT remoteSourcesAvailable(m_remoteSources, reply->error() == QNetworkReply::AuthenticationRequiredError ? 403 : 20007);
         return;
     }
 
     int responseCode = reply->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt();
     if (responseCode != 200) {
         qWarning() << "Fail to fetch remote sources response:" << responseCode;
-        Q_EMIT remoteSourcesAvailable(m_remoteSources);
+        Q_EMIT remoteSourcesAvailable(m_remoteSources, 20007);
         return;
     }
 
@@ -805,7 +827,8 @@ void SyncAccount::onReplyFinished(QNetworkReply *reply)
                         SyncDatabase db;
 
                         db.name = calendar.value("summary").toString();
-                        db.source = QString(calendarSyncUrl).replace("%u", QUrl::toPercentEncoding(calendar.value("id").toString()));
+                        db.remoteId = calendar.value("id").toString();
+                        db.source = QString(calendarSyncUrl).replace("%u", QUrl::toPercentEncoding(db.remoteId));
                         db.writable =  writableRoles.contains(calendar.value("accessRole").toString());
                         db.defaultCalendar = calendar.value("primary").toBool();
                         db.title = calendar.value("summaryOverride").toString();
@@ -817,5 +840,5 @@ void SyncAccount::onReplyFinished(QNetworkReply *reply)
         }
     }
 
-    Q_EMIT remoteSourcesAvailable(m_remoteSources);
+    Q_EMIT remoteSourcesAvailable(m_remoteSources, 0);
 }

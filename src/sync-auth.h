@@ -26,6 +26,7 @@
 #include <SignOn/Identity>
 
 #include <QtCore/QObject>
+#include <QtCore/QScopedPointer>
 
 class SyncAuth : public QObject
 {
@@ -52,10 +53,10 @@ private:
     QString m_serviceName;
     QString m_token;
 
-    QPointer<Accounts::Manager> m_accountManager;
-    QPointer<SignOn::Identity> m_identity;
-    QPointer<SignOn::AuthSession> m_session;
-    QPointer<Accounts::Account> m_account;
+    QScopedPointer<Accounts::Manager> m_accountManager;
+    QScopedPointer<SignOn::Identity> m_identity;
+    QScopedPointer<Accounts::Account> m_account;
+    SignOn::AuthSessionP m_session;
 };
 
 #endif

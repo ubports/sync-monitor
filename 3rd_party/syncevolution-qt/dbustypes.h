@@ -34,6 +34,7 @@ struct SyncDatabase
     bool writable;
     QString color;
     QString title;
+    QString remoteId;
 };
 Q_DECLARE_METATYPE ( SyncDatabase )
 

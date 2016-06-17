@@ -139,6 +139,8 @@ void SyncQueue::remove(SyncAccount *account, const QStringList &sources)
 }
 
 SyncJob::SyncJob()
+    : m_account(0),
+      m_runOnPayedConnection(false)
 {
 }
 

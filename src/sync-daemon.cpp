@@ -139,10 +139,7 @@ void SyncDaemon::onDataChanged(const QString &sourceId)
         }
 
         if (accountAndName.first != 0) {
-            const QString sourceName = SyncConfigure::formatSourceName(CALENDAR_SERVICE_NAME,
-                                                                       accountAndName.first,
-                                                                       accountAndName.second);
-             syncAccount(accountAndName.first, QStringList() << sourceName, false, false);
+            syncAccount(accountAndName.first, QStringList() << accountAndName.second, false, false);
         }
     }
 }
@@ -263,6 +260,7 @@ void SyncDaemon::continueSync()
     if (m_currentJob.isValid()) {
         // remove sync reqeust from offline queue
         m_offlineQueue->remove(m_currentJob);
+        Q_EMIT syncAboutToStart();
         m_currentJob.account()->sync(m_currentJob.sources());
     } else {
         syncFinishedImpl();
@@ -323,6 +321,13 @@ void SyncDaemon::saveSyncResult(uint accountId, const QString &sourceName, const
     m_settings.sync();
 }
 
+void SyncDaemon::clearResultForSource(uint accountId, const QString &sourceName)
+{
+    const QString logKey = QString(ACCOUNT_LOG_GROUP_FORMAT).arg(accountId).arg(sourceName);
+    m_settings.remove(logKey);
+    m_settings.sync();
+}
+
 QString SyncDaemon::loadSyncResult(uint accountId, const QString &sourceName)
 {
     const QString logKey = QString(ACCOUNT_LOG_GROUP_FORMAT).arg(accountId).arg(sourceName);
@@ -349,10 +354,36 @@ QString SyncDaemon::lastSuccessfulSyncDate(quint32 accountId, const QString &cal
     return m_settings.value(configKey + ACCOUNT_LOG_LAST_SUCCESSFUL_DATE).toString();
 }
 
+void SyncDaemon::cleanupLogs()
+{
+    QList<int> accountIds;
+    Q_FOREACH(const SyncAccount *acc, m_accounts) {
+        accountIds << acc->id();
+    }
+
+    Q_FOREACH(const QString &group, m_settings.childGroups()) {
+        QString strId = group.split("_").value(1, "");
+        if (strId.isEmpty())
+            continue;
+
+        bool ok = true;
+        int id = strId.toInt(&ok);
+        if (!ok)
+            continue;
+
+        if (!accountIds.contains(id)) {
+            qDebug() << "Clean log entry" << group << "from account:" << id;
+            m_settings.remove(group);
+        }
+    }
+    m_settings.sync();
+}
+
 void SyncDaemon::run()
 {
     setupAccounts();
     setupTriggers();
+    cleanupLogs();
 
     // export dbus interface
     registerService();
@@ -437,8 +468,11 @@ void SyncDaemon::addAccount(const AccountId &accountId, bool startSync)
                          SLOT(onAccountEnableChanged(QString, bool)));
         connect(syncAcc, SIGNAL(syncError(QString,QString)),
                          SLOT(onAccountSyncError(QString, QString)));
+        connect(syncAcc, SIGNAL(sourceRemoved(QString)),
+                         SLOT(onAccountSourceRemoved(QString)));
 
-        if (startSync) {
+        bool accountEnabled = syncAcc->enabled() && syncAcc->enabledServices().contains(CALENDAR_SERVICE_NAME);
+        if (startSync && accountEnabled) {
             sync(syncAcc, QStringList(), true, true);
         }
         Q_EMIT accountsChanged();
@@ -570,7 +604,7 @@ void SyncDaemon::onAccountSyncStart()
 {
     SyncAccount *acc = qobject_cast<SyncAccount*>(QObject::sender());
     // notification only appears on first sync
-    if (isFirstSync(acc->id())) {
+    if (isFirstSync(acc->id()) && (acc->lastError() == 0)) {
         NotifyMessage *notify = new NotifyMessage(true, this);
         notify->show(_("Synchronization"),
                      QString(_("Start sync: %1 (Calendar)")).arg(acc->displayName()),
@@ -585,7 +619,7 @@ void SyncDaemon::onAccountSourceSyncStarted(const QString &serviceName,
 {
     SyncAccount *acc = qobject_cast<SyncAccount*>(QObject::sender());
     m_syncElapsedTime.restart();
-    qDebug() << QString("[%3] Start sync:  %1 (%2)")
+    qDebug() << QString("[%3] Start sync: %1 (%2)")
                 .arg(acc->displayName())
                 .arg(serviceName + "/" + sourceName)
                 .arg(QDateTime::currentDateTime().toString(Qt::SystemLocaleShortDate));
@@ -605,6 +639,7 @@ void SyncDaemon::onAccountSourceSyncFinished(const QString &serviceName,
                                              const QString &mode)
 {
     Q_UNUSED(mode);
+    Q_UNUSED(firstSync);
 
     SyncAccount *acc = qobject_cast<SyncAccount*>(QObject::sender());
     QString errorMessage = SyncAccount::statusDescription(status);
@@ -652,21 +687,18 @@ void SyncDaemon::onAccountSyncFinished(const QString &serviceName,
         const QString status = statusList.value(source);
         QString errorMessage = SyncAccount::statusDescription(status);
         errorCode = status.toUInt();
-
-        if (accountEnabled) {
-            saveSyncResult((uint) acc->id(), source, status, QDateTime::currentDateTime().toString(Qt::ISODate));
-        }
+        bool saveLog = accountEnabled;
 
         if ((acc->lastError() == 0) && !errorMessage.isEmpty() && whiteListStatus.contains(status)) {
+            fail = true;
+            saveLog = false;
             // white list error retry the sync
-            m_syncQueue->push(acc, serviceName, false);
-            break;
-        } else if (status.endsWith("403")){
-            authenticateAccount(acc, serviceName);
-            errorCode = 0;
+            qDebug() << "Trying a second sync due error:" << errorMessage;
+            m_syncQueue->push(acc, CALENDAR_SERVICE_NAME, false);
             break;
         } else if (!errorMessage.isEmpty()) {
             fail = true;
+            errorCode = 0;
             NotifyMessage *notify = new NotifyMessage(true, this);
             notify->show(_("Synchronization"),
                          QString(_("Fail to sync calendar %1 from account %2.\n%3"))
@@ -676,9 +708,14 @@ void SyncDaemon::onAccountSyncFinished(const QString &serviceName,
                          acc->iconName(CALENDAR_SERVICE_NAME));
             break;
         }
+
+        if (saveLog && !source.isEmpty()) {
+            saveSyncResult((uint) acc->id(), source, status, QDateTime::currentDateTime().toUTC().toString(Qt::ISODate));
+        }
     }
 
     if (!fail) {
+        errorCode = 0;
         // avoid to show sync done message for disabled accounts.
         if (accountEnabled && firstSync) {
             NotifyMessage *notify = new NotifyMessage(true, this);
@@ -697,19 +734,30 @@ void SyncDaemon::onAccountSyncFinished(const QString &serviceName,
 
 void SyncDaemon::onAccountEnableChanged(const QString &serviceName, bool enabled)
 {
-    if (!serviceName.isEmpty() ||
-        (serviceName != CALENDAR_SERVICE_NAME)) {
+    SyncAccount *acc = qobject_cast<SyncAccount*>(QObject::sender());
+    if (serviceName.isEmpty()) {
+        if (!acc->enabledServices().contains(CALENDAR_SERVICE_NAME)) {
+            qDebug() << "Account enabled but calendar service disabled!";
+            return;
+        }
+    } else if (serviceName != CALENDAR_SERVICE_NAME) {
         qDebug() << "Account service enable changed:" << serviceName << ". Ignore it.";
         return;
     }
 
-    SyncAccount *acc = qobject_cast<SyncAccount*>(QObject::sender());
+
     if (enabled) {
         sync(acc, QStringList(), true, true);
     } else {
         cancel(acc, QStringList());
     }
     Q_EMIT accountsChanged();
+}
+
+void SyncDaemon::onAccountSourceRemoved(const QString &source)
+{
+    SyncAccount *acc = qobject_cast<SyncAccount*>(QObject::sender());
+    clearResultForSource(acc->id(), source.mid(source.indexOf("/") + 1));
 }
 
 void SyncDaemon::quit()
