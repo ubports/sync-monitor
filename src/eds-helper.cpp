@@ -18,7 +18,7 @@
 #define COLLECTION_READONLY_METADATA        "collection-readonly"
 #define COLLECTION_SYNC_READONLY_METADATA   "collection-sync-readonly"
 #define COLLECTION_ACCOUNT_ID_METADATA      "collection-account-id"
-#define COLLECTION_REMOTE_URL_METADATA      "collection-metadata"
+#define COLLECTION_REMOTE_ID_METADATA       "collection-metadata"
 #define COLLECTION_SELECTED_METADATA        "collection-selected"
 
 using namespace QtOrganizer;
@@ -47,7 +47,7 @@ EdsHelper::~EdsHelper()
 
 QString EdsHelper::createSource(const QString &sourceName,
                                 const QString &sourceColor,
-                                const QString &sourceRemoteUrl,
+                                const QString &remoteId,
                                 bool writable,
                                 int accountId)
 {
@@ -56,15 +56,15 @@ QString EdsHelper::createSource(const QString &sourceName,
         return QString();
     }
 
-    QString sourceId = sourceIdByRemoteUrl(sourceRemoteUrl, accountId);
-    if (!sourceId.isEmpty()) {
-        return sourceId;
+    EdsSource source = sourceByRemoteId(remoteId, accountId);
+    if (!source.id.isEmpty()) {
+        return source.id;
     }
 
     QOrganizerCollection collection;
     collection.setMetaData(QOrganizerCollection::KeyName, sourceName);
     collection.setMetaData(QOrganizerCollection::KeyColor, sourceColor);
-    collection.setExtendedMetaData(COLLECTION_REMOTE_URL_METADATA, sourceRemoteUrl);
+    collection.setExtendedMetaData(COLLECTION_REMOTE_ID_METADATA, remoteId);
     collection.setExtendedMetaData(COLLECTION_ACCOUNT_ID_METADATA, accountId);
     collection.setExtendedMetaData(COLLECTION_SELECTED_METADATA, true);
     collection.setExtendedMetaData(COLLECTION_SYNC_READONLY_METADATA, !writable);
@@ -108,33 +108,35 @@ QString EdsHelper::sourceIdByName(const QString &sourceName, uint account)
     return QString();
 }
 
-QString EdsHelper::sourceIdByRemoteUrl(const QString &url, uint account)
+EdsSource EdsHelper::sourceByRemoteId(const QString &remoteId, uint account)
 {
     Q_FOREACH(const QOrganizerCollection &c, m_organizerEngine->collections()) {
         if ((c.extendedMetaData(COLLECTION_ACCOUNT_ID_METADATA) == account) &&
-            (c.extendedMetaData(COLLECTION_REMOTE_URL_METADATA).toString() == url)) {
-            return c.id().toString();
+            (c.extendedMetaData(COLLECTION_REMOTE_ID_METADATA).toString() == remoteId)) {
+            EdsSource s;
+            s.id = c.id().toString();
+            s.name = c.metaData(QOrganizerCollection::KeyName).toString();
+            s.account = account;
+            s.remoteId = remoteId;
+            return s;
         }
     }
-    return QString();
+    return EdsSource();
 }
 
-QPair<uint, QString> EdsHelper::sourceAccountAndNameFromId(const QString &sourceId)
+EdsSource EdsHelper::sourceById(const QString &id)
 {
-    QPair<uint, QString> result;
-    QOrganizerCollectionId id = QOrganizerCollectionId::fromString(sourceId);
-    QOrganizerCollection collection = m_organizerEngine->collection(id);
-    if (collection.id().isNull()) {
-        qWarning() << "Collection not found:" << sourceId;
-    } else {
-        bool ok = false;
-        uint accountId = collection.extendedMetaData(COLLECTION_ACCOUNT_ID_METADATA).toUInt(&ok);
-        if (!ok) {
-            accountId = 0;
+    Q_FOREACH(const QOrganizerCollection &c, m_organizerEngine->collections()) {
+        if (c.id().toString() == id) {
+            EdsSource s;
+            s.id = c.id().toString();
+            s.name = c.metaData(QOrganizerCollection::KeyName).toString();
+            s.account = c.extendedMetaData(COLLECTION_ACCOUNT_ID_METADATA).toUInt();
+            s.remoteId = c.extendedMetaData(COLLECTION_REMOTE_ID_METADATA).toString();
+            return s;
         }
-        result = qMakePair(accountId, collection.metaData(QOrganizerCollection::KeyName).toString());
     }
-    return result;
+    return EdsSource();
 }
 
 void EdsHelper::freezeNotify()

@@ -126,20 +126,20 @@ void SyncDaemon::onDataChanged(const QString &sourceId)
     if (sourceId.isEmpty()) {
         syncAll(false, false);
     } else {
-        QPair<uint, QString> accountAndName = m_eds->sourceAccountAndNameFromId(sourceId);
+        EdsSource eSource = m_eds->sourceById(sourceId);
 
         // LEGACY: sources has the same display name and account id = 0
-        if (accountAndName.first == 0 && !accountAndName.second.isEmpty()) {
+        if (eSource.account == 0 && !eSource.name.isEmpty()) {
             Q_FOREACH(SyncAccount *acc, m_accounts.values()) {
-                if (acc->displayName() == accountAndName.second) {
-                    accountAndName.first = acc->id();
+                if (acc->displayName() == eSource.name) {
+                    eSource.account = acc->id();
                     break;
                 }
             }
         }
 
-        if (accountAndName.first != 0) {
-            syncAccount(accountAndName.first, QStringList() << accountAndName.second, false, false);
+        if (eSource.isValid()) {
+            syncAccount(eSource.account, QStringList() << eSource.remoteId, false, false);
         }
     }
 }
@@ -200,13 +200,7 @@ void SyncDaemon::syncAccount(quint32 accountId, const QStringList &calendars, bo
 {
     SyncAccount *acc = m_accounts.value(accountId);
     if (acc) {
-        QStringList sources;
-        Q_FOREACH(const QString &calendar, calendars) {
-            sources << SyncConfigure::formatSourceName(CALENDAR_SERVICE_NAME,
-                                                       accountId,
-                                                       calendar);
-        }
-        sync(acc, sources, runNow, syncOnMobile);
+        sync(acc, calendars, runNow, syncOnMobile);
     } else {
         qWarning() << "Sync account requested with invalid account id:" << accountId;
     }
@@ -268,8 +262,6 @@ void SyncDaemon::continueSync()
         m_currentJob.account()->sync(m_currentJob.sources());
     } else {
         syncFinishedImpl();
-        // The sync has done, unblock notifications
-        m_eds->unfreezeNotify();
     }
 }
 
@@ -299,6 +291,9 @@ bool SyncDaemon::registerService()
 
 void SyncDaemon::syncFinishedImpl()
 {
+    // The sync has done, unblock notifications
+    m_eds->unfreezeNotify();
+
     m_timeout->stop();
     m_currentJob.clear();
     m_syncing = false;

@@ -149,6 +149,17 @@ private Q_SLOTS:
         queue.remove(&account);
         QCOMPARE(queue.count(), 0);
     }
+
+    void testAppendAllWithQueueNotEmpty()
+    {
+        SyncQueue queue;
+        SyncAccountMock account(1);
+        queue.push(&account, QStringLiteral("account1Source0"), false);
+        queue.push(&account);
+        QCOMPARE(queue.count(), 1);
+        QVERIFY(queue.contains(&account, QStringLiteral("account1Source0")));
+        QVERIFY(queue.contains(&account, QStringLiteral("account1Source1")));
+    }
 };
 
 int main(int argc, char *argv[])

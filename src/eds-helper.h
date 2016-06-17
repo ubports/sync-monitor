@@ -34,6 +34,20 @@
 using namespace QtContacts;
 using namespace QtOrganizer;
 
+class EdsSource
+{
+public:
+    QString id;
+    QString name;
+    uint account;
+    QString remoteId;
+
+    bool isValid()
+    {
+        return !id.isEmpty();
+    }
+};
+
 class EdsHelper : public QObject
 {
     Q_OBJECT
@@ -46,8 +60,8 @@ public:
                          int accountId);
     void removeSource(const QString &sourceId);
     QString sourceIdByName(const QString &sourceName, uint account);
-    QString sourceIdByRemoteUrl(const QString &sourceName, uint account);
-    QPair<uint, QString> sourceAccountAndNameFromId(const QString &sourceId);
+    EdsSource sourceByRemoteId(const QString &remoteId, uint account);
+    EdsSource sourceById(const QString &id);
 
     void freezeNotify();
     void unfreezeNotify();

@@ -174,6 +174,12 @@ void SyncJob::appendSources(const QStringList &sources)
         return;
     }
 
+    if (sources.isEmpty()) {
+        m_sources.clear();
+        m_sources << SyncJob::SyncAllKeyword;
+        return;
+    }
+
     Q_FOREACH(const QString &source, sources) {
         if (!m_sources.contains(source)) {
             m_sources.append(source);

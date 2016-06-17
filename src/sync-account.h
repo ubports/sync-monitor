@@ -34,7 +34,17 @@
 class SyncEvolutionSessionProxy;
 class SyncConfigure;
 
-typedef QPair<QString, bool> SourceData;
+class SourceData
+{
+public:
+    QString sourceName;
+    QString remoteId;
+    bool writable;
+
+    SourceData(const QString &_sourceName, const QString &_remoteId, bool _writable)
+        : sourceName(_sourceName), remoteId(_remoteId), writable(_writable)
+    {}
+};
 
 class SyncAccount : public QObject
 {

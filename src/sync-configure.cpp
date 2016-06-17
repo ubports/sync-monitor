@@ -182,7 +182,7 @@ void SyncConfigure::continuePeerConfig(SyncEvolutionSessionProxy *session, const
             }
             // check if there is a source for this remote url already
             if (localDbId.isEmpty()) {
-                localDbId = eds.sourceIdByRemoteUrl(db.source, m_account->id());
+                localDbId = eds.sourceByRemoteId(db.remoteId, m_account->id()).id;
             } else {
                 qDebug() << "Using legacy source:" << localDbId << db.name;
             }
@@ -192,7 +192,7 @@ void SyncConfigure::continuePeerConfig(SyncEvolutionSessionProxy *session, const
                 qDebug() << "Create new EDS source for:" << title;
                 localDbId = eds.createSource(title,
                                              db.color,
-                                             db.source,
+                                             db.remoteId,
                                              db.writable,
                                              m_account->id());
             }
@@ -395,13 +395,18 @@ QString SyncConfigure::formatSourceName(const QString &serviceName, uint account
 
 void SyncConfigure::removeAccountSourceConfig(Account *account, const QString &sourceName)
 {
-    //./default/sources/<source-name>
-    QString configPath = QString("%1/default/sources/%2")
-            .arg(QStandardPaths::locate(QStandardPaths::ConfigLocation,
-                                        QStringLiteral("syncevolution"),
-                                        QStandardPaths::LocateDirectory))
-            .arg(sourceName);
-    removeConfigDir(configPath);
+
+    QString configPath;
+
+    if (sourceName.split("_").value(1, "").toInt() == account->id()) {
+        //./default/sources/<source-name>
+        configPath = QString("%1/default/sources/%2")
+                .arg(QStandardPaths::locate(QStandardPaths::ConfigLocation,
+                                            QStringLiteral("syncevolution"),
+                                            QStandardPaths::LocateDirectory))
+                .arg(sourceName);
+        removeConfigDir(configPath);
+    }
 
     //./default/peers/<provider>-<account-id>/sources/<source-name>
     configPath = QString("%1/default/peers/%2-%3/sources/%4")
@@ -441,11 +446,7 @@ bool SyncConfigure::removeConfigDir(const QString &dirPath)
     if (dir.exists()) {
         if (dir.removeRecursively()) {
             qDebug() << "Config dir removed" << dir.absolutePath();
-        } else {
-            qWarning() << "Fail to remove config dir" << dir.absolutePath();
         }
-    } else {
-        qDebug() << "Remove source config dir not found" << dir.absolutePath();
     }
 }
 

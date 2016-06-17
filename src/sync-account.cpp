@@ -168,6 +168,7 @@ QList<SourceData> SyncAccount::sources() const
         if (key.startsWith(sourcePrefix)) {
             const QString sourceName = key.split("/").last();
             bool writable = true;
+            QString remoteId;
             Q_FOREACH(const SyncDatabase &db, m_remoteSources) {
                 // build sync evolution source name based on service and account.
                 QString dbSourceName = SyncConfigure::formatSourceName(CALENDAR_SERVICE_NAME,
@@ -175,10 +176,11 @@ QList<SourceData> SyncAccount::sources() const
                                                                        db.name);
                 if (dbSourceName == sourceName) {
                     writable = db.writable;
+                    remoteId = db.remoteId;
                     break;
                 }
             }
-            sources << qMakePair(sourceName, writable);
+            sources << SourceData(sourceName, remoteId, writable);
         }
     }
 
@@ -210,15 +212,15 @@ void SyncAccount::continueSync()
     } else {
         qDebug() << "Will prepare to sync:" << m_account->id() << m_sourcesToSync;
         Q_FOREACH(const SourceData &source, sources()) {
-            if (m_sourcesToSync.isEmpty() || m_sourcesToSync.contains(source.first)) {
+            if (m_sourcesToSync.isEmpty() || m_sourcesToSync.contains(source.remoteId)) {
                 bool firstSync = false;
                 // read-only sources aways sync with "refresh-from-remote"
                 QString mode(REFRESH_FROM_REMOTE_SYNC);
-                if (source.second) {
-                    mode = syncMode(CALENDAR_SERVICE_NAME, source.first, &firstSync);
+                if (source.writable) {
+                    mode = syncMode(CALENDAR_SERVICE_NAME, source.sourceName, &firstSync);
                 }
-                syncFlags.insert(source.first, mode);
-                m_sourcesOnSync.insert(source.first, SyncAccount::SourceSyncStarting);
+                syncFlags.insert(source.sourceName, mode);
+                m_sourcesOnSync.insert(source.sourceName, SyncAccount::SourceSyncStarting);
             }
         }
     }
