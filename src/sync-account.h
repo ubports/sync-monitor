@@ -58,14 +58,14 @@ public:
     virtual ~SyncAccount();
 
     virtual void setup();
-    void cancel(const QString &serviceName = QString());
-    void sync(const QString &serviceName = QString());
+    void cancel(const QStringList &sources = QStringList());
+    void sync(const QStringList &sources = QStringList());
     void wait();
     void status() const;
     AccountState state() const;
     bool enabled() const;
     QString displayName() const;
-    int id() const;
+    virtual int id() const;
     QString iconName(const QString &serviceName) const;
     virtual QStringList availableServices() const;
     QStringList enabledServices() const;
@@ -114,7 +114,7 @@ private:
     SyncEvolutionSessionProxy *m_currentSession;
     const QSettings *m_settings;
     SyncConfigure *m_config;
-    QStringList m_servicesToSync;
+    QStringList m_sourcesToSync;
     QStringList m_sourcesOnSync;
     QMap<QString, QString> m_currentSyncResults;
     QElapsedTimer m_syncTime;
@@ -143,7 +143,7 @@ private:
     void attachSession(SyncEvolutionSessionProxy *session);
     void releaseSession();
 
-    QList<SourceData> sources(const QString &serviceName) const;
+    QList<SourceData> sources() const;
     QStringMap filterSourceReport(const QStringMap &report, const QString &serviceName, uint accountId, const QString &sourceName) const;
 
     QString lastSyncStatus(const QString &sourceName) const;

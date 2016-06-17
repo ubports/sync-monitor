@@ -58,12 +58,9 @@ class SyncDBus : public QDBusAbstractAdaptor
 "    <method name=\"servicesAvailable\">\n"
 "      <arg direction=\"out\" type=\"as\" name=\"services\"/>\n"
 "    </method>\n"
-"    <method name=\"sync\">\n"
-"      <arg direction=\"in\" type=\"as\"/>\n"
-"    </method>\n"
+"    <method name=\"syncAll\" />\n"
 "    <method name=\"syncAccount\">\n"
 "      <arg direction=\"in\" type=\"u\"/>\n"
-"      <arg direction=\"in\" type=\"s\"/>\n"
 "      <arg direction=\"in\" type=\"as\"/>\n"
 "    </method>\n"
 "    <method name=\"listCalendarsByAccount\">\n"
@@ -75,9 +72,7 @@ class SyncDBus : public QDBusAbstractAdaptor
 "      <arg direction=\"in\" type=\"s\"/>\n"
 "      <arg direction=\"out\" type=\"s\" name=\"date\"/>\n"
 "    </method>\n"
-"    <method name=\"cancel\">\n"
-"      <arg direction=\"in\" type=\"as\"/>\n"
-"    </method>\n"
+"    <method name=\"cancelAll\" />\n"
 "    <method name=\"attach\"/>\n"
 "    <method name=\"detach\"/>\n"
 "    <method name=\"state\" >\n"
@@ -105,11 +100,11 @@ Q_SIGNALS:
     void clientDeattached(int count);
 
 public Q_SLOTS:
-    void sync(QStringList service);
-    void syncAccount(quint32 accountId, const QString &service, const QStringList &sources);
+    void syncAll();
+    void syncAccount(quint32 accountId, const QStringList &sources);
     QString lastSuccessfulSyncDate(quint32 accountId, const QString &source, const QDBusMessage &message);
     QStringList listCalendarsByAccount(quint32 accountId, const QDBusMessage &message);
-    void cancel(QStringList services);
+    void cancelAll();
     QString state() const;
     QStringList enabledServices() const;
     QStringList servicesAvailable();

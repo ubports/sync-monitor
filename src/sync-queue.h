@@ -29,18 +29,28 @@ class SyncJob
 {
 public:
     SyncJob();
-    SyncJob(SyncAccount *account, const QString &serviceName, bool runOnPayedConnection);
+    SyncJob(SyncAccount *account, const QStringList &sources, bool runOnPayedConnection);
 
     SyncAccount *account() const;
-    QString serviceName() const;
+    QStringList sources() const;
+    void appendSources(const QStringList &sources);
+    void removeSources(const QStringList &sources);
     bool runOnPayedConnection() const;
     bool operator==(const SyncJob &other) const;
     bool isValid() const;
+    bool isEmpty();
+    bool contains(const QString &source) const;
+    bool contains(const QStringList &sources) const;
+    void clear();
 
 private:
+    static const QString SyncAllKeyword;
+
     SyncAccount *m_account;
-    QString m_serviceName;
+    QStringList m_sources;
     bool m_runOnPayedConnection;
+
+    static bool compareSources(const QStringList &listA, const QStringList &listB);
 };
 
 class SyncQueue
@@ -50,18 +60,21 @@ public:
 
     void push(const SyncQueue &other);
     void push(const SyncJob &job);
-    void push(SyncAccount *account, const QString &serviceName, bool syncOnPayedConnection);
-    void push(SyncAccount *account, const QStringList &serviceNames = QStringList(), bool syncOnPayedConnection = false);
+    void push(SyncAccount *account, const QString &sourceName, bool syncOnPayedConnection);
+    void push(SyncAccount *account, const QStringList &sources = QStringList(), bool syncOnPayedConnection = false);
 
     bool contains(const SyncJob &otherJob) const;
-    bool contains(SyncAccount *account, const QString &serviceName) const;
+    bool contains(SyncAccount *account, const QString &sourceName) const;
+    bool contains(SyncAccount *account, const QStringList &sources) const;
 
-    void remove(SyncAccount *account, const QString &serviceName = QString());
+    void remove(const SyncJob &job);
+    void remove(SyncAccount *account, const QString &source);
+    void remove(SyncAccount *account, const QStringList &sources = QStringList());
 
     int count() const;
     bool isEmpty() const;
     void clear();
-    QList<SyncJob> jobs() const;
+    const QList<SyncJob> jobs() const;
 
 private:
     QList<SyncJob> m_jobs;

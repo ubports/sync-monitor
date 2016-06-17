@@ -29,7 +29,10 @@ class SyncAccountMock : public SyncAccount
 {
     Q_OBJECT
 public:
-    SyncAccountMock() : SyncAccount(0, 0) {}
+    SyncAccountMock(int id) : SyncAccount(0, 0), m_id(id) {}
+    int id() const { return m_id; }
+private:
+    int m_id;
 
     MOCK_CONST_METHOD0(availableServices, QStringList());
 };

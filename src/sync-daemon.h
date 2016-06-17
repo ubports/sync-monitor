@@ -28,11 +28,11 @@
 #include <Accounts/Manager>
 
 #include "sync-network.h"
+#include "sync-queue.h"
 
 class SyncAccount;
 class EdsHelper;
 class ProviderTemplate;
-class SyncQueue;
 class SyncDBus;
 class PowerdProxy;
 
@@ -56,9 +56,9 @@ public:
     SyncAccount *accountById(quint32 accountId);
 
 Q_SIGNALS:
-    void syncStarted(SyncAccount *syncAcc, const QString &serviceName);
-    void syncFinished(SyncAccount *syncAcc, const QString &serviceName);
-    void syncError(SyncAccount *syncAcc, const QString &serviceName, const QString &error);
+    void syncStarted(SyncAccount *syncAcc, const QString &source);
+    void syncFinished(SyncAccount *syncAcc, const QString &source);
+    void syncError(SyncAccount *syncAcc, const QString &source, const QString &error);
     void syncAboutToStart();
     void done();
     void accountsChanged();
@@ -66,9 +66,9 @@ Q_SIGNALS:
 
 public Q_SLOTS:
     void quit();
-    void syncAll(const QString &serviceName, bool runNow, bool syncOnMobile);
-    void syncAccount(quint32 accountId, const QString &service, const QStringList &sources);
-    void cancel(const QString &serviceName = QString());
+    void syncAll(bool runNow, bool syncOnMobile);
+    void syncAccount(quint32 accountId, const QStringList &calendars, bool runNow = true, bool syncOnMobile = false);
+    void cancel(uint accountId = 0, const QStringList &sources = QStringList());
 
 private Q_SLOTS:
     void continueSync();
@@ -97,8 +97,7 @@ private:
     QHash<Accounts::AccountId, SyncAccount*> m_accounts;
     SyncQueue *m_syncQueue;
     SyncQueue *m_offlineQueue;
-    SyncAccount *m_currentAccount;
-    QString m_currentServiceName;
+    SyncJob m_currentJob;
     EdsHelper *m_eds;
     ProviderTemplate *m_provider;
     SyncDBus *m_dbusAddaptor;
@@ -112,8 +111,8 @@ private:
 
     void setupAccounts();
     void setupTriggers();
-    void sync(SyncAccount *syncAcc, const QString &serviceName, bool runNow, bool syncOnMobile);
-    void cancel(SyncAccount *syncAcc, const QString &serviceName = QString());
+    void sync(SyncAccount *syncAcc, const QStringList &calendars, bool runNow, bool syncOnMobile);
+    void cancel(SyncAccount *syncAcc, const QStringList &sources);
     void setup();
     void sync(bool runNow);
     bool registerService();

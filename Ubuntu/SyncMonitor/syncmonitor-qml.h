@@ -49,8 +49,8 @@ Q_SIGNALS:
     void enabledServicesChanged();
 
 public Q_SLOTS:
-    void sync(const QStringList &services);
-    void cancel(const QStringList &services);
+    void sync();
+    void cancel();
     bool serviceIsEnabled(const QString &service);
 
     void connectToServer();

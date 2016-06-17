@@ -46,31 +46,19 @@ void SyncDBus::setSyncOnMobileConnection(bool flag)
     m_parent->setSyncOnMobileConnection(flag);
 }
 
-void SyncDBus::sync(QStringList services)
+void SyncDBus::syncAll()
 {
-    if (services.isEmpty()) {
-        m_parent->syncAll(QString(), true, true);
-    } else {
-        Q_FOREACH(const QString &service, services) {
-            m_parent->syncAll(service, true, true);
-        }
-    }
+    m_parent->syncAll(true, true);
 }
 
-void SyncDBus::syncAccount(quint32 accountId, const QString &service, const QStringList &sources)
+void SyncDBus::syncAccount(quint32 accountId, const QStringList &sources)
 {
-    m_parent->syncAccount(accountId, service, sources);
+    m_parent->syncAccount(accountId, sources);
 }
 
-void SyncDBus::cancel(QStringList services)
+void SyncDBus::cancelAll()
 {
-    if (services.isEmpty()) {
-        m_parent->cancel();
-    } else {
-        Q_FOREACH(const QString &service, services) {
-            m_parent->cancel(service);
-        }
-    }
+    m_parent->cancel();
 }
 
 QString SyncDBus::state() const

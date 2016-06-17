@@ -116,20 +116,20 @@ void SyncMonitorQml::componentComplete()
 /*!
   Start a new sync for specified services
 */
-void SyncMonitorQml::sync(const QStringList &services)
+void SyncMonitorQml::sync()
 {
     if (m_iface) {
-        m_iface->call("sync", services);
+        m_iface->call("syncAll");
     }
 }
 
 /*!
   Cancel current sync for specified services
 */
-void SyncMonitorQml::cancel(const QStringList &services)
+void SyncMonitorQml::cancel()
 {
     if (m_iface) {
-        m_iface->call("cancel", services);
+        m_iface->call("cancelAll");
     }
 }
 
