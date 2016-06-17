@@ -124,6 +124,7 @@ void SyncAccount::sync(const QString &serviceName)
     switch(m_state) {
     case SyncAccount::Idle:
         qDebug() << "Sync requested service:" << m_account->displayName() << serviceName;
+        m_startSyncTime = QDateTime::currentDateTime();
         m_servicesToSync.clear();
         if (serviceName.isEmpty()) {
             m_servicesToSync  = m_settings->childGroups();
@@ -473,6 +474,11 @@ void SyncAccount::setRetrySync(bool retry)
 Account *SyncAccount::account() const
 {
     return m_account;
+}
+
+QDateTime SyncAccount::lastSyncTime() const
+{
+    return m_startSyncTime;
 }
 
 void SyncAccount::onAccountEnabledChanged(const QString &serviceName, bool enabled)
@@ -827,7 +833,8 @@ void SyncAccount::onReplyFinished(QNetworkReply *reply)
                         SyncDatabase db;
 
                         db.name = calendar.value("summary").toString();
-                        db.source = QString(calendarSyncUrl).replace("%u", QUrl::toPercentEncoding(calendar.value("id").toString()));
+                        db.remoteId = calendar.value("id").toString();
+                        db.source = QString(calendarSyncUrl).replace("%u", QUrl::toPercentEncoding(db.remoteId));
                         db.writable =  writableRoles.contains(calendar.value("accessRole").toString());
                         db.defaultCalendar = calendar.value("primary").toBool();
                         db.title = calendar.value("summaryOverride").toString();

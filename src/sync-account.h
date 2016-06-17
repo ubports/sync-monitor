@@ -83,6 +83,7 @@ public:
     bool retrySync() const;
     void setRetrySync(bool retry);
     Accounts::Account *account() const;
+    QDateTime lastSyncTime() const;
 
     void fetchRemoteSources(const QString &serviceName);
 
@@ -118,6 +119,7 @@ private Q_SLOTS:
 
 private:
     Accounts::Account *m_account;
+    QDateTime m_startSyncTime;
     SyncEvolutionSessionProxy *m_currentSession;
     const QSettings *m_settings;
     SyncConfigure *m_config;

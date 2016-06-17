@@ -68,7 +68,7 @@ class SyncDBus : public QDBusAbstractAdaptor
 "    </method>\n"
 "    <method name=\"listCalendarsByAccount\">\n"
 "      <arg direction=\"in\" type=\"u\"/>\n"
-"      <arg direction=\"out\" type=\"as\" name=\"calendars\"/>\n"
+"      <arg direction=\"out\" type=\"a(ss)\" name=\"calendars\"/>\n"
 "    </method>\n"
 "    <method name=\"lastSuccessfulSyncDate\">\n"
 "      <arg direction=\"in\" type=\"u\"/>\n"
@@ -108,7 +108,7 @@ public Q_SLOTS:
     void sync(QStringList service);
     void syncAccount(quint32 accountId, const QString &service, const QStringList &sources);
     QString lastSuccessfulSyncDate(quint32 accountId, const QString &source, const QDBusMessage &message);
-    QStringList listCalendarsByAccount(quint32 accountId, const QDBusMessage &message);
+    QMap<QString, QString> listCalendarsByAccount(quint32 accountId, const QDBusMessage &message);
     void cancel(QStringList services);
     QString state() const;
     QStringList enabledServices() const;

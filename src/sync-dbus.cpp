@@ -115,18 +115,18 @@ QString SyncDBus::lastSuccessfulSyncDate(quint32 accountId, const QString &sourc
     return result;
 }
 
-QStringList SyncDBus::listCalendarsByAccount(quint32 accountId, const QDBusMessage &message)
+QMap<QString, QString> SyncDBus::listCalendarsByAccount(quint32 accountId, const QDBusMessage &message)
 {
-    QStringList result;
+    QMap<QString, QString> result;
     message.setDelayedReply(true);
     SyncAccount *acc = m_parent->accountById(accountId);
     if (acc) {
         connect(acc, &SyncAccount::remoteSourcesAvailable, [message] (const QArrayOfDatabases &sources, int error) {
-            QStringList names;
+            QMap<QString, QString> dbs;
             Q_FOREACH(const SyncDatabase &db, sources) {
-                names << db.name;
+                dbs.insert(db.remoteId, db.name);
             }
-            QDBusMessage reply = message.createReply(QVariant::fromValue(names));
+            QDBusMessage reply = message.createReply(QVariant::fromValue(dbs));
             QDBusConnection::sessionBus().send(reply);
         });
         acc->fetchRemoteSources("google-caldav");
