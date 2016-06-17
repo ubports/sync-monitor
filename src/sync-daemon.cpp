@@ -688,7 +688,7 @@ void SyncDaemon::onAccountSyncFinished(const QString &serviceName,
         }
 
         if (saveLog && !source.isEmpty()) {
-            saveSyncResult((uint) acc->id(), source, status, QDateTime::currentDateTime().toString(Qt::ISODate));
+            saveSyncResult((uint) acc->id(), source, status, QDateTime::currentDateTime().toUTC().toString(Qt::ISODate));
         }
     }
 
