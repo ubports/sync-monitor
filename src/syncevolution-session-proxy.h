@@ -37,7 +37,7 @@ public:
     QString status() const;
     bool hasConfig(const QString &configName);
     QStringMultiMap getConfig(const QString &configName, bool isTemplate);
-    bool saveConfig(const QString &configName, QStringMultiMap config, bool temporary = false);
+    bool saveConfig(const QString &configName, QStringMultiMap config, bool temporary = false, bool update = false);
     void detach();
     bool isValid() const;
     void sync(const QString &mode, QStringMap services);

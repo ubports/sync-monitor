@@ -132,19 +132,20 @@ QStringMultiMap SyncEvolutionSessionProxy::getConfig(const QString &configName,
 
 bool SyncEvolutionSessionProxy::saveConfig(const QString &configName,
                                            QStringMultiMap config,
-                                           bool temporary)
+                                           bool temporary,
+                                           bool update)
 {
     Q_ASSERT(isValid());
     QDBusReply<void> reply;
     if (configName.isEmpty()) {
         reply = m_iface->call("SetConfig",
-                              false,
+                              update,
                               temporary,
                               QVariant::fromValue(config));
     } else {
         reply = m_iface->call("SetNamedConfig",
                               configName,
-                              false,
+                              update,
                               temporary,
                               QVariant::fromValue(config));
     }

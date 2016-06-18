@@ -112,9 +112,9 @@ private:
 
     void setupAccounts();
     void setupTriggers();
+    void cleanupConfig();
     void sync(SyncAccount *syncAcc, const QStringList &calendars, bool runNow, bool syncOnMobile);
     void cancel(SyncAccount *syncAcc, const QStringList &sources);
-    void setup();
     void sync(bool runNow);
     bool registerService();
     void syncFinishedImpl();

@@ -50,6 +50,7 @@ public:
     static void dumpMap(const QStringMultiMap &map);
     static void dumpMap(const QStringMap &map);
     static void removeAccountSourceConfig(Accounts::Account *account, const QString &sourceName);
+    static void removeAccountConfig(uint accountId);
 
 Q_SIGNALS:
     void done(const QStringList &services);

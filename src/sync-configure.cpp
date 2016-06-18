@@ -241,11 +241,10 @@ void SyncConfigure::continuePeerConfig(SyncEvolutionSessionProxy *session, const
         }
 
         // remove remote configs not in use
-        const QString fullSourcePrefix = QString("source/%1_").arg(service);
+        const QString fullSourcePrefix = QString("source/calendar_");
         Q_FOREACH(const QString &sourceName, sourcesToRemove) {
             if (sourceName.isEmpty())
                 continue;
-
             if (sourceName.startsWith(fullSourcePrefix)) {
                 qDebug() << "\tRemove source not in use:" << sourceName;
                 // remove config
@@ -438,6 +437,48 @@ void SyncConfigure::removeAccountSourceConfig(Account *account, const QString &s
             .arg(sourceName);
     removeConfigDir(configPath);
 
+}
+
+void SyncConfigure::removeAccountConfig(uint accountId)
+{
+    QString configPath = QString("%1/")
+            .arg(QStandardPaths::locate(QStandardPaths::ConfigLocation,
+                                        QStringLiteral("syncevolution"),
+                                        QStandardPaths::LocateDirectory));
+    qDebug() << "Will remove config from old account:" << accountId;
+    QDir configDir(configPath);
+    configDir.setNameFilters(QStringList() << "*-*");
+    Q_FOREACH(const QString &dir, configDir.entryList()) {
+        if (dir.endsWith(QString("-%1").arg(accountId))) {
+            removeConfigDir(configDir.absoluteFilePath(dir));
+        }
+    }
+
+    //~/.config/syncevolution/default/peers/<provider>-<account-id>
+    configPath = QString("%1/default/peers/")
+                .arg(QStandardPaths::locate(QStandardPaths::ConfigLocation,
+                                            QStringLiteral("syncevolution"),
+                                            QStandardPaths::LocateDirectory));
+    configDir = QDir(configPath);
+    configDir.setNameFilters(QStringList() << "*-*");
+    Q_FOREACH(const QString &dir, configDir.entryList()) {
+        if (dir.endsWith(QString("-%1").arg(accountId))) {
+            removeConfigDir(configDir.absoluteFilePath(dir));
+        }
+    }
+
+    //~/.config/syncevolution/default/sources/<service>_<account-id>_<source-name>
+    configPath = QString("%1/default/sources/")
+                .arg(QStandardPaths::locate(QStandardPaths::ConfigLocation,
+                                            QStringLiteral("syncevolution"),
+                                            QStandardPaths::LocateDirectory));
+    configDir = QDir(configPath);
+    configDir.setNameFilters(QStringList() << "*_*_*");
+    Q_FOREACH(const QString &dir, configDir.entryList()) {
+        if (dir.split("_").value(1, "") == QString::number(accountId)) {
+            removeConfigDir(configDir.absoluteFilePath(dir));
+        }
+    }
 }
 
 bool SyncConfigure::removeConfigDir(const QString &dirPath)

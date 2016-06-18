@@ -121,6 +121,32 @@ void SyncDaemon::setupTriggers()
             this, &SyncDaemon::onDataChanged);
 }
 
+void SyncDaemon::cleanupConfig()
+{
+    QList<int> accountIds;
+    Q_FOREACH(const SyncAccount *acc, m_accounts) {
+        accountIds << acc->id();
+    }
+
+    QString configPath = QString("%1/")
+            .arg(QStandardPaths::locate(QStandardPaths::ConfigLocation,
+                                        QStringLiteral("syncevolution"),
+                                        QStandardPaths::LocateDirectory));
+    QDir configDir(configPath);
+    configDir.setNameFilters(QStringList() << "*-*");
+    Q_FOREACH(const QString &dir, configDir.entryList()) {
+        QString accountId = dir.split("-").last();
+        bool ok = false;
+        uint id = accountId.toUInt(&ok);
+        if (ok) {
+            if (!accountIds.contains(id)) {
+                SyncConfigure::removeAccountConfig(id);
+            }
+        }
+
+    }
+}
+
 void SyncDaemon::onDataChanged(const QString &sourceId)
 {
     if (sourceId.isEmpty()) {
@@ -373,6 +399,7 @@ void SyncDaemon::cleanupLogs()
         if (!accountIds.contains(id)) {
             qDebug() << "Clean log entry" << group << "from account:" << id;
             m_settings.remove(group);
+            SyncConfigure::removeAccountConfig(id);
         }
     }
     m_settings.sync();
@@ -383,6 +410,7 @@ void SyncDaemon::run()
     setupAccounts();
     setupTriggers();
     cleanupLogs();
+    cleanupConfig();
 
     // export dbus interface
     registerService();
