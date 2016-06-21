@@ -97,9 +97,8 @@ bool SyncQueue::contains(SyncAccount *account, const QString &sourceName) const
 bool SyncQueue::contains(SyncAccount *account, const QStringList &sources) const
 {
     Q_FOREACH(const SyncJob &job, m_jobs) {
-        if (job.account() == account) {
-            return job.contains(sources);
-        }
+        if (job.contains(account, sources))
+            return true;
     }
     return false;
 }
@@ -231,6 +230,19 @@ bool SyncJob::contains(const QStringList &sources) const
     }
 
     return true;
+}
+
+bool SyncJob::contains(SyncAccount *account, const QStringList &sources) const
+{
+    if (!isValid()) {
+        return false;
+    }
+
+    if (m_account->id() != account->id()) {
+        return false;
+    }
+
+    return contains(sources);
 }
 
 bool SyncJob::contains(const QString &source) const

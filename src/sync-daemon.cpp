@@ -164,7 +164,7 @@ void SyncDaemon::onDataChanged(const QString &sourceId)
             }
         }
 
-        if (eSource.isValid()) {
+        if (!eSource.remoteId.isEmpty()) {
             syncAccount(eSource.account, QStringList() << eSource.remoteId, false, false);
         }
     }
@@ -523,7 +523,7 @@ void SyncDaemon::sync(SyncAccount *syncAcc, const QStringList &sources, bool run
     qDebug() << "syn requested for account:" << syncAcc->displayName() << sources;
 
     // check if the request is the current sync
-    if (m_currentJob.isValid() && m_currentJob.contains(sources)) {
+    if (m_currentJob.contains(syncAcc, sources)) {
         qDebug() << "Syncing the requested account and sources. Ignore request!";
         return;
     }

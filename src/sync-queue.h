@@ -41,6 +41,7 @@ public:
     bool isEmpty();
     bool contains(const QString &source) const;
     bool contains(const QStringList &sources) const;
+    bool contains(SyncAccount *account, const QStringList &sources) const;
     void clear();
 
 private:
