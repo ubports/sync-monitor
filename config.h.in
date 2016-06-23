@@ -21,6 +21,7 @@
 
 #define PROVIDER_TEMPLATE_PATH          "@CMAKE_INSTALL_FULL_DATADIR@/sync-monitor/templates"
 #define CALENDAR_SERVICE_NAME           "calendar"
+#define CALENDAR_EDS_BACKEND            "Evolution Calendar"
 #define GLOBAL_CONFIG_GROUP             "global"
 
 #define GETTEXT_LOCALEDIR               "@CMAKE_INSTALL_FULL_LOCALEDIR@"
@@ -31,5 +32,6 @@
 #define ACCOUNT_LOG_LAST_SYNC_RESULT        "last_sync_result"
 #define ACCOUNT_LOG_LAST_SYNC_DATE          "last_sync_date"
 #define ACCOUNT_LOG_LAST_SUCCESSFUL_DATE    "last_successful_date"
+#define ACCOUNT_LOG_REMOTE_ID               "remoteId"
 
 #endif

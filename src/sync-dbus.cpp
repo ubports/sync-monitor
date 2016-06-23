@@ -93,11 +93,11 @@ void SyncDBus::detach()
     Q_EMIT clientDeattached(m_clientCount);
 }
 
-QString SyncDBus::lastSuccessfulSyncDate(quint32 accountId, const QString &source, const QDBusMessage &message)
+QString SyncDBus::lastSuccessfulSyncDate(quint32 accountId, const QString &remoteId, const QDBusMessage &message)
 {
     message.setDelayedReply(true);
 
-    QString result = m_parent->lastSuccessfulSyncDate(accountId, source);
+    QString result = m_parent->lastSuccessfulSyncDate(accountId, remoteId);
     QDBusMessage reply = message.createReply(QVariant::fromValue<QString>(result));
     QDBusConnection::sessionBus().send(reply);
     return result;

@@ -49,7 +49,7 @@ public:
     QStringList availableServices() const;
     QStringList enabledServices() const;
     bool isOnline() const;
-    QString lastSuccessfulSyncDate(quint32 accountId, const QString &calendar);
+    QString lastSuccessfulSyncDate(quint32 accountId, const QString &calendarId);
     bool syncOnMobileConnection() const;
     void setSyncOnMobileConnection(bool flag);
 

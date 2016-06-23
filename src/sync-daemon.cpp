@@ -143,7 +143,6 @@ void SyncDaemon::cleanupConfig()
                 SyncConfigure::removeAccountConfig(id);
             }
         }
-
     }
 }
 
@@ -371,9 +370,9 @@ bool SyncDaemon::isFirstSync(uint accountId)
     return true;
 }
 
-QString SyncDaemon::lastSuccessfulSyncDate(quint32 accountId, const QString &calendar)
+QString SyncDaemon::lastSuccessfulSyncDate(quint32 accountId, const QString &calendarId)
 {
-    const QString sourceName = SyncConfigure::formatSourceName(CALENDAR_SERVICE_NAME, accountId, calendar);
+    const QString sourceName = SyncConfigure::formatSourceName(accountId, calendarId);
     const QString configKey = QString(ACCOUNT_LOG_GROUP_FORMAT).arg(accountId).arg(sourceName);
 
     return m_settings.value(configKey + ACCOUNT_LOG_LAST_SUCCESSFUL_DATE).toString();

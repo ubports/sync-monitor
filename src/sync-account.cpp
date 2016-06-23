@@ -163,24 +163,22 @@ QList<SourceData> SyncAccount::sources() const
     }
 
     QStringMultiMap config = m_currentSession->getConfig("@default", false);
-    QString sourcePrefix = QString("source/%1_%2_").arg(CALENDAR_SERVICE_NAME).arg(m_account->id());
     Q_FOREACH(const QString &key, config.keys()) {
-        if (key.startsWith(sourcePrefix)) {
+        if (config[key]["backend"] == CALENDAR_EDS_BACKEND) {
             const QString sourceName = key.split("/").last();
             bool writable = true;
             QString remoteId;
             Q_FOREACH(const SyncDatabase &db, m_remoteSources) {
                 // build sync evolution source name based on service and account.
-                QString dbSourceName = SyncConfigure::formatSourceName(CALENDAR_SERVICE_NAME,
-                                                                       m_account->id(),
-                                                                       db.name);
+                QString dbSourceName = SyncConfigure::formatSourceName(m_account->id(), db.remoteId);
                 if (dbSourceName == sourceName) {
                     writable = db.writable;
                     remoteId = db.remoteId;
                     break;
                 }
             }
-            sources << SourceData(sourceName, remoteId, writable);
+            if (!remoteId.isEmpty())
+                sources << SourceData(sourceName, remoteId, writable);
         }
     }
 
@@ -217,7 +215,7 @@ void SyncAccount::continueSync()
                 // read-only sources aways sync with "refresh-from-remote"
                 QString mode(REFRESH_FROM_REMOTE_SYNC);
                 if (source.writable) {
-                    mode = syncMode(CALENDAR_SERVICE_NAME, source.sourceName, &firstSync);
+                    mode = syncMode(source.sourceName, &firstSync);
                 }
                 syncFlags.insert(source.sourceName, mode);
                 m_sourcesOnSync.insert(source.sourceName, SyncAccount::SourceSyncStarting);
@@ -245,8 +243,7 @@ SyncAccount::AccountState SyncAccount::state() const
     return m_state;
 }
 
-QString SyncAccount::syncMode(const QString &serviceName,
-                              const QString &sourceName,
+QString SyncAccount::syncMode(const QString &sourceName,
                               bool *firstSync) const
 {
     const QString lastStatus = lastSyncStatus(sourceName);

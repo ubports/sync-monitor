@@ -102,7 +102,7 @@ Q_SIGNALS:
 public Q_SLOTS:
     void syncAll();
     void syncAccount(quint32 accountId, const QStringList &sources);
-    QString lastSuccessfulSyncDate(quint32 accountId, const QString &source, const QDBusMessage &message);
+    QString lastSuccessfulSyncDate(quint32 accountId, const QString &remoteId, const QDBusMessage &message);
     QMap<QString, QString> listCalendarsByAccount(quint32 accountId, const QDBusMessage &message);
     void cancelAll();
     QString state() const;

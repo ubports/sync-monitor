@@ -167,6 +167,11 @@ void SyncConfigure::continuePeerConfig(SyncEvolutionSessionProxy *session, const
 
         // remove sources not in use anymore
         QStringList sourcesToRemove = config.keys();
+
+        // skip template sources
+        sourcesToRemove.removeAll("source/addressbook");
+        sourcesToRemove.removeAll("source/calendar");
+
         qDebug() << "Actual sources:" << sourcesToRemove;
 
         Q_FOREACH(const SyncDatabase &db, dbs) {
@@ -189,12 +194,12 @@ void SyncConfigure::continuePeerConfig(SyncEvolutionSessionProxy *session, const
             // create new source if not found
             if (localDbId.isEmpty()) {
                 QString title = db.title.isEmpty() ? db.name : db.title;
-                qDebug() << "Create new EDS source for:" << title;
                 localDbId = eds.createSource(title,
                                              db.color,
                                              db.remoteId,
                                              db.writable,
                                              m_account->id());
+                qDebug() << "Create new EDS source for:" << title << localDbId;
             }
             // remove qorgnizer prefix: "qtorganizer:eds::"
             localDbId = localDbId.split(":").last();
@@ -220,7 +225,7 @@ void SyncConfigure::continuePeerConfig(SyncEvolutionSessionProxy *session, const
             }
 
             // remote database
-            QString sourceName = formatSourceName(service, m_account->id(), db.name);
+            QString sourceName = formatSourceName(m_account->id(), db.remoteId);
             QString fullSourceName = QString("source/%1").arg(sourceName);
             qDebug() << "\tCreate syncevolution source" << fullSourceName;
             if (config.contains(fullSourceName)) {
@@ -241,17 +246,14 @@ void SyncConfigure::continuePeerConfig(SyncEvolutionSessionProxy *session, const
         }
 
         // remove remote configs not in use
-        const QString fullSourcePrefix = QString("source/calendar_");
         Q_FOREACH(const QString &sourceName, sourcesToRemove) {
             if (sourceName.isEmpty())
                 continue;
-            if (sourceName.startsWith(fullSourcePrefix)) {
-                qDebug() << "\tRemove source not in use:" << sourceName;
-                // remove config
-                config.remove(sourceName);
-                removedSources << sourceName;
-                changed = true;
-            }
+            qDebug() << "\tRemove source not in use:" << sourceName;
+            // remove config
+            config.remove(sourceName);
+            removedSources << sourceName;
+            changed = true;
         }
     }
 
@@ -293,11 +295,7 @@ void SyncConfigure::continuePeerConfig(SyncEvolutionSessionProxy *session, const
 
         // create local source when necessary
         if (!config.contains(configName)) {
-            // extract service name from source name "source/<service>_<database>
-            const QString sourceName(configName.split("/").last());
-            const QString serviceName(sourceName.split("_").first());
-
-            config[configName].insert("backend", QString("evolution-%1").arg(serviceName));
+            config[configName].insert("backend", "evolution-calendar");
             config[configName].insert("database", i.value().first);
             config[configName].insert("syncInterval", ACCOUNT_SYNC_INTERVAL);
             qDebug() << "\tCreate local source for[" << configName << "] = " << i.value().first;
@@ -308,24 +306,29 @@ void SyncConfigure::continuePeerConfig(SyncEvolutionSessionProxy *session, const
     qDebug() << "\tRemote dbs" << sourceToDatabase.keys();
 
     // remove local configs and databases
-    Q_FOREACH(const QString &service, services.toSet()) {
-        const QString sourcePrefix = QString("source/%1_%2_").arg(service).arg(m_account->id());
+    Q_FOREACH(const QString &source, config.keys()) {
+        const QString backend = config[source].value("backend");
+        // source is not a calendar
+        if (backend != CALENDAR_EDS_BACKEND)
+            continue;
 
-        Q_FOREACH(const QString &source, config.keys()) {
-            if (source.startsWith(sourcePrefix)) {
-                if (!sourceToDatabase.contains(source)) {
-                    QString database = config[source].value("database");
-                    if (!database.isEmpty()) {
-                        qDebug() << "Remove local config and database" << source << config[source].value("database");
-                        Q_EMIT sourceRemoved(source);
-                        eds.removeSource("qtorganizer:eds::" + database);
-                        changed = true;
-                    }
-                }
+        // source exits on remote side
+        if (sourceToDatabase.contains(source))
+            continue;
+
+        const QString database = config[source].value("database");
+        if (!database.isEmpty()) {
+            EdsSource eSource = eds.sourceById("qtorganizer:eds::" + database.trimmed());
+            if (eSource.isValid() && (eSource.account == m_account->id())) {
+                qDebug() << "Remove local config and database" << source << config[source].value("database");
+                Q_EMIT sourceRemoved(source);
+                eds.removeSource(eSource.id);
+                config.remove(source);
+                removedSources << source;
+                changed = true;
             }
         }
     }
-
     if (changed) {
         if (!session->saveConfig("@default", config)) {
             qWarning() << "Fail to save @default config";
@@ -379,17 +382,13 @@ QString SyncConfigure::normalizeDBName(const QString &name)
     return sourceName.toLower();
 }
 
-QString SyncConfigure::formatSourceName(const QString &serviceName, uint accountId, const QString &dbName)
+QString SyncConfigure::formatSourceName(uint accountId, const QString &remoteId)
 {
-    // build sync evolution source name based on service and account.
-    QString fullSourceName = QString("%1_%2_%3")
-            .arg(serviceName)
-            .arg(accountId)
-            .arg(SyncConfigure::normalizeDBName(dbName));
-
+    QString id = QString("%1_%2").arg(accountId).arg(remoteId.split("@").first());
+    id = SyncConfigure::normalizeDBName(id);
     // WORKAROUND: trunc source name to 30 chars
     // Syncevolution only support source names with max 30 chars.
-    return (fullSourceName.size() > 30 ? fullSourceName.left(30) : fullSourceName);
+    return (id.size() > 30 ? id.left(30) : id);
 }
 
 void SyncConfigure::removeAccountSourceConfig(Account *account, const QString &sourceName)
@@ -397,7 +396,7 @@ void SyncConfigure::removeAccountSourceConfig(Account *account, const QString &s
 
     QString configPath;
 
-    if (sourceName.split("_").value(1, "").toInt() == account->id()) {
+    if (sourceName.startsWith(account->id())) {
         //./default/sources/<source-name>
         configPath = QString("%1/default/sources/%2")
                 .arg(QStandardPaths::locate(QStandardPaths::ConfigLocation,
@@ -467,16 +466,23 @@ void SyncConfigure::removeAccountConfig(uint accountId)
         }
     }
 
-    //~/.config/syncevolution/default/sources/<service>_<account-id>_<source-name>
+    //~/.config/syncevolution/default/sources/<source-name>
     configPath = QString("%1/default/sources/")
                 .arg(QStandardPaths::locate(QStandardPaths::ConfigLocation,
                                             QStringLiteral("syncevolution"),
                                             QStandardPaths::LocateDirectory));
     configDir = QDir(configPath);
-    configDir.setNameFilters(QStringList() << "*_*_*");
+    configDir.setNameFilters(QStringList() << "*");
+    EdsHelper eds;
+
     Q_FOREACH(const QString &dir, configDir.entryList()) {
-        if (dir.split("_").value(1, "") == QString::number(accountId)) {
-            removeConfigDir(configDir.absoluteFilePath(dir));
+        QSettings config(configDir.absoluteFilePath(dir) + "/config.ini", QSettings::IniFormat);
+        if (config.value("backend").toString() == CALENDAR_EDS_BACKEND) {
+            const QString dbId = config.value("database").toString();
+            EdsSource eSource = eds.sourceById("qtorganizer:eds::" + dbId);
+            if (!eSource.isValid()) {
+                removeConfigDir(configDir.absoluteFilePath(dir));
+            }
         }
     }
 }

@@ -44,7 +44,7 @@ public:
 
     bool isValid()
     {
-        return !id.isEmpty();
+        return !id.trimmed().isEmpty();
     }
 };
 

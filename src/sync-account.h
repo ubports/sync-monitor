@@ -153,7 +153,7 @@ private:
     void continueSync();
 
     void setState(AccountState state);
-    QString syncMode(const QString &serviceName, const QString &sourceName, bool *firstSync) const;
+    QString syncMode(const QString &sourceName, bool *firstSync) const;
     bool syncService(const QString &serviceName);
     void setupServices();
 

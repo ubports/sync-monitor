@@ -46,7 +46,7 @@ public:
 
     static QString accountSessionName(Accounts::Account *account);
     static QString normalizeDBName(const QString &name);
-    static QString formatSourceName(const QString &serviceName, uint accountId, const QString &dbName);
+    static QString formatSourceName(uint accountId, const QString &remoteId);
     static void dumpMap(const QStringMultiMap &map);
     static void dumpMap(const QStringMap &map);
     static void removeAccountSourceConfig(Accounts::Account *account, const QString &sourceName);
