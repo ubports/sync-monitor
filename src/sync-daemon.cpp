@@ -720,7 +720,7 @@ void SyncDaemon::onAccountSyncFinished(const QString &serviceName,
             saveLog = false;
             // white list error retry the sync
             qDebug() << "Trying a second sync due error:" << errorMessage;
-            m_syncQueue->push(acc, CALENDAR_SERVICE_NAME, false);
+            m_syncQueue->push(acc, QStringList(), false);
             break;
         } else if (!errorMessage.isEmpty()) {
             fail = true;
