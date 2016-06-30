@@ -103,6 +103,7 @@ void SyncAccount::setup()
 void SyncAccount::cancel(const QStringList &sources)
 {
     Q_UNUSED(sources);
+    qDebug() << "Sync cancel requested" << sources;
 
     //TODO: cancel the only the source
     if (m_currentSession) {
@@ -203,10 +204,8 @@ void SyncAccount::continueSync()
         return;
     }
 
-    bool enabledService = m_availabeServices.value(CALENDAR_SERVICE_NAME, false);
-    if (!enabledService) {
+    if (!isEnabled()) {
         qDebug() << "Calendar Service disabled for account:" << m_account->id() << ". Skip sync!";
-        Q_EMIT syncFinished(CALENDAR_SERVICE_NAME,  QMap<QString, QString>());
     } else {
         qDebug() << "Will prepare to sync:" << m_account->id() << m_sourcesToSync;
         Q_FOREACH(const SourceData &source, sources()) {
@@ -219,7 +218,12 @@ void SyncAccount::continueSync()
                 }
                 syncFlags.insert(source.sourceName, mode);
                 m_sourcesOnSync.insert(source.sourceName, SyncAccount::SourceSyncStarting);
+                m_sourcesToSync.removeAll(source.remoteId);
             }
+        }
+        if (!m_sourcesToSync.isEmpty()) {
+            qDebug() << "Source not present on remote side:" << m_sourcesToSync;
+            m_sourcesToSync.clear();
         }
     }
 
@@ -229,7 +233,9 @@ void SyncAccount::continueSync()
         m_currentSession->sync("none", syncFlags);
     } else {
         qDebug() << "Nothing to sync!";
+        releaseSession();
         setState(SyncAccount::Idle);
+        Q_EMIT syncFinished(CALENDAR_SERVICE_NAME, QMap<QString, QString>());
     }
 }
 
@@ -278,6 +284,9 @@ QString SyncAccount::syncMode(const QString &sourceName,
         // "Disk full";
     case 506:
         // "Fail to sync due some remote problem";
+    case 514:
+        // "Remote problem, not way to recovery";
+        return "refresh-from-remote";
     case 22001:
         // "Fail to sync some items";
     case 22002:
@@ -305,9 +314,9 @@ QString SyncAccount::syncMode(const QString &sourceName,
     }
 }
 
-bool SyncAccount::enabled() const
+bool SyncAccount::isEnabled() const
 {
-    return m_account->enabled();
+    return enabledServices().contains(CALENDAR_SERVICE_NAME);
 }
 
 QString SyncAccount::displayName() const
@@ -346,6 +355,9 @@ QStringList SyncAccount::availableServices() const
 QStringList SyncAccount::enabledServices() const
 {
     QStringList result;
+    if (!m_account->enabled())
+        return result;
+
     Q_FOREACH(const Service &service, m_account->enabledServices()) {
         result << service.serviceType();
     }
@@ -518,8 +530,8 @@ void SyncAccount::onSessionStatusChanged(const QString &status, quint32 error, c
     for(QSyncStatusMap::const_iterator i = sources.begin();
         i != sources.end();
         i++) {
-        QString newStatus = i.value().status;
-        QString sourceName = i.key();
+        const QString newStatus = i.value().status;
+        const QString sourceName = i.key();
 
         if (newStatus == "idle") {
             // skip idle sources

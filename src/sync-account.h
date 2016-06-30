@@ -79,7 +79,7 @@ public:
     void wait();
     void status() const;
     AccountState state() const;
-    bool enabled() const;
+    bool isEnabled() const;
     QString displayName() const;
     virtual int id() const;
     QString iconName(const QString &serviceName) const;

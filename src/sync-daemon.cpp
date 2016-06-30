@@ -438,9 +438,6 @@ QStringList SyncDaemon::enabledServices() const
     QSet<QString> services;
     QStringList available = availableServices();
     Q_FOREACH(SyncAccount *syncAcc, m_accounts) {
-        if (!syncAcc->enabled()) {
-            continue;
-        }
         Q_FOREACH(const QString &service, syncAcc->enabledServices()) {
             if (available.contains(service)) {
                 services << service;
@@ -497,7 +494,7 @@ void SyncDaemon::addAccount(const AccountId &accountId, bool startSync)
         connect(syncAcc, SIGNAL(sourceRemoved(QString)),
                          SLOT(onAccountSourceRemoved(QString)));
 
-        bool accountEnabled = syncAcc->enabled() && syncAcc->enabledServices().contains(CALENDAR_SERVICE_NAME);
+        const bool accountEnabled = syncAcc->isEnabled();
         if (startSync && accountEnabled) {
             sync(syncAcc, QStringList(), true, true);
         }
@@ -520,6 +517,12 @@ void SyncDaemon::sync(bool runNow)
 void SyncDaemon::sync(SyncAccount *syncAcc, const QStringList &sources, bool runNow, bool syncOnMobile)
 {
     qDebug() << "syn requested for account:" << syncAcc->displayName() << sources;
+
+    // check if the account is enabled
+    if (!syncAcc->isEnabled()) {
+        qDebug() << "Account not enabled. Skip sync.";
+        return;
+    }
 
     // check if the request is the current sync
     if (m_currentJob.contains(syncAcc, sources)) {
@@ -688,8 +691,8 @@ void SyncDaemon::onAccountSyncFinished(const QString &serviceName,
 
     SyncAccount *acc = qobject_cast<SyncAccount*>(QObject::sender());
     // check fisrt sync before store the log information
-    bool firstSync = isFirstSync(acc->id());
-    bool accountEnabled = acc->enabled() && acc->enabledServices().contains(CALENDAR_SERVICE_NAME);
+    const bool firstSync = isFirstSync(acc->id());
+    const bool accountEnabled = acc->isEnabled();
 
     Q_EMIT syncFinished(acc, serviceName);
 
@@ -732,7 +735,6 @@ void SyncDaemon::onAccountSyncFinished(const QString &serviceName,
                              .arg(acc->displayName())
                              .arg(errorMessage),
                          acc->iconName(CALENDAR_SERVICE_NAME));
-            break;
         }
 
         if (saveLog && !source.isEmpty()) {
