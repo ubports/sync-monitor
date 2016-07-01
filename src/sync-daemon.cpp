@@ -250,7 +250,10 @@ void SyncDaemon::continueSync()
     const bool continueSync = newJob.isValid() && isOnLine;
     if (!continueSync) {
         if (!isOnLine) {
-            qDebug() << "Device is offline we will skip the sync.";
+            qDebug() << "Device is offline we will sync later.";
+            if (newJob.isValid()) {
+                m_offlineQueue->push(newJob);
+            }
             Q_FOREACH(const SyncJob &j, m_syncQueue->jobs()) {
                 if (j.account() && j.account()->retrySync()) {
                     qDebug() << "Push account to later sync";
@@ -258,6 +261,7 @@ void SyncDaemon::continueSync()
                 }
             }
             m_syncQueue->clear();
+            newJob = SyncJob();
         } else {
             Q_ASSERT(m_syncQueue->count() == 0);
             qDebug() << "No more job to sync.";
