@@ -1,3 +1,10 @@
+sync-monitor (0.2+16.10.20160701-0ubuntu1) yakkety; urgency=medium
+
+  * Remove syncevolution account config files if the account get
+    removed.
+
+ -- Renato Araujo Oliveira Filho <renato.filho@canonical.com>  Fri, 01 Jul 2016 02:15:14 +0000
+
 sync-monitor (0.2+16.10.20160607-0ubuntu1) yakkety; urgency=medium
 
   * Update notifications with new messages.
