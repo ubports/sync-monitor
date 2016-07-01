@@ -40,9 +40,16 @@ SyncEvolutionServerProxy::~SyncEvolutionServerProxy()
 {
     if (m_iface) {
         m_iface->call("Detach");
-        m_iface->deleteLater();
+        delete m_iface;
         m_iface = 0;
     }
+}
+
+void SyncEvolutionServerProxy::killServer()
+{
+    QProcess p;
+    p.execute("pkill syncevo-dbus-server");
+    p.waitForFinished();
 }
 
 SyncEvolutionServerProxy *SyncEvolutionServerProxy::instance()
@@ -76,11 +83,43 @@ SyncEvolutionSessionProxy* SyncEvolutionServerProxy::openSession(const QString &
         return 0;
     }
 
-    return new SyncEvolutionSessionProxy(reply.value(), this);
+    return new SyncEvolutionSessionProxy(sessionName, reply.value(), this);
 }
 
 QStringList SyncEvolutionServerProxy::configs(bool templates) const
 {
     QDBusReply<QStringList> reply = m_iface->call("GetConfigs", templates);
     return reply.value();
+}
+
+void SyncEvolutionServerProxy::getDatabases(const QString &sourceName)
+{
+    QDBusPendingCall pcall =  m_iface->asyncCall("GetDatabases", sourceName);
+    QDBusPendingCallWatcher *watcher = new QDBusPendingCallWatcher(pcall, this);
+
+    QObject::connect(watcher, SIGNAL(finished(QDBusPendingCallWatcher*)),
+                     this, SLOT(getDatabasesFinished(QDBusPendingCallWatcher*)));
+}
+
+QArrayOfStringMap SyncEvolutionServerProxy::reports(const QString &sessionName, uint start, uint count)
+{
+    QDBusReply<QArrayOfStringMap> reply = m_iface->call("GetReports", sessionName, start, count);
+    if (reply.error().isValid()) {
+        qWarning() << "Fail to get sync reports" << reply.error().message();
+        return QArrayOfStringMap();
+    } else {
+        return reply.value();
+    }
+}
+
+void SyncEvolutionServerProxy::getDatabasesFinished(QDBusPendingCallWatcher *call)
+{
+    QDBusPendingReply<QArrayOfDatabases> reply = *call;
+    if (reply.isError()) {
+        qWarning() << "Fail to fetch databases" << reply.error().message();
+        Q_EMIT databasesReceived(QArrayOfDatabases());
+    } else {
+         Q_EMIT databasesReceived(reply.value());
+    }
+    call->deleteLater();
 }

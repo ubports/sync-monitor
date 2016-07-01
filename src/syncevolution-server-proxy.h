@@ -38,6 +38,14 @@ public:
 
     SyncEvolutionSessionProxy *openSession(const QString &sessionName, QStringList flags);
     QStringList configs(bool templates=false) const;
+    void getDatabases(const QString &sourceName);
+    QArrayOfStringMap reports(const QString &sessionName, uint start, uint count);
+
+Q_SIGNALS:
+    void databasesReceived(const QArrayOfDatabases &databases);
+
+private Q_SLOTS:
+    void getDatabasesFinished(QDBusPendingCallWatcher *call);
 
 private:
     static SyncEvolutionServerProxy *m_instance;
@@ -45,6 +53,8 @@ private:
 
     SyncEvolutionServerProxy(QObject *parent = 0);
     ~SyncEvolutionServerProxy();
+
+    static void killServer();
 };
 
 #endif

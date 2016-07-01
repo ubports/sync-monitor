@@ -36,7 +36,7 @@ class EdsHelperMock : public EdsHelper
     Q_OBJECT
 public:
     EdsHelperMock(QObject *parent = 0)
-        : EdsHelper(parent, "memory", "memory")
+        : EdsHelper(parent, "memory")
     {
         setEnabled(true);
     }
@@ -44,9 +44,6 @@ public:
 
     QtOrganizer::QOrganizerManager *organizerEngine()
     { return m_organizerEngine; }
-
-    QtContacts::QContactManager *contactEngine()
-    { return m_contactEngine; }
 
     void trackCollectionFromItem(QtOrganizer::QOrganizerItem *item)
     { m_trackedItem = item; }

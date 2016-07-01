@@ -15,24 +15,21 @@
 #include "config.h"
 
 #define CHANGE_TIMEOUT      3000
+#define COLLECTION_READONLY_METADATA        "collection-readonly"
+#define COLLECTION_SYNC_READONLY_METADATA   "collection-sync-readonly"
+#define COLLECTION_ACCOUNT_ID_METADATA      "collection-account-id"
+#define COLLECTION_REMOTE_ID_METADATA       "collection-metadata"
+#define COLLECTION_SELECTED_METADATA        "collection-selected"
 
 using namespace QtOrganizer;
 using namespace QtContacts;
 
-EdsHelper::EdsHelper(QObject *parent,
-                     const QString &contactManager,
-                     const QString &organizerManager)
+EdsHelper::EdsHelper(QObject *parent, const QString &organizerManager)
     : QObject(parent),
       m_freezed(false)
 {
     qRegisterMetaType<QList<QOrganizerItemId> >("QList<QOrganizerItemId>");
-    qRegisterMetaType<QList<QContactId> >("QList<QContactId>");
 
-    if (!contactManager.isEmpty()) {
-        m_contactEngine = new QContactManager(contactManager, QMap<QString, QString>());
-    } else {
-        m_contactEngine = 0;
-    }
     if (!organizerManager.isEmpty()) {
         m_organizerEngine = new QOrganizerManager(organizerManager, QMap<QString, QString>());
     } else {
@@ -44,31 +41,102 @@ EdsHelper::EdsHelper(QObject *parent,
 
 EdsHelper::~EdsHelper()
 {
-    delete m_contactEngine;
     delete m_organizerEngine;
+    m_organizerEngine = 0;
 }
 
-void EdsHelper::createSource(const QString &serviceName, const QString &sourceName)
+QString EdsHelper::createSource(const QString &sourceName,
+                                const QString &sourceColor,
+                                const QString &remoteId,
+                                bool writable,
+                                int accountId)
 {
-    if (serviceName == CONTACTS_SERVICE_NAME) {
-        createContactsSource(sourceName);
-    } else if (serviceName == CALENDAR_SERVICE_NAME) {
-        createOrganizerSource(sourceName);
+    if (!m_organizerEngine) {
+        qWarning() << "Request to create an organizer source with a null organize engine";
+        return QString();
+    }
+
+    EdsSource source = sourceByRemoteId(remoteId, accountId);
+    if (!source.id.isEmpty()) {
+        return source.id;
+    }
+
+    QOrganizerCollection collection;
+    collection.setMetaData(QOrganizerCollection::KeyName, sourceName);
+    collection.setMetaData(QOrganizerCollection::KeyColor, sourceColor);
+    collection.setExtendedMetaData(COLLECTION_REMOTE_ID_METADATA, remoteId);
+    collection.setExtendedMetaData(COLLECTION_ACCOUNT_ID_METADATA, accountId);
+    collection.setExtendedMetaData(COLLECTION_SELECTED_METADATA, true);
+    collection.setExtendedMetaData(COLLECTION_SYNC_READONLY_METADATA, !writable);
+
+    if (!m_organizerEngine->saveCollection(&collection)) {
+        qWarning() << "Fail to create collection" << sourceName;
+        return QString();
     } else {
-        qWarning() << "Service not supported:" << serviceName;
+        return collection.id().toString();
     }
 }
 
 
-void EdsHelper::removeSource(const QString &serviceName, const QString &sourceName)
+void EdsHelper::removeSource(const QString &sourceId)
 {
-    if (serviceName.isEmpty() || (serviceName == CONTACTS_SERVICE_NAME)) {
-        removeContactsSource(sourceName);
+    if (!m_organizerEngine) {
+        qWarning() << "Request to remove organizer source with a null organize engine";
+        return;
     }
 
-    if (serviceName.isEmpty() || (serviceName == CALENDAR_SERVICE_NAME)) {
-        removeOrganizerSource(sourceName);
+    QOrganizerCollectionId id = QOrganizerCollectionId::fromString(sourceId);
+
+    if (!m_organizerEngine->removeCollection(id)) {
+        qWarning() << "Fail to remove source" << id;
     }
+}
+
+QString EdsHelper::sourceIdByName(const QString &sourceName, uint account)
+{
+    if (!m_organizerEngine) {
+        qWarning() << "sourceIdByName: organizer engine is null";
+        return QString();
+    }
+
+    Q_FOREACH(const QOrganizerCollection &c, m_organizerEngine->collections()) {
+        if ((c.extendedMetaData(COLLECTION_ACCOUNT_ID_METADATA) == account) &&
+            (c.metaData(QOrganizerCollection::KeyName).toString() == sourceName)) {
+            return c.id().toString();
+        }
+    }
+    return QString();
+}
+
+EdsSource EdsHelper::sourceByRemoteId(const QString &remoteId, uint account)
+{
+    Q_FOREACH(const QOrganizerCollection &c, m_organizerEngine->collections()) {
+        if ((c.extendedMetaData(COLLECTION_ACCOUNT_ID_METADATA) == account) &&
+            (c.extendedMetaData(COLLECTION_REMOTE_ID_METADATA).toString() == remoteId)) {
+            EdsSource s;
+            s.id = c.id().toString();
+            s.name = c.metaData(QOrganizerCollection::KeyName).toString();
+            s.account = account;
+            s.remoteId = remoteId;
+            return s;
+        }
+    }
+    return EdsSource();
+}
+
+EdsSource EdsHelper::sourceById(const QString &id)
+{
+    Q_FOREACH(const QOrganizerCollection &c, m_organizerEngine->collections()) {
+        if (c.id().toString() == id) {
+            EdsSource s;
+            s.id = c.id().toString();
+            s.name = c.metaData(QOrganizerCollection::KeyName).toString();
+            s.account = c.extendedMetaData(COLLECTION_ACCOUNT_ID_METADATA).toUInt();
+            s.remoteId = c.extendedMetaData(COLLECTION_REMOTE_ID_METADATA).toString();
+            return s;
+        }
+    }
+    return EdsSource();
 }
 
 void EdsHelper::freezeNotify()
@@ -78,7 +146,6 @@ void EdsHelper::freezeNotify()
 
 void EdsHelper::unfreezeNotify()
 {
-    m_pendingContacts.clear();
     m_pendingCalendars.clear();
     m_freezed = false;
     m_timeoutTimer.start(CHANGE_TIMEOUT);
@@ -87,11 +154,11 @@ void EdsHelper::unfreezeNotify()
 void EdsHelper::flush()
 {
     m_freezed = false;
-    contactChangedFilter(m_pendingContacts.toList());
-    m_pendingContacts.clear();
 
-    Q_FOREACH(const QString &calendar, m_pendingCalendars) {
-        Q_EMIT dataChanged(CALENDAR_SERVICE_NAME, calendar);
+    if (m_organizerEngine) {
+        Q_FOREACH(const QString &calendar, m_pendingCalendars) {
+            Q_EMIT dataChanged(calendar);
+        }
     }
     m_pendingCalendars.clear();
 }
@@ -99,25 +166,6 @@ void EdsHelper::flush()
 void EdsHelper::setEnabled(bool enabled)
 {
     if (enabled) {
-        if (m_contactEngine) {
-            connect(m_contactEngine,
-                    SIGNAL(contactsAdded(QList<QContactId>)),
-                    SLOT(contactChangedFilter(QList<QContactId>)),
-                    Qt::QueuedConnection);
-            connect(m_contactEngine,
-                    SIGNAL(contactsChanged(QList<QContactId>)),
-                    SLOT(contactChangedFilter(QList<QContactId>)),
-                    Qt::QueuedConnection);
-            connect(m_contactEngine,
-                    SIGNAL(contactsRemoved(QList<QContactId>)),
-                    SLOT(contactChanged()),
-                    Qt::QueuedConnection);
-            connect(m_contactEngine,
-                    SIGNAL(dataChanged()),
-                    SLOT(contactDataChanged()),
-                    Qt::QueuedConnection);
-        }
-
         if (m_organizerEngine) {
             connect(m_organizerEngine,
                     SIGNAL(itemsAdded(QList<QOrganizerItemId>)),
@@ -128,70 +176,30 @@ void EdsHelper::setEnabled(bool enabled)
             connect(m_organizerEngine,
                     SIGNAL(itemsChanged(QList<QOrganizerItemId>)),
                     SLOT(calendarChanged(QList<QOrganizerItemId>)), Qt::QueuedConnection);
-            connect(m_organizerEngine,
-                    SIGNAL(collectionsModified(QList<QPair<QOrganizerCollectionId,QOrganizerManager::Operation> >)),
-                    SLOT(calendarCollectionsChanged()));
         }
     } else {
-        if (m_contactEngine) {
-            m_contactEngine->disconnect(this);
-        }
         if (m_organizerEngine) {
             m_organizerEngine->disconnect(this);
         }
     }
 }
 
-void EdsHelper::contactChangedFilter(const QList<QContactId>& contactIds)
+QMap<int, QStringList> EdsHelper::sources()
 {
-    Q_ASSERT(m_contactEngine);
-
-    if (m_freezed) {
-        m_pendingContacts += contactIds.toSet();
-    } else {
-        QContactFetchByIdRequest *request = new QContactFetchByIdRequest(m_contactEngine);
-        request->setManager(m_contactEngine);
-        request->setIds(contactIds);
-
-        QContactFetchHint hint;
-        hint.setDetailTypesHint(QList<QContactDetail::DetailType>() << QContactDetail::TypeSyncTarget);
-        request->setFetchHint(hint);
-        connect(request, SIGNAL(stateChanged(QContactAbstractRequest::State)),
-                SLOT(contactFetchStateChanged(QContactAbstractRequest::State)));
-        request->start();
-    }
-}
-
-void EdsHelper::contactFetchStateChanged(QContactAbstractRequest::State newState)
-{
-    Q_ASSERT(m_contactEngine);
-
-    if ((newState == QContactAbstractRequest::ActiveState) ||
-        (newState == QContactAbstractRequest::InactiveState)) {
-        return;
-    }
-
-    QContactFetchByIdRequest *request = qobject_cast<QContactFetchByIdRequest*>(QObject::sender());
-    if (newState == QContactAbstractRequest::FinishedState) {
-        QSet<QString> sources;
-        Q_FOREACH(const QContact &contact, request->contacts()) {
-            QContactSyncTarget syncTarget = contact.detail<QContactSyncTarget>();
-            if (!syncTarget.syncTarget().isEmpty()) {
-                sources << syncTarget.syncTarget();
-            }
+    QMap<int, QStringList> result;
+    QList<QOrganizerCollection> collections = m_organizerEngine->collections();
+    Q_FOREACH(const QOrganizerCollection &collection, collections) {
+        bool ok = false;
+        int accountId = collection.extendedMetaData(COLLECTION_ACCOUNT_ID_METADATA).toInt(&ok);
+        if (!ok) {
+            accountId = -1;
         }
-
-        Q_FOREACH(const QString &source, sources) {
-            contactChanged(source);
-        }
+        QStringList sources  = result.value(accountId);
+        sources << collection.id().toString();
+        result.insert(accountId, sources);
     }
 
-    request->deleteLater();
-}
-
-void EdsHelper::calendarCollectionsChanged()
-{
-    m_calendarCollections.clear();
+    return result;
 }
 
 QString EdsHelper::getCollectionIdFromItemId(const QOrganizerItemId &itemId) const
@@ -199,27 +207,14 @@ QString EdsHelper::getCollectionIdFromItemId(const QOrganizerItemId &itemId) con
     return itemId.toString().split("/").first();
 }
 
-void EdsHelper::contactChanged(const QString& sourceName)
-{
-    if (!m_timeoutTimer.isActive()) {
-        Q_EMIT dataChanged(CONTACTS_SERVICE_NAME, sourceName);
-    } else {
-        qDebug() << "Ignore contact changed:" << sourceName;
-    }
-}
-
-void EdsHelper::contactDataChanged()
-{
-    // The dataChanged signal is fired during the server startup.
-    // Some contact data is loaded async like Avatar, a signal with contactChanged will be fired
-    // late during the server startup. Because of that We will wait for some time before start to
-    // accept contact changes signals, to avoid unnecessary syncs.
-    m_timeoutTimer.start(CHANGE_TIMEOUT);
-}
-
 void EdsHelper::calendarChanged(const QList<QOrganizerItemId> &itemIds)
 {
     Q_ASSERT(m_organizerEngine);
+
+    if (m_timeoutTimer.isActive()) {
+        // ignore changes just after sync
+        return;
+    }
 
     QSet<QString> uniqueColletions;
 
@@ -232,136 +227,11 @@ void EdsHelper::calendarChanged(const QList<QOrganizerItemId> &itemIds)
         return;
     }
 
-    if (m_calendarCollections.isEmpty()) {
-        m_calendarCollections = m_organizerEngine->collections();
-    }
-
     Q_FOREACH(const QString &collectionId, uniqueColletions) {
-        Q_FOREACH(const QOrganizerCollection &collection, m_calendarCollections) {
-            if (collection.id().toString() == collectionId) {
-                QString collectionName = collection.metaData(QOrganizerCollection::KeyName).toString();
-                if (m_freezed) {
-                    m_pendingCalendars << collectionName;
-                } else {
-                    Q_EMIT dataChanged(CALENDAR_SERVICE_NAME, collectionName);
-                }
-                break;
-            }
+        if (m_freezed) {
+            m_pendingCalendars << collectionId;
+        } else {
+            Q_EMIT dataChanged(collectionId);
         }
-    }
-}
-
-void EdsHelper::createContactsSource(const QString &sourceName)
-{
-    if (!m_contactEngine) {
-        qWarning() << "Request to create contact source with null engine";
-        return;
-    }
-
-    // filter all contact groups/addressbook
-    QContactDetailFilter filter;
-    filter.setDetailType(QContactDetail::TypeType, QContactType::FieldType);
-    filter.setValue(QContactType::TypeGroup);
-
-    // check if the source already exists
-    QList<QContact> sources = m_contactEngine->contacts(filter);
-    Q_FOREACH(const QContact &contact, sources) {
-        if (contact.detail<QContactDisplayLabel>().label() == sourceName) {
-            return;
-        }
-    }
-
-    // create a new source
-    QContact contact;
-    contact.setType(QContactType::TypeGroup);
-
-    QContactDisplayLabel label;
-    label.setLabel(sourceName);
-    contact.saveDetail(&label);
-
-    // set the new source as default if there is only the local source
-    if (sources.size() == 1) {
-        QContactExtendedDetail isDefault;
-        isDefault.setName("IS-PRIMARY");
-        isDefault.setData(true);
-        contact.saveDetail(&isDefault);
-    }
-
-    if (!m_contactEngine->saveContact(&contact)) {
-        qWarning() << "Fail to create contact source:" << sourceName;
-    }
-}
-
-void EdsHelper::removeOrganizerSource(const QString &sourceName)
-{
-    if (!m_organizerEngine) {
-        qWarning() << "Request to remove organizer source with a null organize engine";
-        return;
-    }
-
-    QOrganizerCollectionId collectionId;
-    QList<QOrganizerCollection> result = m_organizerEngine->collections();
-    Q_FOREACH(const QOrganizerCollection &collection, result) {
-        if (collection.metaData(QOrganizerCollection::KeyName).toString() == sourceName) {
-            collectionId = collection.id();
-            break;
-        }
-    }
-
-    if (!collectionId.isNull()) {
-        if (!m_organizerEngine->removeCollection(collectionId)) {
-            qWarning() << "Fail to remove calendar source" <<  sourceName;
-        }
-    } else {
-        qWarning() << "Calendar source not found" << sourceName;
-    }
-}
-
-void EdsHelper::removeContactsSource(const QString &sourceName)
-{
-    if (!m_contactEngine) {
-        qWarning() << "Request to remove contact source with a null contact engine";
-        return;
-    }
-
-    // check source Id
-    QContactId sourceId;
-    QContactDetailFilter filter;
-    filter.setDetailType(QContactDetail::TypeType, QContactType::FieldType);
-    filter.setValue(QContactType::TypeGroup);
-
-    // check if the source already exists
-    QList<QContact> sources = m_contactEngine->contacts(filter);
-    Q_FOREACH(const QContact &contact, sources) {
-        if (contact.detail<QContactDisplayLabel>().label() == sourceName) {
-            sourceId = contact.id();
-            break;
-        }
-    }
-
-    if (sourceId.isNull() || !m_contactEngine->removeContact(sourceId)) {
-        qWarning() << "Fail to remove contact source:" << sourceName;
-    }
-}
-
-void EdsHelper::createOrganizerSource(const QString &sourceName)
-{
-    if (!m_organizerEngine) {
-        qWarning() << "Request to create an organizer source with a null organize engine";
-        return;
-    }
-
-    QList<QOrganizerCollection> result = m_organizerEngine->collections();
-    Q_FOREACH(const QOrganizerCollection &collection, result) {
-        if (collection.metaData(QOrganizerCollection::KeyName).toString() == sourceName) {
-            return;
-        }
-    }
-
-    QOrganizerCollection collection;
-    collection.setMetaData(QOrganizerCollection::KeyName, sourceName);
-    collection.setExtendedMetaData("collection-selected", true);
-    if (!m_organizerEngine->saveCollection(&collection)) {
-        qWarning() << "Fail to create collection" << sourceName;
     }
 }

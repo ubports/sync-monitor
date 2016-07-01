@@ -46,31 +46,19 @@ void SyncDBus::setSyncOnMobileConnection(bool flag)
     m_parent->setSyncOnMobileConnection(flag);
 }
 
-void SyncDBus::sync(QStringList services)
+void SyncDBus::syncAll()
 {
-    if (services.isEmpty()) {
-        m_parent->syncAll(QString(), true, true);
-    } else {
-        Q_FOREACH(const QString &service, services) {
-            m_parent->syncAll(service, true, true);
-        }
-    }
+    m_parent->syncAll(true, true);
 }
 
-void SyncDBus::syncAccount(quint32 accountId, const QString &service)
+void SyncDBus::syncAccount(quint32 accountId, const QStringList &sources)
 {
-    m_parent->syncAccount(accountId, service);
+    m_parent->syncAccount(accountId, sources);
 }
 
-void SyncDBus::cancel(QStringList services)
+void SyncDBus::cancelAll()
 {
-    if (services.isEmpty()) {
-        m_parent->cancel();
-    } else {
-        Q_FOREACH(const QString &service, services) {
-            m_parent->cancel(service);
-        }
-    }
+    m_parent->cancel();
 }
 
 QString SyncDBus::state() const
@@ -105,14 +93,37 @@ void SyncDBus::detach()
     Q_EMIT clientDeattached(m_clientCount);
 }
 
-QString SyncDBus::lastSuccessfulSyncDate(quint32 accountId, const QString &service, const QDBusMessage &message)
+QString SyncDBus::lastSuccessfulSyncDate(quint32 accountId, const QString &remoteId, const QDBusMessage &message)
 {
     message.setDelayedReply(true);
 
-    QString result = m_parent->lastSuccessfulSyncDate(accountId, service);
-    qDebug() << "Result" << result;
+    QString result = m_parent->lastSuccessfulSyncDate(accountId, remoteId);
     QDBusMessage reply = message.createReply(QVariant::fromValue<QString>(result));
     QDBusConnection::sessionBus().send(reply);
+    return result;
+}
+
+QMap<QString, QString> SyncDBus::listCalendarsByAccount(quint32 accountId, const QDBusMessage &message)
+{
+    QMap<QString, QString> result;
+    message.setDelayedReply(true);
+    SyncAccount *acc = m_parent->accountById(accountId);
+    if (acc) {
+        connect(acc, &SyncAccount::remoteSourcesAvailable, [message] (const QArrayOfDatabases &sources, int error) {
+            QMap<QString, QString> dbs;
+            Q_FOREACH(const SyncDatabase &db, sources) {
+                dbs.insert(db.remoteId, db.name);
+            }
+            QDBusMessage reply = message.createReply(QVariant::fromValue(dbs));
+            QDBusConnection::sessionBus().send(reply);
+        });
+        acc->fetchRemoteSources("google-caldav");
+    } else {
+        qWarning() << "Invalid account id" << accountId;
+        QDBusMessage reply = message.createReply(QVariant::fromValue(result));
+        QDBusConnection::sessionBus().send(reply);
+    }
+
     return result;
 }
 

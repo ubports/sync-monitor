@@ -25,9 +25,15 @@
 #define SYNCEVOLUTION_SERVICE_NAME          "org.syncevolution"
 #define SYNCEVOLUTIOON_SESSION_IFACE_NAME   "org.syncevolution.Session"
 
-SyncEvolutionSessionProxy::SyncEvolutionSessionProxy(const QDBusObjectPath &objectPath, QObject *parent)
-    : QObject(parent)
+uint SyncEvolutionSessionProxy::m_count = 0;
+
+SyncEvolutionSessionProxy::SyncEvolutionSessionProxy(const QString &sessionName,
+                                                     const QDBusObjectPath &objectPath,
+                                                     QObject *parent)
+    : QObject(parent),
+      m_sessionName(sessionName)
 {
+    ++m_count;
     m_iface = new QDBusInterface(SYNCEVOLUTION_SERVICE_NAME,
                                  objectPath.path(),
                                  SYNCEVOLUTIOON_SESSION_IFACE_NAME);
@@ -37,7 +43,7 @@ SyncEvolutionSessionProxy::SyncEvolutionSessionProxy(const QDBusObjectPath &obje
                                   SYNCEVOLUTIOON_SESSION_IFACE_NAME,
                                   "StatusChanged",
                                   this,
-                                  SLOT(onSessionStatusChanged(QString,uint, QSyncStatusMap)));
+                                  SIGNAL(statusChanged(QString,uint,QSyncStatusMap)));
 
     m_iface->connection().connect(SYNCEVOLUTION_SERVICE_NAME,
                                   objectPath.path(),
@@ -45,6 +51,16 @@ SyncEvolutionSessionProxy::SyncEvolutionSessionProxy(const QDBusObjectPath &obje
                                   "ProgressChanged",
                                   this,
                                   SLOT(onSessionProgressChanged(int, QSyncProgressMap)));
+}
+
+SyncEvolutionSessionProxy::~SyncEvolutionSessionProxy()
+{
+    --m_count;
+}
+
+QString SyncEvolutionSessionProxy::sessionName() const
+{
+    return m_sessionName;
 }
 
 QString SyncEvolutionSessionProxy::id() const
@@ -65,6 +81,9 @@ void SyncEvolutionSessionProxy::destroy()
     m_iface->deleteLater();
 
     m_iface = 0;
+
+    // self destroy
+    deleteLater();
 }
 
 QString SyncEvolutionSessionProxy::status() const
@@ -84,19 +103,25 @@ bool SyncEvolutionSessionProxy::hasConfig(const QString &configName)
     Q_ASSERT(isValid());
     QDBusReply<QStringMultiMap> reply = m_iface->call("GetNamedConfig", configName, false);
     if (reply.error().isValid()) {
-        qWarning() << "Fail to get session named config" << reply.error().message();
         return false;
     }
     return (reply.value().size() > 0);
 }
 
 QStringMultiMap SyncEvolutionSessionProxy::getConfig(const QString &configName,
-                                                             bool isTemplate)
+                                                     bool isTemplate)
 {
     Q_ASSERT(isValid());
-    QDBusReply<QStringMultiMap> reply = m_iface->call("GetNamedConfig",
-                                                              configName,
-                                                              isTemplate);
+    QDBusReply<QStringMultiMap> reply;
+
+    if (configName.isEmpty()) {
+        reply = m_iface->call("GetConfig",
+                              isTemplate);
+    } else {
+        reply = m_iface->call("GetNamedConfig",
+                              configName,
+                              isTemplate);
+    }
     if (reply.error().isValid()) {
         qWarning() << "Fail to get session named config" << reply.error().message();
         return QStringMultiMap();
@@ -106,20 +131,22 @@ QStringMultiMap SyncEvolutionSessionProxy::getConfig(const QString &configName,
 }
 
 bool SyncEvolutionSessionProxy::saveConfig(const QString &configName,
-                                           QStringMultiMap config)
+                                           QStringMultiMap config,
+                                           bool temporary,
+                                           bool update)
 {
     Q_ASSERT(isValid());
     QDBusReply<void> reply;
     if (configName.isEmpty()) {
         reply = m_iface->call("SetConfig",
-                              false,
-                              false,
+                              update,
+                              temporary,
                               QVariant::fromValue(config));
     } else {
         reply = m_iface->call("SetNamedConfig",
                               configName,
-                              false,
-                              false,
+                              update,
+                              temporary,
                               QVariant::fromValue(config));
     }
     if (reply.error().isValid()) {
@@ -134,13 +161,12 @@ bool SyncEvolutionSessionProxy::isValid() const
     return (m_iface != 0);
 }
 
-void SyncEvolutionSessionProxy::sync(QStringMap services)
+void SyncEvolutionSessionProxy::sync(const QString &mode, QStringMap services)
 {
     Q_ASSERT(isValid());
-    QDBusReply<void> reply = m_iface->call("Sync", QString(), QVariant::fromValue(services));
+    QDBusReply<void> reply = m_iface->call("Sync", mode, QVariant::fromValue(services));
     if (reply.error().isValid()) {
         qWarning() << "Fail to sync account" << reply.error().message();
-        Q_EMIT this->error(0);
     }
 }
 
@@ -155,12 +181,33 @@ QArrayOfStringMap SyncEvolutionSessionProxy::reports(uint start, uint maxCount)
     }
 }
 
-void SyncEvolutionSessionProxy::onSessionStatusChanged(const QString &status, uint errorNuber, QSyncStatusMap source)
+void SyncEvolutionSessionProxy::getDatabases(const QString &sourceName)
 {
-    Q_UNUSED(source);
-    Q_EMIT statusChanged(status);
-    if (errorNuber != 0) {
-        Q_EMIT error(errorNuber);
+    QDBusPendingCall pcall =  m_iface->asyncCall("GetDatabases", sourceName);
+    QDBusPendingCallWatcher *watcher = new QDBusPendingCallWatcher(pcall, this);
+
+    QObject::connect(watcher, SIGNAL(finished(QDBusPendingCallWatcher*)),
+                     this, SLOT(getDatabasesFinished(QDBusPendingCallWatcher*)));
+}
+
+void SyncEvolutionSessionProxy::getDatabasesFinished(QDBusPendingCallWatcher *call)
+{
+    QDBusPendingReply<QArrayOfDatabases> reply = *call;
+    call->deleteLater();
+
+    if (reply.isError()) {
+        qWarning() << "Fail to fetch databases" << reply.error().message();
+        Q_EMIT databasesReceived(QArrayOfDatabases());
+    } else {
+         Q_EMIT databasesReceived(reply.value());
+    }
+}
+
+void SyncEvolutionSessionProxy::execute(const QStringList &args)
+{
+    QDBusReply<void> reply = m_iface->call("Execute", args);
+    if (reply.error().isValid()) {
+        qWarning() << "Fail to execute command" << reply.error().message();
     }
 }
 

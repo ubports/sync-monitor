@@ -28,11 +28,11 @@
 #include <Accounts/Manager>
 
 #include "sync-network.h"
+#include "sync-queue.h"
 
 class SyncAccount;
 class EdsHelper;
 class ProviderTemplate;
-class SyncQueue;
 class SyncDBus;
 class PowerdProxy;
 
@@ -49,14 +49,16 @@ public:
     QStringList availableServices() const;
     QStringList enabledServices() const;
     bool isOnline() const;
-    QString lastSuccessfulSyncDate(quint32 accountId, const QString &service);
+    QString lastSuccessfulSyncDate(quint32 accountId, const QString &calendarId);
     bool syncOnMobileConnection() const;
     void setSyncOnMobileConnection(bool flag);
 
+    SyncAccount *accountById(quint32 accountId);
+
 Q_SIGNALS:
-    void syncStarted(SyncAccount *syncAcc, const QString &serviceName);
-    void syncFinished(SyncAccount *syncAcc, const QString &serviceName);
-    void syncError(SyncAccount *syncAcc, const QString &serviceName, const QString &error);
+    void syncStarted(SyncAccount *syncAcc, const QString &source);
+    void syncFinished(SyncAccount *syncAcc, const QString &source);
+    void syncError(SyncAccount *syncAcc, const QString &source, const QString &error);
     void syncAboutToStart();
     void done();
     void accountsChanged();
@@ -64,9 +66,9 @@ Q_SIGNALS:
 
 public Q_SLOTS:
     void quit();
-    void syncAll(const QString &serviceName, bool runNow, bool syncOnMobile);
-    void syncAccount(quint32 accountId, const QString &service);
-    void cancel(const QString &serviceName = QString());
+    void syncAll(bool runNow, bool syncOnMobile);
+    void syncAccount(quint32 accountId, const QStringList &calendars, bool runNow = true, bool syncOnMobile = false);
+    void cancel(uint accountId = 0, const QStringList &sources = QStringList());
 
 private Q_SLOTS:
     void continueSync();
@@ -77,12 +79,15 @@ private Q_SLOTS:
                              const QString &serviceName);
     void runAuthentication();
 
-    void onAccountSyncStarted(const QString &serviceName, bool firstSync);
-    void onAccountSyncFinished(const QString &serviceName, bool firstSync, const QString &status, const QString &syncMode);
+
+    void onAccountSyncStart();
+    void onAccountSyncFinished(const QString &serviceName, const QMap<QString, QString> &statusList);
+    void onAccountSourceSyncStarted(const QString &serviceName, const QString &source, bool firstSync);
+    void onAccountSourceSyncFinished(const QString &serviceName, const QString &sourceName, const bool firstSync, const QString &status, const QString &mode);
     void onAccountSyncError(const QString &serviceName, const QString &error);
     void onAccountEnableChanged(const QString &serviceName, bool enabled);
-    void onAccountConfigured(const QString &serviceName);
-    void onDataChanged(const QString &serviceName, const QString &sourceName);
+    void onAccountSourceRemoved(const QString &source);
+    void onDataChanged(const QString &sourceId);
     void onClientAttached();
 
     void onOnlineStatusChanged(SyncNetwork::NetworkState state);
@@ -93,8 +98,7 @@ private:
     QHash<Accounts::AccountId, SyncAccount*> m_accounts;
     SyncQueue *m_syncQueue;
     SyncQueue *m_offlineQueue;
-    SyncAccount *m_currentAccount;
-    QString m_currentServiceName;
+    SyncJob m_currentJob;
     EdsHelper *m_eds;
     ProviderTemplate *m_provider;
     SyncDBus *m_dbusAddaptor;
@@ -108,12 +112,18 @@ private:
 
     void setupAccounts();
     void setupTriggers();
-    void sync(SyncAccount *syncAcc, const QString &serviceName, bool runNow, bool syncOnMobile);
-    void cancel(SyncAccount *syncAcc, const QString &serviceName = QString());
-    void setup();
+    void cleanupConfig();
+    void sync(SyncAccount *syncAcc, const QStringList &calendars, bool runNow, bool syncOnMobile);
+    void cancel(SyncAccount *syncAcc, const QStringList &sources);
     void sync(bool runNow);
     bool registerService();
     void syncFinishedImpl();
+
+    void saveSyncResult(uint accountId, const QString &sourceName, const QString &result, const QString &date);
+    void clearResultForSource(uint accountId, const QString &sourceName);
+    QString loadSyncResult(uint accountId, const QString &sourceName);
+    bool isFirstSync(uint accountId);
+    void cleanupLogs();
 };
 
 #endif

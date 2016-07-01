@@ -1,4 +1,5 @@
 project(synq-src)
+add_definitions(-std=c++11)
 
 set(SYNQ_BIN sync-monitor)
 set(SYNQ_LIB synq-lib)
@@ -14,6 +15,8 @@ set(SYNQ_LIB_SRC
     provider-template.cpp
     sync-account.h
     sync-account.cpp
+    sync-auth.h
+    sync-auth.cpp
     sync-configure.h
     sync-configure.cpp
     sync-daemon.h
@@ -38,6 +41,7 @@ add_library(${SYNQ_LIB} STATIC
 target_link_libraries(${SYNQ_LIB}
     ${ACCOUNTS_LIBRARIES}
     ${LIBNOTIFY_LIBRARIES}
+    ${LIBSIGNON_LIBRARIES}
     ${URLDISPATCHER_LIBRARIES}
     syncevolution-qt
 )
@@ -62,6 +66,7 @@ include_directories(
     ${CMAKE_SOURCE_DIR}
     ${CMAKE_BINARY_DIR}
     ${ACCOUNTS_INCLUDE_DIRS}
+    ${LIBSIGNON_INCLUDE_DIRS}
     ${LIBNOTIFY_INCLUDE_DIRS}
     ${URLDISPATCHER_INCLUDE_DIRS}
     ${syncevolution-qt_SOURCE_DIR}

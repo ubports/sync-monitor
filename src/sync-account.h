@@ -22,6 +22,10 @@
 #include <QtCore/QObject>
 #include <QtCore/QHash>
 #include <QtCore/QSettings>
+#include <QtCore/QPair>
+#include <QtCore/QString>
+
+#include <QtNetwork/QNetworkReply>
 
 #include <Accounts/Account>
 
@@ -30,96 +34,138 @@
 class SyncEvolutionSessionProxy;
 class SyncConfigure;
 
+class SourceData
+{
+public:
+    QString sourceName;
+    QString remoteId;
+    bool writable;
+
+    SourceData(const QString &_sourceName, const QString &_remoteId, bool _writable)
+        : sourceName(_sourceName), remoteId(_remoteId), writable(_writable)
+    {}
+};
+
 class SyncAccount : public QObject
 {
     Q_OBJECT
 public:
     enum AccountState {
         Configuring = 0,
+        AboutToSync,
         Syncing,
         Idle,
         Invalid
     };
 
+    enum SourceState {
+        SourceSyncStarting = 0,
+        SourceSyncRunning,
+        SourceSyncDone
+    };
+
     SyncAccount(Accounts::Account *account,
-                QSettings *settings,
+                const QSettings *settings,
                 QObject *parent=0);
     SyncAccount(Accounts::Account *account,
                 const QString &service,
-                QSettings *settings,
+                const QSettings *settings,
                 QObject *parent);
     virtual ~SyncAccount();
 
     virtual void setup();
-    void cancel(const QString &serviceName = QString());
-    void sync(const QString &serviceName = QString());
+    void cancel(const QStringList &sources = QStringList());
+    void sync(const QStringList &sources = QStringList());
     void wait();
     void status() const;
     AccountState state() const;
-    bool enabled() const;
+    bool isEnabled() const;
     QString displayName() const;
-    int id() const;
+    virtual int id() const;
     QString iconName(const QString &serviceName) const;
     virtual QStringList availableServices() const;
     QStringList enabledServices() const;
     uint lastError() const;
+    void removeConfig();
+    void removeOldConfig() const;
     void setLastError(uint errorCode);
     QString serviceId(const QString &serviceName) const;
     bool retrySync() const;
     void setRetrySync(bool retry);
-    QString lastSuccessfulSyncDate(const QString &serviceName);
+    Accounts::Account *account() const;
+    QDateTime lastSyncTime() const;
+
+    void fetchRemoteSources(const QString &serviceName);
 
     static QString statusDescription(const QString &status);
 
 Q_SIGNALS:
     void stateChanged(AccountState newState);
-    void syncStarted(const QString &serviceName, bool firstSync);
-    void syncFinished(const QString &serviceName, bool firstSync, const QString &status, const QString &mode);
+    void syncSourceStarted(const QString &serviceName, const QString &sourceName, bool firstSync);
+    void syncSourceFinished(const QString &serviceName, const QString &sourceName, bool firstSync, const QString &status, const QString &mode);
+
+    void syncStarted();
+    void syncFinished(const QString &serviceName, QMap<QString, QString> sourcesStatus);
     void syncError(const QString &serviceName, const QString &syncError);
+
     void enableChanged(const QString &serviceName, bool enable);
-    void configured(const QString &serviceName);
+    void configured(const QStringList &services);
+    void sourceRemoved(const QString &sourceName);
+
+    void remoteSourcesAvailable(const QArrayOfDatabases &sources, int error);
 
 private Q_SLOTS:
-    void onAccountConfigured();
-    void onAccountConfigureError();
+    void onAccountConfigured(const QStringList &services);
+    void onAccountConfigureError(int error);
 
     void onAccountEnabledChanged(const QString &serviceName, bool enabled);
-    void onSessionStatusChanged(const QString &newStatus);
+    void onSessionStatusChanged(const QString &status, quint32 error, const QSyncStatusMap &sources);
     void onSessionProgressChanged(int progress);
-    void onSessionError(uint error);
+
+    // calendar list
+    void onAuthSucess();
+    void onAuthFailed();
+    void onReplyFinished(QNetworkReply *reply);
 
 private:
     Accounts::Account *m_account;
+    QDateTime m_startSyncTime;
     SyncEvolutionSessionProxy *m_currentSession;
-    QSettings *m_settings;
+    const QSettings *m_settings;
+    SyncConfigure *m_config;
+    QStringList m_sourcesToSync;
+    QMap<QString, SyncAccount::SourceState> m_sourcesOnSync;
+    QMap<QString, QString> m_currentSyncResults;
+    QElapsedTimer m_syncTime;
 
     QMap<QString, bool> m_availabeServices;
     AccountState m_state;
     QList<QMetaObject::Connection> m_sessionConnections;
-    QList<SyncConfigure*> m_pendingConfigs;
     uint m_lastError;
     bool m_retrySync;
+    QArrayOfDatabases m_remoteSources;
 
     // current sync information
     QString m_syncMode;
     QString m_syncServiceName;
-    bool m_firstSync;
 
-    void configure(const QString &serviceName, const QString &syncMode);
+    void configure();
+    void continueSync();
+
     void setState(AccountState state);
-    void continueSync(const QString &serviceName);
-    void attachSession(SyncEvolutionSessionProxy *session);
-    void releaseSession();
-    QStringMap lastReport(const QString &serviceName, bool onlySuccessful = false) const;
-    QString syncMode(const QString &serviceName, bool *firstSync) const;
-    QString lastSyncStatus(const QString &serviceName, QString *lastSyncMode) const;
+    QString syncMode(const QString &sourceName, bool *firstSync) const;
     bool syncService(const QString &serviceName);
     void setupServices();
-    void dumpReport(const QStringMap &report) const;
-    bool prepareSession(const QString &serviceName);
 
-    QString sessionName(const QString &serviceName) const;
-    QString sourceName(const QString &serviceName) const;
+    // session control
+    bool prepareSession(const QString &session = QString::null);
+    void attachSession(SyncEvolutionSessionProxy *session);
+    void releaseSession();
+
+    QList<SourceData> sources() const;
+    QStringMap filterSourceReport(const QStringMap &report, const QString &serviceName, uint accountId, const QString &sourceName) const;
+
+    QString lastSyncStatus(const QString &sourceName) const;
 };
 
 #endif

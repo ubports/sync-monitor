@@ -58,23 +58,26 @@ class SyncDBus : public QDBusAbstractAdaptor
 "    <method name=\"servicesAvailable\">\n"
 "      <arg direction=\"out\" type=\"as\" name=\"services\"/>\n"
 "    </method>\n"
-"    <method name=\"sync\">\n"
-"      <arg direction=\"in\" type=\"as\"/>\n"
-"    </method>\n"
+"    <method name=\"syncAll\" />\n"
 "    <method name=\"syncAccount\">\n"
 "      <arg direction=\"in\" type=\"u\"/>\n"
-"      <arg direction=\"in\" type=\"s\"/>\n"
+"      <arg direction=\"in\" type=\"as\"/>\n"
+"    </method>\n"
+"    <method name=\"listCalendarsByAccount\">\n"
+"      <arg direction=\"in\" type=\"u\"/>\n"
+"      <arg direction=\"out\" type=\"a(ss)\" name=\"calendars\"/>\n"
 "    </method>\n"
 "    <method name=\"lastSuccessfulSyncDate\">\n"
 "      <arg direction=\"in\" type=\"u\"/>\n"
 "      <arg direction=\"in\" type=\"s\"/>\n"
 "      <arg direction=\"out\" type=\"s\" name=\"date\"/>\n"
 "    </method>\n"
-"    <method name=\"cancel\">\n"
-"      <arg direction=\"in\" type=\"as\"/>\n"
-"    </method>\n"
+"    <method name=\"cancelAll\" />\n"
 "    <method name=\"attach\"/>\n"
 "    <method name=\"detach\"/>\n"
+"    <method name=\"state\" >\n"
+"      <arg direction=\"out\" type=\"s\"/>\n"
+"    </method>\n"
 "  </interface>\n"
         "")
     Q_PROPERTY(QString state READ state NOTIFY stateChanged)
@@ -97,10 +100,11 @@ Q_SIGNALS:
     void clientDeattached(int count);
 
 public Q_SLOTS:
-    void sync(QStringList service);
-    void syncAccount(quint32 accountId, const QString &service);
-    QString lastSuccessfulSyncDate(quint32 accountId, const QString &service, const QDBusMessage &message);
-    void cancel(QStringList services);
+    void syncAll();
+    void syncAccount(quint32 accountId, const QStringList &sources);
+    QString lastSuccessfulSyncDate(quint32 accountId, const QString &remoteId, const QDBusMessage &message);
+    QMap<QString, QString> listCalendarsByAccount(quint32 accountId, const QDBusMessage &message);
+    void cancelAll();
     QString state() const;
     QStringList enabledServices() const;
     QStringList servicesAvailable();

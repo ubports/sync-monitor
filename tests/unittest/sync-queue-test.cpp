@@ -34,66 +34,44 @@ private Q_SLOTS:
 
     void testRegisterNewAccount()
     {
-        QStringList expectedServices;
         SyncQueue queue;
-        SyncAccountMock account;
-
-        expectedServices << "contacts" << "calendar";
+        SyncAccountMock account(1);
 
         // empty queue
         QCOMPARE(queue.isEmpty(), true);
         QCOMPARE(queue.count(), 0);
 
-        EXPECT_CALL(account, availableServices())
-             .Times(1)
-             .WillOnce(::testing::Return(expectedServices));
-
         // push a account
         queue.push(&account);
         QCOMPARE(queue.isEmpty(), false);
-        QCOMPARE(queue.count(), 2);
-        Q_FOREACH(const QString &serviceName, expectedServices) {
-            QVERIFY(queue.contains(&account, serviceName));
-        }
+        QCOMPARE(queue.count(), 1);
+
+        // check if queue accepts any source
+        QVERIFY(queue.contains(&account, "my source"));
+        QVERIFY(queue.contains(&account, "my source2"));
     }
 
     void testRegiterTwoAccounts()
     {
-        QStringList expectedServices;
         SyncQueue queue;
-        SyncAccountMock account;
-        SyncAccountMock account2;
-
-        expectedServices << "contacts" << "calendar";
-        EXPECT_CALL(account, availableServices())
-             .WillRepeatedly(::testing::Return(expectedServices));
-        EXPECT_CALL(account2, availableServices())
-             .WillRepeatedly(::testing::Return(expectedServices));
+        SyncAccountMock account(1);
+        SyncAccountMock account2(2);
 
         queue.push(&account);
         queue.push(&account2);
 
         // Check if the account was registered correct
         QCOMPARE(queue.isEmpty(), false);
-        QCOMPARE(queue.count(), 4);
-        Q_FOREACH(const QString &serviceName, expectedServices) {
-            QVERIFY(queue.contains(&account, serviceName));
-            QVERIFY(queue.contains(&account2, serviceName));
-        }
+        QCOMPARE(queue.count(), 2);
+        QVERIFY(queue.contains(&account, "my source"));
+        QVERIFY(queue.contains(&account2, "my source2"));
     }
 
     void testRemoveAccount()
     {
-        QStringList expectedServices;
         SyncQueue queue;
-        SyncAccountMock account;
-        SyncAccountMock account2;
-
-        expectedServices << "contacts" << "calendar";
-        EXPECT_CALL(account, availableServices())
-             .WillRepeatedly(::testing::Return(expectedServices));
-        EXPECT_CALL(account2, availableServices())
-             .WillRepeatedly(::testing::Return(expectedServices));
+        SyncAccountMock account(1);
+        SyncAccountMock account2(2);
 
         queue.push(&account);
         queue.push(&account2);
@@ -103,33 +81,15 @@ private Q_SLOTS:
 
         // Check if the account was registered correct
         QCOMPARE(queue.isEmpty(), false);
-        QCOMPARE(queue.count(), 2);
-        Q_FOREACH(const QString &serviceName, expectedServices) {
-            QVERIFY(queue.contains(&account2, serviceName));
-            QVERIFY(!queue.contains(&account, serviceName));
-        }
-
-        // remove calendar services from account2
-        queue.remove(&account2, "calendar");
-
-        // Check if the account was registered correct
-        QCOMPARE(queue.isEmpty(), false);
         QCOMPARE(queue.count(), 1);
-        QVERIFY(queue.contains(&account2, "contacts"));
-        QVERIFY(!queue.contains(&account2, "calendar"));
+        QVERIFY(!queue.contains(&account, "my source"));
+        QVERIFY(queue.contains(&account2, "my source2"));
     }
 
     void testPushAccountTwice()
     {
-        QStringList expectedServices;
         SyncQueue queue;
-        SyncAccountMock account;
-
-        expectedServices << "contacts" << "calendar";
-
-        EXPECT_CALL(account, availableServices())
-             .Times(2)
-             .WillRepeatedly(::testing::Return(expectedServices));
+        SyncAccountMock account(1);
 
         // push a account twice
         queue.push(&account);
@@ -137,47 +97,68 @@ private Q_SLOTS:
 
         // Check if the account was registered only once
         QCOMPARE(queue.isEmpty(), false);
-        QCOMPARE(queue.count(), 2);
-        Q_FOREACH(const QString &serviceName, expectedServices) {
-            QVERIFY(queue.contains(&account, serviceName));
-        }
+        QCOMPARE(queue.count(), 1);
+        QVERIFY(queue.contains(&account, "my source"));
     }
 
     void testPopAccount()
     {
-        QStringList expectedServices;
         SyncQueue queue;
-        SyncAccountMock account;
-        SyncAccountMock account2;
-
-        expectedServices << "contacts" << "calendar";
-        EXPECT_CALL(account, availableServices())
-             .WillRepeatedly(::testing::Return(expectedServices));
-        EXPECT_CALL(account2, availableServices())
-             .WillRepeatedly(::testing::Return(expectedServices));
+        SyncAccountMock account(1);
+        SyncAccountMock account2(2);
 
         queue.push(&account);
-        queue.push(&account2,"", false);
+        queue.push(&account2, QStringLiteral("account2Source"), false);
 
-        // account with contacts
+        // Firs account with all sources
         SyncJob job = queue.popNext();
-        QCOMPARE(job.serviceName(), expectedServices.first());
-        QVERIFY(job.account() == &account);
+        QCOMPARE(queue.count(), 1);
+        QCOMPARE(job.account()->id(), account.id());
+        QCOMPARE(job.sources().size(), 0);
+        QVERIFY(job.contains("my source1"));
+        QVERIFY(job.contains("my source2"));
 
-        // account with calendar
+        // account2 with a single source
         job = queue.popNext();
-        QCOMPARE(job.serviceName(), expectedServices[1]);
-        QVERIFY(job.account() == &account);
+        QCOMPARE(queue.count(), 0);
+        QCOMPARE(job.account()->id(), account2.id());
+        QCOMPARE(job.sources().size(), 1);
+        QVERIFY(job.contains(QStringLiteral("account2Source")));
+        QVERIFY(!job.contains(QStringLiteral("my source")));
+    }
 
-        // account2 with contacts
-        job = queue.popNext();
-        QCOMPARE(job.serviceName(), expectedServices.first());
-        QVERIFY(job.account() == &account2);
+    void testAppendMoreSources()
+    {
+        SyncQueue queue;
+        SyncAccountMock account(1);
+        queue.push(&account, QStringLiteral("account1Source0"), false);
+        queue.push(&account, QStringLiteral("account1Source1"), false);
 
-        // acount2 with calendar
-        job = queue.popNext();
-        QCOMPARE(job.serviceName(), expectedServices[1]);
-        QVERIFY(job.account() == &account2);
+        QCOMPARE(queue.count(), 1);
+        QVERIFY(queue.contains(&account, QStringLiteral("account1Source0")));
+        QVERIFY(queue.contains(&account, QStringLiteral("account1Source1")));
+    }
+
+    void testAppendMoreSourcesAfterAddAccount()
+    {
+        SyncQueue queue;
+        SyncAccountMock account(1);
+        queue.push(&account);
+        queue.push(&account, QStringLiteral("account1Source0"), false);
+        QCOMPARE(queue.count(), 1);
+        queue.remove(&account);
+        QCOMPARE(queue.count(), 0);
+    }
+
+    void testAppendAllWithQueueNotEmpty()
+    {
+        SyncQueue queue;
+        SyncAccountMock account(1);
+        queue.push(&account, QStringLiteral("account1Source0"), false);
+        queue.push(&account);
+        QCOMPARE(queue.count(), 1);
+        QVERIFY(queue.contains(&account, QStringLiteral("account1Source0")));
+        QVERIFY(queue.contains(&account, QStringLiteral("account1Source1")));
     }
 };
 
