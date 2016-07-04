@@ -488,6 +488,39 @@ QDateTime SyncAccount::lastSyncTime() const
     return m_startSyncTime;
 }
 
+QString SyncAccount::host() const
+{
+    // Append "?SyncEvolution=Google" to tell syncevolution to enable all hacks necessary to work with google
+    static const QString googleSyncUrl = "https://apidata.googleusercontent.com/caldav/v2?SyncEvolution=Google";
+
+    if (m_account) {
+        QString myHost = m_account->value("host", "").toString();
+        if (myHost.isEmpty() && (providerName() == GOOGLE_PROVIDER_NAME)) {
+            return googleSyncUrl;
+        }
+        return myHost;
+    }
+    return QString();
+}
+
+QString SyncAccount::providerName() const
+{
+    if (m_account) {
+        return m_account->providerName();
+    }
+    return QString();
+}
+
+QString SyncAccount::calendarServiceName() const
+{
+    Q_FOREACH(Service service, m_account->services()) {
+        if (service.serviceType() == CALENDAR_SERVICE_NAME) {
+            return service.name();
+        }
+    }
+    return QString();
+}
+
 void SyncAccount::onAccountEnabledChanged(const QString &serviceName, bool enabled)
 {
     // empty service name means that the hole account has been enabled/disabled
@@ -744,12 +777,6 @@ QString SyncAccount::statusDescription(const QString &status)
 
 void SyncAccount::fetchRemoteSources(const QString &serviceName)
 {
-    if (serviceName != "google-caldav") {
-        qWarning() << "Service not supported" << serviceName;
-        Q_EMIT remoteSourcesAvailable(QArrayOfDatabases(), -1);
-        return;
-    }
-
     m_remoteSources.clear();
 
     SyncAuth *auth = new SyncAuth(m_account->id(), serviceName, this);
@@ -767,16 +794,21 @@ void SyncAccount::onAuthSucess()
     SyncAuth *auth = qobject_cast<SyncAuth*>(QObject::sender());
     Q_ASSERT(auth);
 
-    QNetworkAccessManager *manager = new QNetworkAccessManager(this);
-    connect(manager, SIGNAL(finished(QNetworkReply*)),
-            this, SLOT(onReplyFinished(QNetworkReply*)));
+    if (providerName() == GOOGLE_PROVIDER_NAME) {
+        QNetworkAccessManager *manager = new QNetworkAccessManager(this);
+        connect(manager, SIGNAL(finished(QNetworkReply*)),
+                this, SLOT(onReplyFinished(QNetworkReply*)));
 
-    QNetworkRequest req;
-    req.setUrl(QUrl("https://www.googleapis.com/calendar/v3/users/me/calendarList"));
-    req.setRawHeader(QByteArray("GData-Version"), QByteArray("3.0"));
-    req.setRawHeader(QByteArray("Authorization"), QByteArray("Bearer " + auth->token().toUtf8()));
+        QNetworkRequest req;
+        req.setUrl(QUrl("https://www.googleapis.com/calendar/v3/users/me/calendarList"));
+        req.setRawHeader(QByteArray("GData-Version"), QByteArray("3.0"));
+        req.setRawHeader(QByteArray("Authorization"), QByteArray("Bearer " + auth->token().toUtf8()));
 
-    manager->get(req);
+        manager->get(req);
+    } else {
+        const QString username = QString("uoa:%1,%2").arg(id()).arg(calendarServiceName());
+        fetchRemoteCalendarsFromCommand(username, "");
+    }
     auth->deleteLater();
 }
 
@@ -852,4 +884,77 @@ void SyncAccount::onReplyFinished(QNetworkReply *reply)
     }
 
     Q_EMIT remoteSourcesAvailable(m_remoteSources, 0);
+}
+
+
+void SyncAccount::fetchRemoteCalendarsFromCommand(const QString &username, const QString &password) const
+{
+    // syncevolution --print-databases backend=caldav
+    QStringList args;
+    args << "--print-databases"
+         << "backend=caldav"
+         << QString("username=%1").arg(username)
+         << QString("password=%1").arg(password)
+         << QString("syncURL=%1").arg(host());
+    QProcess *syncEvo = new QProcess;
+    syncEvo->setProcessChannelMode(QProcess::MergedChannels);
+    syncEvo->start("syncevolution", args);
+    connect(syncEvo, SIGNAL(finished(int,QProcess::ExitStatus)),
+            SLOT(fetchRemoteCalendarsProcessDone(int,QProcess::ExitStatus)));
+    qDebug() << "Fetching remote calendars (wait...)";
+}
+
+void SyncAccount::fetchRemoteCalendarsProcessDone(int exitCode, QProcess::ExitStatus exitStatus)
+{
+    QProcess *syncEvo = qobject_cast<QProcess*>(QObject::sender());
+
+    if (exitStatus == QProcess::NormalExit) {
+        QString output = syncEvo->readAll();
+        QStringList lines = output.split("\n");
+        while (lines.count() > 0) {
+            if (lines.first().startsWith("caldav:")) {
+                lines.takeFirst();
+                break;
+            }
+            lines.takeFirst();
+        }
+
+        while (lines.count() > 0) {
+            QString line = lines.takeFirst();
+            if (line.isEmpty()) {
+                continue;
+            }
+
+            QStringList fields = line.split("(");
+            if (fields.count() == 2) {
+                SyncDatabase db;
+
+                db.name = fields.first().trimmed();
+                db.title = db.name;
+
+                const QString syncUrl = fields.at(1).split(")").first();
+                db.source = syncUrl;
+                db.remoteId = syncUrl.split("/", QString::SkipEmptyParts).last();
+                db.defaultCalendar =fields.at(1).trimmed().endsWith("<default>");
+                //TODO: get calendar permissions
+                db.writable = true;
+                //TODO: get calendar color
+                //db.color = ""
+
+                m_remoteSources << db;
+
+                qDebug() << "DB" << db.name
+                         << "\n\tId:" << db.remoteId
+                         << "\n\tSource" << db.source
+                         << "\n\tFlag" << db.writable;
+
+            } else {
+                qWarning() << "Fail to parse db output" << line;
+            }
+        }
+
+        Q_EMIT remoteSourcesAvailable(m_remoteSources, 0);
+    } else {
+        Q_EMIT remoteSourcesAvailable(m_remoteSources, 20007);
+    }
 }

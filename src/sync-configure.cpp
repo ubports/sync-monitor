@@ -64,7 +64,7 @@ void SyncConfigure::fetchRemoteCalendars()
 {
     connect(m_account, SIGNAL(remoteSourcesAvailable(QArrayOfDatabases,int)),
             SLOT(onRemoteSourcesAvailable(QArrayOfDatabases, int)));
-    m_account->fetchRemoteSources("google-caldav");
+    m_account->fetchRemoteSources(m_account->calendarServiceName());
 }
 
 void SyncConfigure::onRemoteSourcesAvailable(const QArrayOfDatabases &sources, int error)
@@ -116,15 +116,16 @@ void SyncConfigure::continuePeerConfig(SyncEvolutionSessionProxy *session, const
     if (configs.contains(peerConfigName)) {
         config = session->getConfig(peerConfigName, false);
     } else {
-        QString templateName = m_settings->value(GLOBAL_CONFIG_GROUP"/template", "Google").toString();
-        qDebug() << "Create New config with template" << templateName;
+        const QString serviceName = m_settings->value(CALENDAR_SERVICE_NAME"/uoa-service", "").toString();
+        const QString templateName = m_settings->value(GLOBAL_CONFIG_GROUP"/template", "Google").toString();
+
+        qDebug() << "Create New config with template" << templateName << "for service" << serviceName;
         config = session->getConfig(templateName, true);
         //FIXME: use hardcoded calendar service, we only support calendar for now
-        config[""]["username"] = QString("uoa:%1,google-caldav").arg(m_account->id());
+        config[""]["username"] = QString("uoa:%1,%2").arg(m_account->id()).arg(serviceName);
         config[""]["password"] = QString();
         config[""]["consumerReady"] = "0";
-        // Append "?SyncEvolution=Google" to tell syncevolution to enable all hacks necessary to work with google
-        config[""]["syncURL"] = "https://apidata.googleusercontent.com/caldav/v2?SyncEvolution=Google";
+        config[""]["syncURL"] = m_account->host();
         config[""]["dumpData"] = "0";
         config[""]["printChanges"] = "0";
         config[""]["maxlogdirs"] = "2";

@@ -81,7 +81,8 @@ bool SyncAuth::authenticate()
     }
 
     QVariantMap signonSessionData;
-    AuthData authData = authData = accSrv->authData();
+    AuthData authData = accSrv->authData();
+
     m_identity.reset(SignOn::Identity::existingIdentity(authData.credentialsId()));
     if (!m_identity) {
         qWarning() << QString("error: Account %1 has no valid credentials")

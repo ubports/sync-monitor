@@ -20,6 +20,7 @@
 #define __CONFIG_H__
 
 #define PROVIDER_TEMPLATE_PATH          "@CMAKE_INSTALL_FULL_DATADIR@/sync-monitor/templates"
+#define GOOGLE_PROVIDER_NAME            "google-caldav"
 #define CALENDAR_SERVICE_NAME           "calendar"
 #define CALENDAR_EDS_BACKEND            "Evolution Calendar"
 #define GLOBAL_CONFIG_GROUP             "global"

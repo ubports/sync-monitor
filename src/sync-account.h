@@ -94,6 +94,9 @@ public:
     void setRetrySync(bool retry);
     Accounts::Account *account() const;
     QDateTime lastSyncTime() const;
+    QString host() const;
+    QString providerName() const;
+    QString calendarServiceName() const;
 
     void fetchRemoteSources(const QString &serviceName);
 
@@ -121,6 +124,8 @@ private Q_SLOTS:
     void onAccountEnabledChanged(const QString &serviceName, bool enabled);
     void onSessionStatusChanged(const QString &status, quint32 error, const QSyncStatusMap &sources);
     void onSessionProgressChanged(int progress);
+
+    void fetchRemoteCalendarsProcessDone(int exitCode, QProcess::ExitStatus exitStatus);
 
     // calendar list
     void onAuthSucess();
@@ -156,6 +161,8 @@ private:
     QString syncMode(const QString &sourceName, bool *firstSync) const;
     bool syncService(const QString &serviceName);
     void setupServices();
+
+    void fetchRemoteCalendarsFromCommand(const QString &username, const QString &password) const;
 
     // session control
     bool prepareSession(const QString &session = QString::null);
