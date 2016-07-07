@@ -19,6 +19,7 @@
 #include "provider-template.h"
 
 #include <QtCore/QDir>
+#include <QtCore/QStringList>
 #include <QtCore/QDebug>
 
 #include "config.h"
@@ -66,13 +67,26 @@ bool ProviderTemplate::contains(const QString &provider) const
 
 QStringList ProviderTemplate::supportedServices(const QString &provider) const
 {
-    if (m_providers.contains(provider)) {
-        return m_providers[provider]->childGroups();
+    QStringList result;
+
+    if (provider.isEmpty()) {
+        Q_FOREACH(const QSettings* s, m_providers.values()) {
+            result << s->childGroups();
+        }
+    } else if (m_providers.contains(provider)) {
+        result << m_providers[provider]->childGroups();
     }
-    return QStringList();
+    result.removeDuplicates();
+    result.removeOne(GLOBAL_CONFIG_GROUP);
+    return result;
 }
 
 QSettings *ProviderTemplate::settings(const QString &provider) const
 {
     return m_providers.value(provider, 0);
+}
+
+QStringList ProviderTemplate::providers() const
+{
+    return m_providers.keys();
 }

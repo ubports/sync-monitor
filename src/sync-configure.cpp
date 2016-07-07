@@ -75,8 +75,8 @@ void SyncConfigure::onRemoteSourcesAvailable(const QArrayOfDatabases &sources, i
         Q_EMIT SyncConfigure::error(error);
         return;
     }
-    m_remoteDatabasesByService.insert(CALENDAR_SERVICE_NAME, sources);
-    configurePeer(QStringList() << CALENDAR_SERVICE_NAME);
+    m_remoteDatabasesByService.insert(CALENDAR_SERVICE_TYPE, sources);
+    configurePeer(QStringList() << CALENDAR_SERVICE_TYPE);
 }
 
 void SyncConfigure::configurePeer(const QStringList &services)
@@ -116,7 +116,7 @@ void SyncConfigure::continuePeerConfig(SyncEvolutionSessionProxy *session, const
     if (configs.contains(peerConfigName)) {
         config = session->getConfig(peerConfigName, false);
     } else {
-        const QString serviceName = m_settings->value(CALENDAR_SERVICE_NAME"/uoa-service", "").toString();
+        const QString serviceName = m_settings->value(CALENDAR_SERVICE_TYPE"/uoa-service", "").toString();
         const QString templateName = m_settings->value(GLOBAL_CONFIG_GROUP"/template", "Google").toString();
 
         qDebug() << "Create New config with template" << templateName << "for service" << serviceName;
@@ -134,7 +134,7 @@ void SyncConfigure::continuePeerConfig(SyncEvolutionSessionProxy *session, const
 
     static QMap<QString, QString> templates;
     if (templates.isEmpty()) {
-        templates.insert(CALENDAR_SERVICE_NAME, QString("source/calendar"));
+        templates.insert(CALENDAR_SERVICE_TYPE, QString("source/calendar"));
     }
 
     EdsHelper eds;

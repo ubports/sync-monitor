@@ -77,11 +77,11 @@ void SyncAccount::setupServices()
 {
     m_availabeServices.clear();
     if (m_settings) {
-        QStringList supportedSevices = m_settings->childGroups();
-        ServiceList enabledServices = m_account->enabledServices();
+        const QStringList supportedSevices = m_settings->childGroups();
+        const ServiceList enabledServices = m_account->enabledServices();
         Q_FOREACH(Service service, m_account->services()) {
             if (supportedSevices.contains(service.serviceType())) {
-                bool enabled = m_account->enabled() && enabledServices.contains(service);
+                const bool enabled = m_account->enabled() && enabledServices.contains(service);
                 m_availabeServices.insert(service.serviceType(), enabled);
             }
         }
@@ -235,7 +235,7 @@ void SyncAccount::continueSync()
         qDebug() << "Nothing to sync!";
         releaseSession();
         setState(SyncAccount::Idle);
-        Q_EMIT syncFinished(CALENDAR_SERVICE_NAME, QMap<QString, QString>());
+        Q_EMIT syncFinished(CALENDAR_SERVICE_TYPE, QMap<QString, QString>());
     }
 }
 
@@ -316,7 +316,7 @@ QString SyncAccount::syncMode(const QString &sourceName,
 
 bool SyncAccount::isEnabled() const
 {
-    return enabledServices().contains(CALENDAR_SERVICE_NAME);
+    return enabledServices().contains(CALENDAR_SERVICE_TYPE);
 }
 
 QString SyncAccount::displayName() const
@@ -379,7 +379,7 @@ void SyncAccount::removeOldConfig() const
                                         QStringLiteral("syncevolution"),
                                         QStandardPaths::LocateDirectory))
             .arg(m_account->providerName())
-            .arg(CALENDAR_SERVICE_NAME)
+            .arg(CALENDAR_SERVICE_TYPE)
             .arg(m_account->id());
     QDir configDir(configPath);
     if (configDir.exists()) {
@@ -397,7 +397,7 @@ void SyncAccount::removeOldConfig() const
             .arg(QStandardPaths::locate(QStandardPaths::ConfigLocation,
                                         QStringLiteral("syncevolution"),
                                         QStandardPaths::LocateDirectory))
-            .arg(CALENDAR_SERVICE_NAME)
+            .arg(CALENDAR_SERVICE_TYPE)
             .arg(m_account->id());
     configDir = QDir(configPath);
     if (configDir.exists()) {
@@ -416,7 +416,7 @@ void SyncAccount::removeOldConfig() const
                                         QStringLiteral("syncevolution"),
                                         QStandardPaths::LocateDirectory))
             .arg(m_account->providerName())
-            .arg(CALENDAR_SERVICE_NAME)
+            .arg(CALENDAR_SERVICE_TYPE)
             .arg(m_account->id());
     configDir = QDir(configPath);
     if (configDir.exists()) {
@@ -514,7 +514,7 @@ QString SyncAccount::providerName() const
 QString SyncAccount::calendarServiceName() const
 {
     Q_FOREACH(Service service, m_account->services()) {
-        if (service.serviceType() == CALENDAR_SERVICE_NAME) {
+        if (service.serviceType() == CALENDAR_SERVICE_TYPE) {
             return service.name();
         }
     }
@@ -580,14 +580,14 @@ void SyncAccount::onSessionStatusChanged(const QString &status, quint32 error, c
         if (newStatus == "running") {
             if (m_sourcesOnSync.value(sourceName) == SyncAccount::SourceSyncStarting) {
                 m_sourcesOnSync[sourceName] = SyncAccount::SourceSyncRunning;
-                Q_EMIT syncSourceStarted(CALENDAR_SERVICE_NAME, newStatus, isFirstSync);
+                Q_EMIT syncSourceStarted(CALENDAR_SERVICE_TYPE, newStatus, isFirstSync);
             }
 
         } else if (newStatus == "done") {
             if (m_sourcesOnSync.value(sourceName) == SyncAccount::SourceSyncRunning) {
                 m_sourcesOnSync[sourceName] = SyncAccount::SourceSyncDone;
                 m_currentSyncResults.insert(sourceName, QString::number(i.value().error));
-                Q_EMIT syncSourceFinished(CALENDAR_SERVICE_NAME, sourceName, isFirstSync, newStatus, "");
+                Q_EMIT syncSourceFinished(CALENDAR_SERVICE_TYPE, sourceName, isFirstSync, newStatus, "");
             }
         } else if ((status == "running;waiting") ||
                    (status == "idle")) {
@@ -609,7 +609,7 @@ void SyncAccount::onSessionStatusChanged(const QString &status, quint32 error, c
         if (error != 0) {
             QString errorMessage = statusDescription(QString::number(error));
             qWarning() << "Sync Error" << error << errorMessage;
-            Q_EMIT syncError(CALENDAR_SERVICE_NAME, errorMessage);
+            Q_EMIT syncError(CALENDAR_SERVICE_TYPE, errorMessage);
             m_currentSyncResults.insert("", QString::number(error));
             // fail to sync, notify sync finished
             done = true;
@@ -621,7 +621,7 @@ void SyncAccount::onSessionStatusChanged(const QString &status, quint32 error, c
             setState(SyncAccount::Idle);
             releaseSession();
 
-            Q_EMIT syncFinished(CALENDAR_SERVICE_NAME, m_currentSyncResults);
+            Q_EMIT syncFinished(CALENDAR_SERVICE_TYPE, m_currentSyncResults);
             m_currentSyncResults.clear();
             qDebug() << "---------------------------------------------------------Sync finished:" << m_syncTime.elapsed() / 1000 << "secs";
         }
