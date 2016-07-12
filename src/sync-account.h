@@ -173,6 +173,7 @@ private:
     QStringMap filterSourceReport(const QStringMap &report, const QString &serviceName, uint accountId, const QString &sourceName) const;
 
     QString lastSyncStatus(const QString &sourceName) const;
+    static QString pickAColor();
 };
 
 #endif

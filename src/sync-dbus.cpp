@@ -117,7 +117,7 @@ QMap<QString, QString> SyncDBus::listCalendarsByAccount(quint32 accountId, const
             QDBusMessage reply = message.createReply(QVariant::fromValue(dbs));
             QDBusConnection::sessionBus().send(reply);
         });
-        acc->fetchRemoteSources("google-caldav");
+        acc->fetchRemoteSources(acc->calendarServiceName());
     } else {
         qWarning() << "Invalid account id" << accountId;
         QDBusMessage reply = message.createReply(QVariant::fromValue(result));

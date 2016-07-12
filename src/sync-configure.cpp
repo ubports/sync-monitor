@@ -202,7 +202,7 @@ void SyncConfigure::continuePeerConfig(SyncEvolutionSessionProxy *session, const
                                              m_account->id());
                 qDebug() << "Create new EDS source for:" << title << localDbId;
             }
-            // remove qorgnizer prefix: "qtorganizer:eds::"
+            // remove qorganizer prefix: "qtorganizer:eds::"
             localDbId = localDbId.split(":").last();
             qDebug() << "\tCheck for evolution source:" << localDbId;
 
