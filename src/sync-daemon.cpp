@@ -711,6 +711,7 @@ void SyncDaemon::onAccountSyncFinished(const QString &serviceName,
         // this is a bug on SyncEvolution sometimes it fail to read the correct address book
         // FIXME: we should fix that on SyncEvolution
         whiteListStatus << QStringLiteral("10500");
+        whiteListStatus << QStringLiteral("500");
     }
 
     // check if we are going re-sync due a know problem
