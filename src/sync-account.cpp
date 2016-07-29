@@ -911,6 +911,13 @@ void SyncAccount::fetchRemoteCalendarsFromCommand(const QString &username, const
 {
     // syncevolution --print-databases backend=caldav
     QStringList args;
+    QString syncUrl(host());
+
+    // Use well-known url that will re-direct to the correct path
+    if (providerName().toLower() == "owncloud") {
+        syncUrl += QStringLiteral("/remote.php/dav/");
+    }
+
     args << "--print-databases"
          << "backend=caldav"
          << QString("username=%1").arg(username)
