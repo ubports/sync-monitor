@@ -915,14 +915,14 @@ void SyncAccount::fetchRemoteCalendarsFromCommand(const QString &username, const
 
     // Use well-known url that will re-direct to the correct path
     if (providerName().toLower() == "owncloud") {
-        syncUrl += QStringLiteral("/remote.php/dav/");
+        syncUrl += QStringLiteral("/remote.php/dav");
     }
 
     args << "--print-databases"
          << "backend=caldav"
          << QString("username=%1").arg(username)
          << QString("password=%1").arg(password)
-         << QString("syncURL=%1").arg(host());
+         << QString("syncURL=%1").arg(syncUrl);
     QProcess *syncEvo = new QProcess;
     syncEvo->setProcessChannelMode(QProcess::MergedChannels);
     syncEvo->start("syncevolution", args);
