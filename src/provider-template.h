@@ -31,8 +31,9 @@ public:
     void load();
 
     bool contains(const QString &provider) const;
-    QStringList supportedServices(const QString &provider) const;
+    QStringList supportedServices(const QString &provider = QString()) const;
     QSettings *settings(const QString &provider) const;
+    QStringList providers() const;
 
 private:
     QMap<QString, QSettings*> m_providers;
