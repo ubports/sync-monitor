@@ -97,3 +97,60 @@ const QDBusArgument &operator>>(const QDBusArgument &argument, SessionStatus &s)
     }
     return argument;
 }
+
+//Parse syncevolution output command into the list of databases
+QArrayOfDatabases &operator<<(QArrayOfDatabases &databases, const QString &output)
+{
+    static QStringList colorNames;
+    if (colorNames.isEmpty()) {
+        colorNames << "#2C001E"
+                   << "#333333"
+                   << "#DD4814"
+                   << "#DF382C"
+                   << "#EFB73E"
+                   << "#19B6EE"
+                   << "#38B44A"
+                   << "#001F5C";
+        qsrand(colorNames.size());
+    }
+
+
+    QStringList lines = output.split("\n");
+    while (lines.count() > 0) {
+        if (lines.first().startsWith("caldav:")) {
+            lines.takeFirst();
+            break;
+        }
+        lines.takeFirst();
+    }
+
+    while (lines.count() > 0) {
+        QString line = lines.takeFirst();
+        if (line.isEmpty()) {
+            continue;
+        }
+
+        int calendarNameEndIndex = line.lastIndexOf('(');
+        int calendarUrlEndIndex = line.lastIndexOf(')');
+        if ((calendarNameEndIndex == -1) ||
+            (calendarUrlEndIndex == -1)) {
+            continue;
+        }
+
+        SyncDatabase db;
+        db.name = line.left(calendarNameEndIndex).trimmed();
+        db.source = line.mid(calendarNameEndIndex + 1, calendarUrlEndIndex - calendarNameEndIndex - 1);
+        db.remoteId = QUrl::fromPercentEncoding(db.source.split("/", QString::SkipEmptyParts).last().toLatin1());
+        db.defaultCalendar = (line.indexOf("<default>", calendarUrlEndIndex + 1) != -1);
+
+        //TODO: get calendar original color
+        const int index = (rand() % (colorNames.size() - 1));
+        db.color = colorNames.value(index, 0);
+
+        //TODO: get calendar permissions
+        db.writable = true;
+        databases << db;
+    }
+
+    return databases;
+}

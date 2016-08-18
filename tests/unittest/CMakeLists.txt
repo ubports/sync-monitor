@@ -29,3 +29,7 @@ declare_test(eds-helper-test
              eds-helper-test.cpp
              eds-helper-mock.h
 )
+
+declare_test(syncevolution-output-parser
+             syncevolution-output-parser.cpp
+             ${CMAKE_SOURCE_DIR}/3rd_party/syncevolution-qt/dbustypes.cpp)

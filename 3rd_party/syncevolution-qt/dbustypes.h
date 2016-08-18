@@ -100,6 +100,9 @@ QDBusArgument &operator<<(QDBusArgument &argument, const SessionStatus &mystruct
 // Retrieve the SessionStatus data from the D-BUS argument
 const QDBusArgument &operator>>(const QDBusArgument &argument, SessionStatus &mystruct);
 
+//Parse syncevolution output command into the list of databases
+QArrayOfDatabases  &operator<<(QArrayOfDatabases &databases, const QString &output);
+
 inline void syncevolution_qt_dbus_register_types() {
     qDBusRegisterMetaType< SyncDatabase >();
     qDBusRegisterMetaType< QStringMap >();
