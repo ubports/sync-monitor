@@ -733,13 +733,17 @@ void SyncDaemon::onAccountSyncFinished(const QString &serviceName,
         } else if (!errorMessage.isEmpty()) {
             fail = true;
             errorCode = 0;
-            NotifyMessage *notify = new NotifyMessage(true, this);
-            notify->show(_("Synchronization"),
-                         QString(_("Fail to sync calendar %1 from account %2.\n%3"))
-                             .arg(source)
-                             .arg(acc->displayName())
-                             .arg(errorMessage),
-                         acc->iconName(CALENDAR_SERVICE_NAME));
+
+            // only show error message if error is not on whitelist
+            if (!whiteListStatus.contains(status)) {
+                NotifyMessage *notify = new NotifyMessage(true, this);
+                notify->show(_("Synchronization"),
+                             QString(_("Fail to sync calendar %1 from account %2.\n%3"))
+                                 .arg(source)
+                                 .arg(acc->displayName())
+                                 .arg(errorMessage),
+                             acc->iconName(CALENDAR_SERVICE_NAME));
+            }
         }
 
         if (saveLog && !source.isEmpty()) {
