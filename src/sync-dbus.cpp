@@ -112,12 +112,12 @@ QMap<QString, QString> SyncDBus::listCalendarsByAccount(quint32 accountId, const
         connect(acc, &SyncAccount::remoteSourcesAvailable, [message] (const QArrayOfDatabases &sources, int error) {
             QMap<QString, QString> dbs;
             Q_FOREACH(const SyncDatabase &db, sources) {
-                dbs.insert(db.remoteId, db.name);
+                dbs.insert(db.remoteId, db.source);
             }
             QDBusMessage reply = message.createReply(QVariant::fromValue(dbs));
             QDBusConnection::sessionBus().send(reply);
         });
-        acc->fetchRemoteSources("google-caldav");
+        acc->fetchRemoteSources(acc->calendarServiceName());
     } else {
         qWarning() << "Invalid account id" << accountId;
         QDBusMessage reply = message.createReply(QVariant::fromValue(result));

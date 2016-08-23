@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<service id="owncloud-caldav">
+  <type>calendar</type>
+  <name>Calendar</name>
+  <provider>owncloud</provider>
+  <icon>calendar</icon>
+  <translations>sync-monitor</translations>
+</service>

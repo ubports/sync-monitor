@@ -77,11 +77,11 @@ void SyncAccount::setupServices()
 {
     m_availabeServices.clear();
     if (m_settings) {
-        QStringList supportedSevices = m_settings->childGroups();
-        ServiceList enabledServices = m_account->enabledServices();
+        const QStringList supportedSevices = m_settings->childGroups();
+        const ServiceList enabledServices = m_account->enabledServices();
         Q_FOREACH(Service service, m_account->services()) {
             if (supportedSevices.contains(service.serviceType())) {
-                bool enabled = m_account->enabled() && enabledServices.contains(service);
+                const bool enabled = m_account->enabled() && enabledServices.contains(service);
                 m_availabeServices.insert(service.serviceType(), enabled);
             }
         }
@@ -194,6 +194,26 @@ QString SyncAccount::lastSyncStatus(const QString &sourceName) const
     return settings.value(logKey + ACCOUNT_LOG_LAST_SYNC_RESULT).toString();
 }
 
+QString SyncAccount::pickAColor()
+{
+    static QStringList colorNames;
+    if (colorNames.isEmpty()) {
+        colorNames << "#2C001E"
+                   << "#333333"
+                   << "#DD4814"
+                   << "#DF382C"
+                   << "#EFB73E"
+                   << "#19B6EE"
+                   << "#38B44A"
+                   << "#001F5C";
+        qsrand(colorNames.size());
+    }
+
+    const int index = (rand() % (colorNames.size() - 1));
+    qDebug() << "Color" << index;
+    return colorNames.value(index, 0);
+}
+
 void SyncAccount::continueSync()
 {
     setState(SyncAccount::AboutToSync);
@@ -235,7 +255,7 @@ void SyncAccount::continueSync()
         qDebug() << "Nothing to sync!";
         releaseSession();
         setState(SyncAccount::Idle);
-        Q_EMIT syncFinished(CALENDAR_SERVICE_NAME, QMap<QString, QString>());
+        Q_EMIT syncFinished(CALENDAR_SERVICE_TYPE, QMap<QString, QString>());
     }
 }
 
@@ -322,7 +342,7 @@ QString SyncAccount::syncMode(const QString &sourceName,
 
 bool SyncAccount::isEnabled() const
 {
-    return enabledServices().contains(CALENDAR_SERVICE_NAME);
+    return enabledServices().contains(CALENDAR_SERVICE_TYPE);
 }
 
 QString SyncAccount::displayName() const
@@ -385,7 +405,7 @@ void SyncAccount::removeOldConfig() const
                                         QStringLiteral("syncevolution"),
                                         QStandardPaths::LocateDirectory))
             .arg(m_account->providerName())
-            .arg(CALENDAR_SERVICE_NAME)
+            .arg(CALENDAR_SERVICE_TYPE)
             .arg(m_account->id());
     QDir configDir(configPath);
     if (configDir.exists()) {
@@ -403,7 +423,7 @@ void SyncAccount::removeOldConfig() const
             .arg(QStandardPaths::locate(QStandardPaths::ConfigLocation,
                                         QStringLiteral("syncevolution"),
                                         QStandardPaths::LocateDirectory))
-            .arg(CALENDAR_SERVICE_NAME)
+            .arg(CALENDAR_SERVICE_TYPE)
             .arg(m_account->id());
     configDir = QDir(configPath);
     if (configDir.exists()) {
@@ -422,7 +442,7 @@ void SyncAccount::removeOldConfig() const
                                         QStringLiteral("syncevolution"),
                                         QStandardPaths::LocateDirectory))
             .arg(m_account->providerName())
-            .arg(CALENDAR_SERVICE_NAME)
+            .arg(CALENDAR_SERVICE_TYPE)
             .arg(m_account->id());
     configDir = QDir(configPath);
     if (configDir.exists()) {
@@ -494,6 +514,39 @@ QDateTime SyncAccount::lastSyncTime() const
     return m_startSyncTime;
 }
 
+QString SyncAccount::host() const
+{
+    // Append "?SyncEvolution=Google" to tell syncevolution to enable all hacks necessary to work with google
+    static const QString googleSyncUrl = "https://apidata.googleusercontent.com/caldav/v2?SyncEvolution=Google";
+
+    if (m_account) {
+        QString myHost = m_account->value("host", "").toString();
+        if (myHost.isEmpty() && (providerName() == GOOGLE_PROVIDER_NAME)) {
+            return googleSyncUrl;
+        }
+        return myHost;
+    }
+    return QString();
+}
+
+QString SyncAccount::providerName() const
+{
+    if (m_account) {
+        return m_account->providerName();
+    }
+    return QString();
+}
+
+QString SyncAccount::calendarServiceName() const
+{
+    Q_FOREACH(Service service, m_account->services()) {
+        if (service.serviceType() == CALENDAR_SERVICE_TYPE) {
+            return service.name();
+        }
+    }
+    return QString();
+}
+
 void SyncAccount::onAccountEnabledChanged(const QString &serviceName, bool enabled)
 {
     // empty service name means that the hole account has been enabled/disabled
@@ -553,14 +606,14 @@ void SyncAccount::onSessionStatusChanged(const QString &status, quint32 error, c
         if (newStatus == "running") {
             if (m_sourcesOnSync.value(sourceName) == SyncAccount::SourceSyncStarting) {
                 m_sourcesOnSync[sourceName] = SyncAccount::SourceSyncRunning;
-                Q_EMIT syncSourceStarted(CALENDAR_SERVICE_NAME, newStatus, isFirstSync);
+                Q_EMIT syncSourceStarted(CALENDAR_SERVICE_TYPE, newStatus, isFirstSync);
             }
 
         } else if (newStatus == "done") {
             if (m_sourcesOnSync.value(sourceName) == SyncAccount::SourceSyncRunning) {
                 m_sourcesOnSync[sourceName] = SyncAccount::SourceSyncDone;
                 m_currentSyncResults.insert(sourceName, QString::number(i.value().error));
-                Q_EMIT syncSourceFinished(CALENDAR_SERVICE_NAME, sourceName, isFirstSync, newStatus, "");
+                Q_EMIT syncSourceFinished(CALENDAR_SERVICE_TYPE, sourceName, isFirstSync, newStatus, "");
             }
         } else if ((status == "running;waiting") ||
                    (status == "idle")) {
@@ -582,7 +635,7 @@ void SyncAccount::onSessionStatusChanged(const QString &status, quint32 error, c
         if (error != 0) {
             QString errorMessage = statusDescription(QString::number(error));
             qWarning() << "Sync Error" << error << errorMessage;
-            Q_EMIT syncError(CALENDAR_SERVICE_NAME, errorMessage);
+            Q_EMIT syncError(CALENDAR_SERVICE_TYPE, errorMessage);
             m_currentSyncResults.insert("", QString::number(error));
             // fail to sync, notify sync finished
             done = true;
@@ -594,7 +647,7 @@ void SyncAccount::onSessionStatusChanged(const QString &status, quint32 error, c
             setState(SyncAccount::Idle);
             releaseSession();
 
-            Q_EMIT syncFinished(CALENDAR_SERVICE_NAME, m_currentSyncResults);
+            Q_EMIT syncFinished(CALENDAR_SERVICE_TYPE, m_currentSyncResults);
             m_currentSyncResults.clear();
             qDebug() << "---------------------------------------------------------Sync finished:" << m_syncTime.elapsed() / 1000 << "secs";
         }
@@ -750,12 +803,6 @@ QString SyncAccount::statusDescription(const QString &status)
 
 void SyncAccount::fetchRemoteSources(const QString &serviceName)
 {
-    if (serviceName != "google-caldav") {
-        qWarning() << "Service not supported" << serviceName;
-        Q_EMIT remoteSourcesAvailable(QArrayOfDatabases(), -1);
-        return;
-    }
-
     m_remoteSources.clear();
 
     SyncAuth *auth = new SyncAuth(m_account->id(), serviceName, this);
@@ -773,16 +820,21 @@ void SyncAccount::onAuthSucess()
     SyncAuth *auth = qobject_cast<SyncAuth*>(QObject::sender());
     Q_ASSERT(auth);
 
-    QNetworkAccessManager *manager = new QNetworkAccessManager(this);
-    connect(manager, SIGNAL(finished(QNetworkReply*)),
-            this, SLOT(onReplyFinished(QNetworkReply*)));
+    if (providerName() == GOOGLE_PROVIDER_NAME) {
+        QNetworkAccessManager *manager = new QNetworkAccessManager(this);
+        connect(manager, SIGNAL(finished(QNetworkReply*)),
+                this, SLOT(onReplyFinished(QNetworkReply*)));
 
-    QNetworkRequest req;
-    req.setUrl(QUrl("https://www.googleapis.com/calendar/v3/users/me/calendarList"));
-    req.setRawHeader(QByteArray("GData-Version"), QByteArray("3.0"));
-    req.setRawHeader(QByteArray("Authorization"), QByteArray("Bearer " + auth->token().toUtf8()));
+        QNetworkRequest req;
+        req.setUrl(QUrl("https://www.googleapis.com/calendar/v3/users/me/calendarList"));
+        req.setRawHeader(QByteArray("GData-Version"), QByteArray("3.0"));
+        req.setRawHeader(QByteArray("Authorization"), QByteArray("Bearer " + auth->token().toUtf8()));
 
-    manager->get(req);
+        manager->get(req);
+    } else {
+        const QString username = QString("uoa:%1,%2").arg(id()).arg(calendarServiceName());
+        fetchRemoteCalendarsFromCommand(username, "");
+    }
     auth->deleteLater();
 }
 
@@ -858,4 +910,83 @@ void SyncAccount::onReplyFinished(QNetworkReply *reply)
     }
 
     Q_EMIT remoteSourcesAvailable(m_remoteSources, 0);
+}
+
+
+void SyncAccount::fetchRemoteCalendarsFromCommand(const QString &username, const QString &password) const
+{
+    // syncevolution --print-databases backend=caldav
+    QStringList args;
+    QString syncUrl(host());
+
+    // Use well-known url that will re-direct to the correct path
+    if (providerName().toLower() == "owncloud") {
+        syncUrl += QStringLiteral("/remote.php/caldav");
+    }
+
+    args << "--print-databases"
+         << "backend=caldav"
+         << QString("username=%1").arg(username)
+         << QString("password=%1").arg(password)
+         << QString("syncURL=%1").arg(syncUrl);
+    QProcess *syncEvo = new QProcess;
+    syncEvo->setProcessChannelMode(QProcess::MergedChannels);
+    syncEvo->start("syncevolution", args);
+    connect(syncEvo, SIGNAL(finished(int,QProcess::ExitStatus)),
+            SLOT(fetchRemoteCalendarsProcessDone(int,QProcess::ExitStatus)));
+    qDebug() << "Fetching remote calendars (wait...)";
+}
+
+void SyncAccount::fetchRemoteCalendarsProcessDone(int exitCode, QProcess::ExitStatus exitStatus)
+{
+    QProcess *syncEvo = qobject_cast<QProcess*>(QObject::sender());
+
+    if (exitStatus == QProcess::NormalExit) {
+        QString output = syncEvo->readAll();
+        QStringList lines = output.split("\n");
+        while (lines.count() > 0) {
+            if (lines.first().startsWith("caldav:")) {
+                lines.takeFirst();
+                break;
+            }
+            lines.takeFirst();
+        }
+
+        while (lines.count() > 0) {
+            QString line = lines.takeFirst();
+            if (line.isEmpty()) {
+                continue;
+            }
+
+            QStringList fields = line.split("(");
+            if (fields.count() == 2) {
+                SyncDatabase db;
+
+                db.name = fields.first().trimmed();
+
+                const QString syncUrl = fields.at(1).split(")").first();
+                db.source = syncUrl;
+                db.remoteId = QUrl::fromPercentEncoding(syncUrl.split("/", QString::SkipEmptyParts).last().toLatin1());
+                db.defaultCalendar =fields.at(1).trimmed().endsWith("<default>");
+                //TODO: get calendar permissions
+                db.writable = true;
+                //TODO: get calendar color
+                db.color = pickAColor();
+
+                m_remoteSources << db;
+
+                qDebug() << "DB" << db.name
+                         << "\n\tId:" << db.remoteId
+                         << "\n\tSource" << db.source
+                         << "\n\tFlag" << db.writable;
+
+            } else {
+                qWarning() << "Fail to parse db output" << line;
+            }
+        }
+
+        Q_EMIT remoteSourcesAvailable(m_remoteSources, 0);
+    } else {
+        Q_EMIT remoteSourcesAvailable(m_remoteSources, 20007);
+    }
 }

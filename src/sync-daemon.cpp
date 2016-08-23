@@ -433,8 +433,7 @@ bool SyncDaemon::isSyncing() const
 
 QStringList SyncDaemon::availableServices() const
 {
-    // TODO: check for all providers
-    return m_provider->supportedServices("google");
+    return m_provider->supportedServices();
 }
 
 QStringList SyncDaemon::enabledServices() const
@@ -641,7 +640,7 @@ void SyncDaemon::onAccountSyncStart()
         NotifyMessage *notify = new NotifyMessage(true, this);
         notify->show(_("Synchronization"),
                      QString(_("Start sync: %1 (Calendar)")).arg(acc->displayName()),
-                     acc->iconName(CALENDAR_SERVICE_NAME));
+                     acc->iconName(CALENDAR_SERVICE_TYPE));
     }
 }
 
@@ -733,7 +732,6 @@ void SyncDaemon::onAccountSyncFinished(const QString &serviceName,
         } else if (!errorMessage.isEmpty()) {
             fail = true;
             errorCode = 0;
-
             // only show error message if error is not on whitelist
             if (!whiteListStatus.contains(status)) {
                 NotifyMessage *notify = new NotifyMessage(true, this);
@@ -742,7 +740,7 @@ void SyncDaemon::onAccountSyncFinished(const QString &serviceName,
                                  .arg(source)
                                  .arg(acc->displayName())
                                  .arg(errorMessage),
-                             acc->iconName(CALENDAR_SERVICE_NAME));
+                             acc->iconName(CALENDAR_SERVICE_TYPE));
             }
         }
 
@@ -758,7 +756,7 @@ void SyncDaemon::onAccountSyncFinished(const QString &serviceName,
             NotifyMessage *notify = new NotifyMessage(true, this);
             notify->show(_("Synchronization"),
                          QString(_("Sync done: %1 (Calendar)")).arg(acc->displayName()),
-                         acc->iconName(CALENDAR_SERVICE_NAME));
+                         acc->iconName(CALENDAR_SERVICE_TYPE));
         }
     }
 
@@ -773,11 +771,11 @@ void SyncDaemon::onAccountEnableChanged(const QString &serviceName, bool enabled
 {
     SyncAccount *acc = qobject_cast<SyncAccount*>(QObject::sender());
     if (serviceName.isEmpty()) {
-        if (!acc->enabledServices().contains(CALENDAR_SERVICE_NAME)) {
+        if (!acc->enabledServices().contains(CALENDAR_SERVICE_TYPE)) {
             qDebug() << "Account enabled but calendar service disabled!";
             return;
         }
-    } else if (serviceName != CALENDAR_SERVICE_NAME) {
+    } else if (serviceName != CALENDAR_SERVICE_TYPE) {
         qDebug() << "Account service enable changed:" << serviceName << ". Ignore it.";
         return;
     }
