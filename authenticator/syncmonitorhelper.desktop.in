@@ -5,3 +5,6 @@ Exec=@SYNC_MONITOR_HELPER_INSTALL_PATH@@SYNC_MONITOR_HELPER_BIN@ %u
 Terminal=false
 Type=Application
 Version=1.0
+Icon=account
+X-Ubuntu-Single-Instance=true
+X-Ubuntu-Splash-Show-Header=false
