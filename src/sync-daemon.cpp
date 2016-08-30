@@ -732,8 +732,8 @@ void SyncDaemon::onAccountSyncFinished(const QString &serviceName,
         } else if (!errorMessage.isEmpty()) {
             fail = true;
             errorCode = 0;
-            // only show error message if error is not on whitelist
-            if (firstSync && !whiteListStatus.contains(status)) {
+            // only show error message if is the first sync or if error is not on whitelist
+            if (firstSync || !whiteListStatus.contains(status)) {
                 NotifyMessage *notify = new NotifyMessage(true, this);
                 notify->show(_("Synchronization"),
                              QString(_("Fail to sync calendar %1 from account %2.\n%3"))
