@@ -1,0 +1,147 @@
+# Portuguese translation for sync-monitor
+# Copyright (c) 2016 Rosetta Contributors and Canonical Ltd 2016
+# This file is distributed under the same license as the sync-monitor package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2016.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: sync-monitor\n"
+"Report-Msgid-Bugs-To: FULL NAME <EMAIL@ADDRESS>\n"
+"POT-Creation-Date: 2016-08-30 17:13-0300\n"
+"PO-Revision-Date: 2016-08-30 19:20+0000\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: Portuguese <pt@li.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"X-Launchpad-Export-Date: 2016-08-31 06:38+0000\n"
+"X-Generator: Launchpad (build 18179)\n"
+
+#: authenticator/main.qml:66 authenticator/main.qml:84
+msgid "Accounts"
+msgstr ""
+
+#: src/sync-account.cpp:740
+msgid "Command not allowed"
+msgstr ""
+
+#: src/sync-account.cpp:762
+msgid "Connection certificate has expired"
+msgstr ""
+
+#: src/sync-account.cpp:764
+msgid "Connection certificate is invalid"
+msgstr ""
+
+#: src/sync-account.cpp:760
+msgid "Connection timeout"
+msgstr ""
+
+#: src/sync-account.cpp:745
+msgid "Disk full"
+msgstr ""
+
+#: src/sync-account.cpp:727
+msgid "Fail to configure account"
+msgstr ""
+
+#: src/sync-account.cpp:768
+msgid "Fail to connect with the server"
+msgstr ""
+
+#: authenticator/main.qml:94
+msgid "Fail to load account information."
+msgstr ""
+
+#: src/sync-account.cpp:749
+msgid "Fail to run \"two-way\" sync"
+msgstr ""
+
+#: authenticator/main.qml:119
+msgid "Fail to sync"
+msgstr ""
+
+#: src/sync-daemon.cpp:736
+#, qt-format
+msgid ""
+"Fail to sync calendar %1 from account %2.\n"
+"%3"
+msgstr ""
+
+#: src/sync-account.cpp:747
+msgid "Fail to sync due some remote problem"
+msgstr ""
+
+#: src/sync-account.cpp:751
+msgid "Fail to sync some items"
+msgstr ""
+
+#: src/sync-account.cpp:736
+msgid "Forbidden / access denied"
+msgstr ""
+
+#: src/notify-message.cpp:88
+msgid "No"
+msgstr ""
+
+#: src/sync-account.cpp:738
+msgid "Object not found / unassigned field"
+msgstr ""
+
+#: src/sync-account.cpp:753
+msgid "Process unexpected die."
+msgstr ""
+
+#: src/sync-account.cpp:743
+msgid "Proxy authentication required"
+msgstr ""
+
+#: authenticator/main.qml:88 authenticator/main.qml:123
+msgid "Quit"
+msgstr ""
+
+#: src/sync-account.cpp:771
+msgid "Server not found"
+msgstr ""
+
+#: src/sync-account.cpp:756
+msgid "Server sent bad content"
+msgstr ""
+
+#: src/sync-daemon.cpp:642
+#, qt-format
+msgid "Start sync: %1 (Calendar)"
+msgstr ""
+
+#: src/sync-account.cpp:758
+msgid "Sync canceled"
+msgstr ""
+
+#: src/sync-daemon.cpp:754
+#, qt-format
+msgid "Sync done: %1 (Calendar)"
+msgstr ""
+
+#: src/sync-daemon.cpp:619 src/sync-daemon.cpp:641 src/sync-daemon.cpp:735
+#: src/sync-daemon.cpp:753
+msgid "Synchronization"
+msgstr ""
+
+#: src/sync-account.cpp:773
+msgid "Unknown status"
+msgstr ""
+
+#: src/notify-message.cpp:83
+msgid "Yes"
+msgstr ""
+
+#: src/sync-daemon.cpp:620
+msgid ""
+"Your access key is not valid anymore. Do you want to re-authenticate it?."
+msgstr ""
+
+#: authenticator/main.qml:160
+msgid ""
+"Your account failed to authenticate while syncing. Please click below to re-"
+"authenticate."
+msgstr ""
