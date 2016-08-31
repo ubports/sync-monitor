@@ -1,3 +1,9 @@
+sync-monitor (0.2+16.10.20160822-0ubuntu1) yakkety; urgency=medium
+
+  * Fix calendar parser when it contains parens. (LP: #1614251)
+
+ -- Renato Araujo Oliveira Filho <renato.filho@canonical.com>  Mon, 22 Aug 2016 12:31:59 +0000
+
 sync-monitor (0.2+16.10.20160804-0ubuntu1) yakkety; urgency=medium
 
   * Added support for multi protocols sync. (LP: #1540152)
