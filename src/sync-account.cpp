@@ -194,26 +194,6 @@ QString SyncAccount::lastSyncStatus(const QString &sourceName) const
     return settings.value(logKey + ACCOUNT_LOG_LAST_SYNC_RESULT).toString();
 }
 
-QString SyncAccount::pickAColor()
-{
-    static QStringList colorNames;
-    if (colorNames.isEmpty()) {
-        colorNames << "#2C001E"
-                   << "#333333"
-                   << "#DD4814"
-                   << "#DF382C"
-                   << "#EFB73E"
-                   << "#19B6EE"
-                   << "#38B44A"
-                   << "#001F5C";
-        qsrand(colorNames.size());
-    }
-
-    const int index = (rand() % (colorNames.size() - 1));
-    qDebug() << "Color" << index;
-    return colorNames.value(index, 0);
-}
-
 void SyncAccount::continueSync()
 {
     setState(SyncAccount::AboutToSync);
@@ -949,48 +929,7 @@ void SyncAccount::fetchRemoteCalendarsProcessDone(int exitCode, QProcess::ExitSt
 
     if (exitStatus == QProcess::NormalExit) {
         QString output = syncEvo->readAll();
-        QStringList lines = output.split("\n");
-        while (lines.count() > 0) {
-            if (lines.first().startsWith("caldav:")) {
-                lines.takeFirst();
-                break;
-            }
-            lines.takeFirst();
-        }
-
-        while (lines.count() > 0) {
-            QString line = lines.takeFirst();
-            if (line.isEmpty()) {
-                continue;
-            }
-
-            QStringList fields = line.split("(");
-            if (fields.count() == 2) {
-                SyncDatabase db;
-
-                db.name = fields.first().trimmed();
-
-                const QString syncUrl = fields.at(1).split(")").first();
-                db.source = syncUrl;
-                db.remoteId = QUrl::fromPercentEncoding(syncUrl.split("/", QString::SkipEmptyParts).last().toLatin1());
-                db.defaultCalendar =fields.at(1).trimmed().endsWith("<default>");
-                //TODO: get calendar permissions
-                db.writable = true;
-                //TODO: get calendar color
-                db.color = pickAColor();
-
-                m_remoteSources << db;
-
-                qDebug() << "DB" << db.name
-                         << "\n\tId:" << db.remoteId
-                         << "\n\tSource" << db.source
-                         << "\n\tFlag" << db.writable;
-
-            } else {
-                qWarning() << "Fail to parse db output" << line;
-            }
-        }
-
+        m_remoteSources << output;
         Q_EMIT remoteSourcesAvailable(m_remoteSources, 0);
     } else {
         Q_EMIT remoteSourcesAvailable(m_remoteSources, 20007);
