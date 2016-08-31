@@ -269,10 +269,16 @@ QString SyncAccount::syncMode(const QString &sourceName,
     case 204:
     case 207:
         // status ok
-        return "two-way";
-    case 401:
+    case 500:
+        // server side generic error (just retry the sync)
+    case 1500:
+        // server side generic error (just retry the sync)
     case 403:
         // "Forbidden / access denied";
+    case 10403:
+        // "Forbidden / access denied";
+        return "two-way";
+    case 401:
     case 404:
         // "Object not found / unassigned field";
     case 405:
