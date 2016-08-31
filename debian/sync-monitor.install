@@ -1,3 +1,4 @@
 usr/lib/*/sync-monitor/sync-monitor
 usr/share/upstart/sessions/sync-monitor.conf
 usr/share/sync-monitor/templates/*
+usr/share/locale/*/LC_MESSAGES/sync-monitor.mo
