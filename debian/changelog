@@ -1,3 +1,10 @@
+sync-monitor (0.2+16.10.20160901-0ubuntu1) yakkety; urgency=medium
+
+  [ Renato Araujo Oliveira Filho ]
+  * Include translations files into debian package. (LP: #1617916)
+
+ -- Łukasz Zemczak <lukasz.zemczak@canonical.com>  Thu, 01 Sep 2016 08:54:23 +0000
+
 sync-monitor (0.2+16.10.20160822-0ubuntu1) yakkety; urgency=medium
 
   * Fix calendar parser when it contains parens. (LP: #1614251)
