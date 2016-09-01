@@ -165,7 +165,7 @@ MainView {
                     iconName: accountPage.getServiceIcon(accountPage.account.serviceId)
                     onClicked: {
                         accountPage.loginInProcess = true
-                        account.authenticate({})
+                        account.authenticate({"ForceTokenRefresh": true})
                     }
                 }
             }
