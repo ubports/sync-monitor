@@ -710,6 +710,7 @@ void SyncDaemon::onAccountSyncFinished(const QString &serviceName,
         // this is a bug on SyncEvolution sometimes it fail to read the correct address book
         // FIXME: we should fix that on SyncEvolution
         whiteListStatus << QStringLiteral("10500");
+        whiteListStatus << QStringLiteral("500");
     }
 
     // check if we are going re-sync due a know problem
@@ -731,13 +732,16 @@ void SyncDaemon::onAccountSyncFinished(const QString &serviceName,
         } else if (!errorMessage.isEmpty()) {
             fail = true;
             errorCode = 0;
-            NotifyMessage *notify = new NotifyMessage(true, this);
-            notify->show(_("Synchronization"),
-                         QString(_("Fail to sync calendar %1 from account %2.\n%3"))
-                             .arg(source)
-                             .arg(acc->displayName())
-                             .arg(errorMessage),
-                         acc->iconName(CALENDAR_SERVICE_TYPE));
+            // only show error message if is the first sync or if error is not on whitelist
+            if (firstSync || !whiteListStatus.contains(status)) {
+                NotifyMessage *notify = new NotifyMessage(true, this);
+                notify->show(_("Synchronization"),
+                             QString(_("Fail to sync calendar %1 from account %2.\n%3"))
+                                 .arg(source)
+                                 .arg(acc->displayName())
+                                 .arg(errorMessage),
+                             acc->iconName(CALENDAR_SERVICE_TYPE));
+            }
         }
 
         if (saveLog && !source.isEmpty()) {
