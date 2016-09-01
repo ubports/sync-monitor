@@ -614,7 +614,7 @@ void SyncDaemon::authenticateAccount(const SyncAccount *account, const QString &
 {
     NotifyMessage *notify = new NotifyMessage(true, this);
     notify->setProperty("ACCOUNT", QVariant::fromValue<AccountId>(account->id()));
-    notify->setProperty("SERVICE", QVariant::fromValue<QString>(account->serviceId(serviceName)));
+    notify->setProperty("SERVICE", QVariant::fromValue<QString>(serviceName));
     connect(notify, SIGNAL(questionAccepted()), SLOT(runAuthentication()));
     notify->askYesOrNo(_("Synchronization"),
                        QString(_("Your access key is not valid anymore. Do you want to re-authenticate it?.")),
