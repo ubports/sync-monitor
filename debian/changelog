@@ -1,3 +1,12 @@
+sync-monitor (0.2+16.10.20160901.3-0ubuntu1) yakkety; urgency=medium
+
+  * Retry sync in case of error 500. (LP: #1605122)
+  * Ask the user for re-validade his account if the authentication fail.
+    (LP: #1616343)
+  * Notify individual source sync error. (LP: #1618907)
+
+ -- Renato Araujo Oliveira Filho <renato.filho@canonical.com>  Thu, 01 Sep 2016 21:29:39 +0000
+
 sync-monitor (0.2+16.10.20160901-0ubuntu1) yakkety; urgency=medium
 
   [ Renato Araujo Oliveira Filho ]
