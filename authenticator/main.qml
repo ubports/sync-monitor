@@ -2,7 +2,7 @@ import QtQuick 2.2
 
 import Ubuntu.Components 1.1
 import Ubuntu.Components.ListItems 1.0 as ListItem
-import Ubuntu.OnlineAccounts 0.1
+import Ubuntu.OnlineAccounts 2.0
 
 MainView {
     id: root
@@ -13,26 +13,21 @@ MainView {
     height: units.gu(71)
     useDeprecatedToolbar: false
 
-    AccountServiceModel {
-        id: accountServiceModel
+    AccountModel {
+        id: accountModel
 
-        accountId: ONLINE_ACCOUNT.accountId
-        service: ONLINE_ACCOUNT.serviceName
-        onCountChanged: {
-            console.debug("Account count changed:" + count)
-            if ((count == 1) && (pageStack.depth == 0)) {
-                var _acc = {}
-                _acc["displayName"] = accountServiceModel.get(0, "displayName")
-                _acc["providerName"] = accountServiceModel.get(0, "providerName")
-                _acc["serviceName"] = accountServiceModel.get(0, "serviceName")
-                _acc["accountServiceHandle"] = accountServiceModel.get(0, "accountServiceHandle")
-                _acc["accountId"] = accountServiceModel.get(0, "accountId")
-                _acc["accountHandle"] = accountServiceModel.get(0, "accountHandle")
+        serviceId: ONLINE_ACCOUNT.serviceName
+        applicationId: "com.ubuntu.calendar"
+        onReadyChanged:  {
+            console.debug("Model is Ready:" + ready)
+            console.debug("Model count:" + count)
+            if (count > 0) {
                 root.accountFound = true
-                pageStack.push(accountPageComponent, {"account" : _acc})
+                pageStack.push(accountPageComponent, {"account" : accountModel.get(0, "account")})
             }
         }
     }
+
 
     PageStack {
         id: pageStack
@@ -105,37 +100,35 @@ MainView {
             property var account
             property bool loginInProcess: false
 
-            function getProviderIcon(providerName)
+            function getServiceIcon(serviceId)
             {
-                switch(providerName)
-                {
-                case "Google":
+                if (serviceId.indexOf("google") != -1) {
                     return "google"
-                default:
-                    return "contact-group"
+                } else {
+                    return "account"
                 }
             }
 
-            title: i18n.tr("Fail to sync")
+            function accountAuthenticationReply(authenticationData)
+            {
+                accountPage.loginInProcess = false
+                if (authenticationData.errorCode) {
+                    console.warn("Authentication failed: " + authenticationData.errorCode + ": " + authenticationData.errorText)
+
+                } else {
+                    accountPage.loginInProcess = false
+                    console.debug("Authentication sucess.")
+                    Qt.quit()
+                }
+            }
+
+
+            title: accountPage.loginInProcess ? i18n.tr("Wait..") : i18n.tr("Fail to sync")
 
             head.backAction: Action {
                 iconName: "back"
                 text: i18n.tr("Quit")
                 onTriggered: Qt.quit()
-            }
-
-            AccountService {
-                id: accountService
-
-                objectHandle: accountPage.account.accountServiceHandle
-                onAuthenticated: {
-                    accountPage.loginInProcess = false
-                    Qt.quit()
-                }
-                onAuthenticationError: {
-                    accountPage.loginInProcess = false
-                    console.log("Authentication failed, code " + error.code)
-                }
             }
 
             Column {
@@ -169,12 +162,10 @@ MainView {
                         right: parent.right
                     }
                     text: accountPage.account.displayName
-                    iconName: accountPage.getProviderIcon(accountPage.account.providerName)
+                    iconName: accountPage.getServiceIcon(accountPage.account.serviceId)
                     onClicked: {
-                        if (!accountPage.busy) {
-                            accountPage.loginInProcess = true
-                            accountService.authenticate(null)
-                        }
+                        accountPage.loginInProcess = true
+                        account.authenticate({})
                     }
                 }
             }
@@ -183,8 +174,16 @@ MainView {
                 id: activity
 
                 anchors.centerIn: parent
-                running: visible
-                visible: accountPage.loginInProcess
+                running: accountPage.loginInProcess
+                visible: running
+            }
+
+            Component.onCompleted:  {
+                if (account) {
+                    account.onAuthenticationReply.connect(accountAuthenticationReply)
+                } else {
+                    console.warn("No accoun sett")
+                }
             }
         }
     }
