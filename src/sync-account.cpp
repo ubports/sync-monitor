@@ -292,6 +292,8 @@ QString SyncAccount::syncMode(const QString &sourceName,
         // "Fail to sync due some remote problem";
     case 514:
         // "Remote problem, not way to recovery";
+    case 20023:
+        // "Unknown status"
         return "refresh-from-remote";
     case 22001:
         // "Fail to sync some items";
@@ -300,6 +302,8 @@ QString SyncAccount::syncMode(const QString &sourceName,
     case 20006:
     case 20007:
         // "Server sent bad content";
+    case 20017:
+        // "Sync Canceled";
     case 20020:
         // "Connection timeout";
     case 20021:
@@ -609,6 +613,9 @@ void SyncAccount::onSessionStatusChanged(const QString &status, quint32 error, c
             if (m_sourcesOnSync[source] != SyncAccount::SourceSyncDone) {
                 done = false;
                 qWarning() << "Sync status changed to done. But source still syncing" << source;
+                if (error != 0) {
+                    m_currentSyncResults.insert(source, QString::number(error));
+                }
             }
         }
 
@@ -616,7 +623,6 @@ void SyncAccount::onSessionStatusChanged(const QString &status, quint32 error, c
             QString errorMessage = statusDescription(QString::number(error));
             qWarning() << "Sync Error" << error << errorMessage;
             Q_EMIT syncError(calendarServiceName(), errorMessage);
-            m_currentSyncResults.insert("", QString::number(error));
             // fail to sync, notify sync finished
             done = true;
         }
