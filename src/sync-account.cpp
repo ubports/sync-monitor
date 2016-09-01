@@ -111,7 +111,7 @@ void SyncAccount::cancel(const QStringList &sources)
         m_currentSession = 0;
 
         if (m_state == SyncAccount::Syncing) {
-            Q_EMIT syncError("", "canceled");
+            Q_EMIT syncError(calendarServiceName(), "canceled");
         } else {
             qDebug() << "Cancelled with no sync state";
         }
@@ -615,7 +615,7 @@ void SyncAccount::onSessionStatusChanged(const QString &status, quint32 error, c
         if (error != 0) {
             QString errorMessage = statusDescription(QString::number(error));
             qWarning() << "Sync Error" << error << errorMessage;
-            Q_EMIT syncError(CALENDAR_SERVICE_TYPE, errorMessage);
+            Q_EMIT syncError(calendarServiceName(), errorMessage);
             m_currentSyncResults.insert("", QString::number(error));
             // fail to sync, notify sync finished
             done = true;
@@ -681,7 +681,7 @@ void SyncAccount::onAccountConfigureError(int error)
 
     qWarning() << "Fail to configure account" << m_account->displayName() << error;
     setState(SyncAccount::Idle);
-    Q_EMIT syncError("", QString::number(error));
+    Q_EMIT syncError(calendarServiceName(), QString::number(error));
 
     // Send sync finish due the config error there is nothing to do
     QMap<QString, QString> errorMap;
@@ -824,7 +824,6 @@ void SyncAccount::onAuthFailed()
     Q_ASSERT(auth);
     auth->deleteLater();
 
-    qWarning() << "Fail to authenticate";
     Q_EMIT remoteSourcesAvailable(m_remoteSources, 403);
 }
 

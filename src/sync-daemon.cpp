@@ -176,7 +176,7 @@ void SyncDaemon::onClientAttached()
         // accept eds changes
         qDebug() << "First client connected, will auto-sync on next EDS change";
         m_eds->setEnabled(true);
-     }
+    }
 }
 
 void SyncDaemon::onOnlineStatusChanged(SyncNetwork::NetworkState state)
@@ -614,7 +614,7 @@ void SyncDaemon::authenticateAccount(const SyncAccount *account, const QString &
 {
     NotifyMessage *notify = new NotifyMessage(true, this);
     notify->setProperty("ACCOUNT", QVariant::fromValue<AccountId>(account->id()));
-    notify->setProperty("SERVICE", QVariant::fromValue<QString>(account->serviceId(serviceName)));
+    notify->setProperty("SERVICE", QVariant::fromValue<QString>(serviceName));
     connect(notify, SIGNAL(questionAccepted()), SLOT(runAuthentication()));
     notify->askYesOrNo(_("Synchronization"),
                        QString(_("Your access key is not valid anymore. Do you want to re-authenticate it?.")),
@@ -660,7 +660,17 @@ void SyncDaemon::onAccountSourceSyncStarted(const QString &serviceName,
 
 void SyncDaemon::onAccountSyncError(const QString &serviceName, const QString &error)
 {
-    Q_EMIT syncError(qobject_cast<SyncAccount*>(QObject::sender()), serviceName, error);
+    SyncAccount *acc = qobject_cast<SyncAccount*>(QObject::sender());
+    qWarning() << "Account sync error" << acc->displayName() << serviceName << error;
+
+    // If auth error (403) we ask the user to re-authenticate
+    // Only ask for re-authentication if the error happened twice
+    // (avoid problems with disconnection during the authentication)
+    if ((acc->lastError() == 403) && (error == "403")) {
+        authenticateAccount(acc, serviceName);
+    } else {
+        Q_EMIT syncError(acc, serviceName, error);
+    }
     syncFinishedImpl();
 }
 
