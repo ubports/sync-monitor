@@ -1,4 +1,4 @@
-# Hungarian translation for sync-monitor
+# Gaelic; Scottish translation for sync-monitor
 # Copyright (c) 2016 Rosetta Contributors and Canonical Ltd 2016
 # This file is distributed under the same license as the sync-monitor package.
 # FIRST AUTHOR <EMAIL@ADDRESS>, 2016.
@@ -8,9 +8,9 @@ msgstr ""
 "Project-Id-Version: sync-monitor\n"
 "Report-Msgid-Bugs-To: FULL NAME <EMAIL@ADDRESS>\n"
 "POT-Creation-Date: 2016-08-30 17:13-0300\n"
-"PO-Revision-Date: 2016-09-05 07:09+0000\n"
-"Last-Translator: Richard Somlói <ricsipontaz@gmail.com>\n"
-"Language-Team: Hungarian <hu@li.org>\n"
+"PO-Revision-Date: 2016-09-05 11:32+0000\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: Gaelic; Scottish <gd@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
@@ -19,130 +19,126 @@ msgstr ""
 
 #: authenticator/main.qml:66 authenticator/main.qml:84
 msgid "Accounts"
-msgstr "Fiókok"
+msgstr ""
 
 #: ../src/sync-account.cpp:752
 msgid "Command not allowed"
-msgstr "Nem engedélyezett parancs"
+msgstr ""
 
 #: ../src/sync-account.cpp:774
 msgid "Connection certificate has expired"
-msgstr "A kapcsolat tanúsítványa lejárt"
+msgstr ""
 
 #: ../src/sync-account.cpp:776
 msgid "Connection certificate is invalid"
-msgstr "A kapcsolat tanúsítványa érvénytelen"
+msgstr ""
 
 #: ../src/sync-account.cpp:772
 msgid "Connection timeout"
-msgstr "Időtúllépés"
+msgstr ""
 
 #: ../src/sync-account.cpp:757
 msgid "Disk full"
-msgstr "Betelt a lemez"
+msgstr "Diosg làn"
 
 #: ../src/sync-account.cpp:739
 msgid "Fail to configure account"
-msgstr "Nem sikerült a fiók beállítása"
+msgstr ""
 
 #: ../src/sync-account.cpp:780
 msgid "Fail to connect with the server"
-msgstr "Nem sikerült kapcsolódni a kiszolgálóhoz"
+msgstr ""
 
 #: authenticator/main.qml:94
 msgid "Fail to load account information."
-msgstr "Nem sikerült a fiókinformációk betöltése."
+msgstr ""
 
 #: ../src/sync-account.cpp:761
 msgid "Fail to run \"two-way\" sync"
-msgstr "Nem sikerült a „két-irányú” szinkronizálás futtatása"
+msgstr ""
 
 #: authenticator/main.qml:119
 msgid "Fail to sync"
-msgstr "Sikertelen szinkronizálás"
+msgstr ""
 
 #: ../src/sync-daemon.cpp:749
 msgid ""
 "Fail to sync calendar %1 from account %2.\n"
 "%3"
 msgstr ""
-"A(z) %2 fiók %1 naptárjának szinkronizálása sikertelen.\n"
-"%3"
 
 #: ../src/sync-account.cpp:759
 msgid "Fail to sync due some remote problem"
-msgstr "Távoli problémák miatt a szinkronizálás sikertelen"
+msgstr ""
 
 #: ../src/sync-account.cpp:763
 msgid "Fail to sync some items"
-msgstr "Néhány elem szinkronizálása sikertelen"
+msgstr ""
 
 #: ../src/sync-account.cpp:748
 msgid "Forbidden / access denied"
-msgstr "Hozzáférés megtagadva"
+msgstr ""
 
 #: src/notify-message.cpp:88
 msgid "No"
-msgstr "Nem"
+msgstr ""
 
 #: ../src/sync-account.cpp:750
 msgid "Object not found / unassigned field"
-msgstr "Az objektum nem található / nem hozzárendelt mező"
+msgstr ""
 
 #: ../src/sync-account.cpp:765
 msgid "Process unexpected die."
-msgstr "A folyamat váratlanul leállt."
+msgstr ""
 
 #: ../src/sync-account.cpp:755
 msgid "Proxy authentication required"
-msgstr "Proxyhitelesítés szükséges"
+msgstr "Tha feum air dearbhadh progsaidh"
 
 #: authenticator/main.qml:88 authenticator/main.qml:123
 msgid "Quit"
-msgstr "Kilépés"
+msgstr ""
 
 #: ../src/sync-account.cpp:783
 msgid "Server not found"
-msgstr "A kiszolgáló nem található"
+msgstr ""
 
 #: ../src/sync-account.cpp:768
 msgid "Server sent bad content"
-msgstr "A kiszolgáló rossz tartalmat küldött"
+msgstr ""
 
 #: ../src/sync-daemon.cpp:642
 msgid "Start sync: %1 (Calendar)"
-msgstr "Szinkronizálás elkezdve: %1 (Naptár)"
+msgstr ""
 
 #: ../src/sync-account.cpp:770
 msgid "Sync canceled"
-msgstr "Szinkronizálás megszakítva"
+msgstr ""
 
 #: ../src/sync-daemon.cpp:768
 msgid "Sync done: %1 (Calendar)"
-msgstr "Szinkronizálás befejezve: %1 (Naptár)"
+msgstr ""
 
 #: ../src/sync-daemon.cpp:619 ../src/sync-daemon.cpp:641
 #: ../src/sync-daemon.cpp:748 ../src/sync-daemon.cpp:767
 msgid "Synchronization"
-msgstr "Szinkronizálás"
+msgstr ""
 
 #: ../src/sync-account.cpp:785
 msgid "Unknown status"
-msgstr "Ismeretlen állapot"
+msgstr ""
 
 #: src/notify-message.cpp:83
 msgid "Yes"
-msgstr "Igen"
+msgstr ""
 
 #: ../src/sync-daemon.cpp:620
 msgid ""
 "Your access key is not valid anymore. Do you want to re-authenticate it?."
-msgstr "A hozzáférési kulcsa már nem érvényes. Szeretné újra érvényesíteni?"
+msgstr ""
 
 #: authenticator/main.qml:160
 msgid ""
 "Your account failed to authenticate while syncing. Please click below to re-"
 "authenticate."
 msgstr ""
-"A szinkronizálás közben nem sikerült a fiók hitelesítése. Kattintson az "
-"újrahitelesítéshez."
