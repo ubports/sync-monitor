@@ -1,0 +1,148 @@
+# Slovak translation for sync-monitor
+# Copyright (c) 2016 Rosetta Contributors and Canonical Ltd 2016
+# This file is distributed under the same license as the sync-monitor package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2016.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: sync-monitor\n"
+"Report-Msgid-Bugs-To: FULL NAME <EMAIL@ADDRESS>\n"
+"POT-Creation-Date: 2016-08-30 17:13-0300\n"
+"PO-Revision-Date: 2016-09-13 11:40+0000\n"
+"Last-Translator: P_E_T_O <Unknown>\n"
+"Language-Team: Slovak <sk@li.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"X-Launchpad-Export-Date: 2016-09-14 06:27+0000\n"
+"X-Generator: Launchpad (build 18186)\n"
+
+#: authenticator/main.qml:66 authenticator/main.qml:84
+msgid "Accounts"
+msgstr "Účty"
+
+#: ../src/sync-account.cpp:752
+msgid "Command not allowed"
+msgstr "Nepovolený príkaz"
+
+#: ../src/sync-account.cpp:774
+msgid "Connection certificate has expired"
+msgstr "Certifikát pripojenia vypršal"
+
+#: ../src/sync-account.cpp:776
+msgid "Connection certificate is invalid"
+msgstr "Neplatný certifikát pripojenia"
+
+#: ../src/sync-account.cpp:772
+msgid "Connection timeout"
+msgstr "Čas pripojenia vypršal"
+
+#: ../src/sync-account.cpp:757
+msgid "Disk full"
+msgstr "Plný disk"
+
+#: ../src/sync-account.cpp:739
+msgid "Fail to configure account"
+msgstr "Nepodarilo sa nakonfigurovať účet"
+
+#: ../src/sync-account.cpp:780
+msgid "Fail to connect with the server"
+msgstr "Nepodarilo sa spojiť so serverom"
+
+#: authenticator/main.qml:94
+msgid "Fail to load account information."
+msgstr "Nepodarilo sa načítať informácie o účte."
+
+#: ../src/sync-account.cpp:761
+msgid "Fail to run \"two-way\" sync"
+msgstr "Nepodarilo sa spustiť \"obojsmernú\" synchronizáciu"
+
+#: authenticator/main.qml:119
+msgid "Fail to sync"
+msgstr "Synchronizácia zlyhala"
+
+#: ../src/sync-daemon.cpp:749
+msgid ""
+"Fail to sync calendar %1 from account %2.\n"
+"%3"
+msgstr ""
+"Zlyhala synchronizácia kalendára %1 z účtu %2.\n"
+"%3"
+
+#: ../src/sync-account.cpp:759
+msgid "Fail to sync due some remote problem"
+msgstr "Synchronizácia zlyhala kvôli vzialenému problému"
+
+#: ../src/sync-account.cpp:763
+msgid "Fail to sync some items"
+msgstr "Niektoré položky sa nepodarilo synchronizovať"
+
+#: ../src/sync-account.cpp:748
+msgid "Forbidden / access denied"
+msgstr "Zakázané / prístup odmietnutý"
+
+#: src/notify-message.cpp:88
+msgid "No"
+msgstr "Nie"
+
+#: ../src/sync-account.cpp:750
+msgid "Object not found / unassigned field"
+msgstr "Objekt nenájdený / nepriradené pole"
+
+#: ../src/sync-account.cpp:765
+msgid "Process unexpected die."
+msgstr "Proces neočakávane zlyhal."
+
+#: ../src/sync-account.cpp:755
+msgid "Proxy authentication required"
+msgstr "Vyžaduje sa overenie servera proxy"
+
+#: authenticator/main.qml:88 authenticator/main.qml:123
+msgid "Quit"
+msgstr "Ukončiť"
+
+#: ../src/sync-account.cpp:783
+msgid "Server not found"
+msgstr "Server nenájdený"
+
+#: ../src/sync-account.cpp:768
+msgid "Server sent bad content"
+msgstr "Server poslal zlý obsah"
+
+#: ../src/sync-daemon.cpp:642
+msgid "Start sync: %1 (Calendar)"
+msgstr "Štart synchronizácie: %1 (Kalendár)"
+
+#: ../src/sync-account.cpp:770
+msgid "Sync canceled"
+msgstr "Synchronizácia zrušená"
+
+#: ../src/sync-daemon.cpp:768
+msgid "Sync done: %1 (Calendar)"
+msgstr "Koniec synchronizácie: %1 (Kalendár)"
+
+#: ../src/sync-daemon.cpp:619 ../src/sync-daemon.cpp:641
+#: ../src/sync-daemon.cpp:748 ../src/sync-daemon.cpp:767
+msgid "Synchronization"
+msgstr "Synchronizácia"
+
+#: ../src/sync-account.cpp:785
+msgid "Unknown status"
+msgstr "Neznámy status"
+
+#: src/notify-message.cpp:83
+msgid "Yes"
+msgstr "Áno"
+
+#: ../src/sync-daemon.cpp:620
+msgid ""
+"Your access key is not valid anymore. Do you want to re-authenticate it?."
+msgstr "Váš prístupový kľúč je neplatný. Chcete ho znova overiť?"
+
+#: authenticator/main.qml:160
+msgid ""
+"Your account failed to authenticate while syncing. Please click below to re-"
+"authenticate."
+msgstr ""
+"Váš účet sa počas synchronizácie nepodarilo overiť. Kliknite na odkaz nižšie "
+"pre overenie."
