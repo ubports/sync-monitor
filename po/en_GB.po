@@ -8,137 +8,137 @@ msgstr ""
 "Project-Id-Version: sync-monitor\n"
 "Report-Msgid-Bugs-To: FULL NAME <EMAIL@ADDRESS>\n"
 "POT-Creation-Date: 2016-08-30 17:13-0300\n"
-"PO-Revision-Date: 2016-08-30 19:20+0000\n"
-"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"PO-Revision-Date: 2016-09-19 18:09+0000\n"
+"Last-Translator: Anthony Harrington <untaintableangel@ubuntu.com>\n"
 "Language-Team: English (United Kingdom) <en_GB@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"X-Launchpad-Export-Date: 2016-08-31 06:38+0000\n"
-"X-Generator: Launchpad (build 18179)\n"
+"X-Launchpad-Export-Date: 2016-09-20 08:01+0000\n"
+"X-Generator: Launchpad (build 18200)\n"
 
 #: authenticator/main.qml:66 authenticator/main.qml:84
 msgid "Accounts"
 msgstr ""
 
-#: src/sync-account.cpp:740
+#: ../src/sync-account.cpp:752
 msgid "Command not allowed"
-msgstr ""
+msgstr "Command not allowed"
 
-#: src/sync-account.cpp:762
+#: ../src/sync-account.cpp:774
 msgid "Connection certificate has expired"
-msgstr ""
+msgstr "Connection certificate has expired"
 
-#: src/sync-account.cpp:764
+#: ../src/sync-account.cpp:776
 msgid "Connection certificate is invalid"
-msgstr ""
+msgstr "Connection certificate is invalid"
 
-#: src/sync-account.cpp:760
+#: ../src/sync-account.cpp:772
 msgid "Connection timeout"
-msgstr ""
+msgstr "Connection timeout"
 
-#: src/sync-account.cpp:745
+#: ../src/sync-account.cpp:757
 msgid "Disk full"
-msgstr ""
+msgstr "Disk full"
 
-#: src/sync-account.cpp:727
+#: ../src/sync-account.cpp:739
 msgid "Fail to configure account"
-msgstr ""
+msgstr "Failed to configure account"
 
-#: src/sync-account.cpp:768
+#: ../src/sync-account.cpp:780
 msgid "Fail to connect with the server"
-msgstr ""
+msgstr "Failed to connect with the server"
 
 #: authenticator/main.qml:94
 msgid "Fail to load account information."
 msgstr ""
 
-#: src/sync-account.cpp:749
+#: ../src/sync-account.cpp:761
 msgid "Fail to run \"two-way\" sync"
-msgstr ""
+msgstr "Failed to run \"two-way\" sync"
 
 #: authenticator/main.qml:119
 msgid "Fail to sync"
 msgstr ""
 
-#: src/sync-daemon.cpp:736
-#, qt-format
+#: ../src/sync-daemon.cpp:749
 msgid ""
 "Fail to sync calendar %1 from account %2.\n"
 "%3"
 msgstr ""
+"Failed to sync calendar %1 from account %2.\n"
+"%3"
 
-#: src/sync-account.cpp:747
+#: ../src/sync-account.cpp:759
 msgid "Fail to sync due some remote problem"
-msgstr ""
+msgstr "Failed to sync due some remote problem"
 
-#: src/sync-account.cpp:751
+#: ../src/sync-account.cpp:763
 msgid "Fail to sync some items"
-msgstr ""
+msgstr "Failed to sync some items"
 
-#: src/sync-account.cpp:736
+#: ../src/sync-account.cpp:748
 msgid "Forbidden / access denied"
-msgstr ""
+msgstr "Forbidden / access denied"
 
 #: src/notify-message.cpp:88
 msgid "No"
 msgstr ""
 
-#: src/sync-account.cpp:738
+#: ../src/sync-account.cpp:750
 msgid "Object not found / unassigned field"
-msgstr ""
+msgstr "Object not found / unassigned field"
 
-#: src/sync-account.cpp:753
+#: ../src/sync-account.cpp:765
 msgid "Process unexpected die."
-msgstr ""
+msgstr "Process died unexpectedly"
 
-#: src/sync-account.cpp:743
+#: ../src/sync-account.cpp:755
 msgid "Proxy authentication required"
-msgstr ""
+msgstr "Proxy authentication required"
 
 #: authenticator/main.qml:88 authenticator/main.qml:123
 msgid "Quit"
 msgstr ""
 
-#: src/sync-account.cpp:771
+#: ../src/sync-account.cpp:783
 msgid "Server not found"
-msgstr ""
+msgstr "Server not found"
 
-#: src/sync-account.cpp:756
+#: ../src/sync-account.cpp:768
 msgid "Server sent bad content"
-msgstr ""
+msgstr "Server sent bad content"
 
-#: src/sync-daemon.cpp:642
-#, qt-format
+#: ../src/sync-daemon.cpp:642
 msgid "Start sync: %1 (Calendar)"
-msgstr ""
+msgstr "Start sync: %1 (Calendar)"
 
-#: src/sync-account.cpp:758
+#: ../src/sync-account.cpp:770
 msgid "Sync canceled"
-msgstr ""
+msgstr "Sync cancelled"
 
-#: src/sync-daemon.cpp:754
-#, qt-format
+#: ../src/sync-daemon.cpp:768
 msgid "Sync done: %1 (Calendar)"
-msgstr ""
+msgstr "Sync done: %1 (Calendar)"
 
-#: src/sync-daemon.cpp:619 src/sync-daemon.cpp:641 src/sync-daemon.cpp:735
-#: src/sync-daemon.cpp:753
+#: ../src/sync-daemon.cpp:619 ../src/sync-daemon.cpp:641
+#: ../src/sync-daemon.cpp:748 ../src/sync-daemon.cpp:767
 msgid "Synchronization"
-msgstr ""
+msgstr "Synchronisation"
 
-#: src/sync-account.cpp:773
+#: ../src/sync-account.cpp:785
 msgid "Unknown status"
-msgstr ""
+msgstr "Unknown status"
 
 #: src/notify-message.cpp:83
 msgid "Yes"
 msgstr ""
 
-#: src/sync-daemon.cpp:620
+#: ../src/sync-daemon.cpp:620
 msgid ""
 "Your access key is not valid anymore. Do you want to re-authenticate it?."
 msgstr ""
+"Your access key is not valid anymore. Do you want to re-authenticate it?"
 
 #: authenticator/main.qml:160
 msgid ""
