@@ -1,0 +1,146 @@
+# Breton translation for sync-monitor
+# Copyright (c) 2016 Rosetta Contributors and Canonical Ltd 2016
+# This file is distributed under the same license as the sync-monitor package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2016.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: sync-monitor\n"
+"Report-Msgid-Bugs-To: FULL NAME <EMAIL@ADDRESS>\n"
+"POT-Creation-Date: 2016-08-30 17:13-0300\n"
+"PO-Revision-Date: 2016-10-10 07:14+0000\n"
+"Last-Translator: Fohanno Thierry <thierry.fohanno@ofis-bzh.org>\n"
+"Language-Team: Breton <br@li.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"X-Launchpad-Export-Date: 2016-10-10 07:26+0000\n"
+"X-Generator: Launchpad (build 18227)\n"
+
+#: authenticator/main.qml:66 authenticator/main.qml:84
+msgid "Accounts"
+msgstr "Kontoù"
+
+#: ../src/sync-account.cpp:752
+msgid "Command not allowed"
+msgstr "Urzh diaotreet"
+
+#: ../src/sync-account.cpp:774
+msgid "Connection certificate has expired"
+msgstr "Diamzeret eo an testeni kevreañ"
+
+#: ../src/sync-account.cpp:776
+msgid "Connection certificate is invalid"
+msgstr "Direizh eo an testeni kevreañ"
+
+#: ../src/sync-account.cpp:772
+msgid "Connection timeout"
+msgstr "Kevreadur kollet"
+
+#: ../src/sync-account.cpp:757
+msgid "Disk full"
+msgstr "Pladenn leun"
+
+#: ../src/sync-account.cpp:739
+msgid "Fail to configure account"
+msgstr "N'eus ket bet gallet kefluniañ ar gont"
+
+#: ../src/sync-account.cpp:780
+msgid "Fail to connect with the server"
+msgstr "N'eus ket bet gallet kevreañ ouzh ar servijer"
+
+#: authenticator/main.qml:94
+msgid "Fail to load account information."
+msgstr "N'eus ket bet gallet kargañ titouroù ar gont"
+
+#: ../src/sync-account.cpp:761
+msgid "Fail to run \"two-way\" sync"
+msgstr ""
+
+#: authenticator/main.qml:119
+msgid "Fail to sync"
+msgstr "N'eus ket bet gallet sinkronelaat"
+
+#: ../src/sync-daemon.cpp:749
+msgid ""
+"Fail to sync calendar %1 from account %2.\n"
+"%3"
+msgstr ""
+"N'eus ket bet gallet sinkronelaat an deiziataer %1 eus ar gont %2.\n"
+"%3"
+
+#: ../src/sync-account.cpp:759
+msgid "Fail to sync due some remote problem"
+msgstr "N'eus ket bet gallet sinkronelaat abalamour d'un diaester a-bell"
+
+#: ../src/sync-account.cpp:763
+msgid "Fail to sync some items"
+msgstr "N'eus ket bet gallet sinkronelaat elfennoù zo"
+
+#: ../src/sync-account.cpp:748
+msgid "Forbidden / access denied"
+msgstr "Difennet / moned nac'het"
+
+#: src/notify-message.cpp:88
+msgid "No"
+msgstr "Ket"
+
+#: ../src/sync-account.cpp:750
+msgid "Object not found / unassigned field"
+msgstr "Traezenn ha n'eo ket bet kavet / maezienn ha n'eo ket bet deroet"
+
+#: ../src/sync-account.cpp:765
+msgid "Process unexpected die."
+msgstr ""
+
+#: ../src/sync-account.cpp:755
+msgid "Proxy authentication required"
+msgstr ""
+
+#: authenticator/main.qml:88 authenticator/main.qml:123
+msgid "Quit"
+msgstr "Kuitaat"
+
+#: ../src/sync-account.cpp:783
+msgid "Server not found"
+msgstr "N'eo ket bet kavet ar servijer"
+
+#: ../src/sync-account.cpp:768
+msgid "Server sent bad content"
+msgstr "Ar servijer en deus kaset roadennoù direizh"
+
+#: ../src/sync-daemon.cpp:642
+msgid "Start sync: %1 (Calendar)"
+msgstr "Kregiñ da sinkronelaat : %1 (Deiziataer)"
+
+#: ../src/sync-account.cpp:770
+msgid "Sync canceled"
+msgstr "Sinkroneladur nullet"
+
+#: ../src/sync-daemon.cpp:768
+msgid "Sync done: %1 (Calendar)"
+msgstr "Sinkroneladur echu : %1 (Deiziataer)"
+
+#: ../src/sync-daemon.cpp:619 ../src/sync-daemon.cpp:641
+#: ../src/sync-daemon.cpp:748 ../src/sync-daemon.cpp:767
+msgid "Synchronization"
+msgstr "Sinkroneladur"
+
+#: ../src/sync-account.cpp:785
+msgid "Unknown status"
+msgstr "Statud dianav"
+
+#: src/notify-message.cpp:83
+msgid "Yes"
+msgstr "Ya"
+
+#: ../src/sync-daemon.cpp:620
+msgid ""
+"Your access key is not valid anymore. Do you want to re-authenticate it?."
+msgstr ""
+
+#: authenticator/main.qml:160
+msgid ""
+"Your account failed to authenticate while syncing. Please click below to re-"
+"authenticate."
+msgstr ""
