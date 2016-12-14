@@ -1,0 +1,144 @@
+# Amharic translation for sync-monitor
+# Copyright (c) 2016 Rosetta Contributors and Canonical Ltd 2016
+# This file is distributed under the same license as the sync-monitor package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2016.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: sync-monitor\n"
+"Report-Msgid-Bugs-To: FULL NAME <EMAIL@ADDRESS>\n"
+"POT-Creation-Date: 2016-08-30 17:13-0300\n"
+"PO-Revision-Date: 2016-12-13 14:31+0000\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: Amharic <am@li.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"X-Launchpad-Export-Date: 2016-12-14 05:35+0000\n"
+"X-Generator: Launchpad (build 18293)\n"
+
+#: authenticator/main.qml:66 authenticator/main.qml:84
+msgid "Accounts"
+msgstr ""
+
+#: ../src/sync-account.cpp:752
+msgid "Command not allowed"
+msgstr "ይህ ትእዛዝ አይፈቀድም"
+
+#: ../src/sync-account.cpp:774
+msgid "Connection certificate has expired"
+msgstr ""
+
+#: ../src/sync-account.cpp:776
+msgid "Connection certificate is invalid"
+msgstr ""
+
+#: ../src/sync-account.cpp:772
+msgid "Connection timeout"
+msgstr ""
+
+#: ../src/sync-account.cpp:757
+msgid "Disk full"
+msgstr "ዲስኩ ሙሉ ነው"
+
+#: ../src/sync-account.cpp:739
+msgid "Fail to configure account"
+msgstr "መግለጫውን ማሰናዳት አልተቻለም"
+
+#: ../src/sync-account.cpp:780
+msgid "Fail to connect with the server"
+msgstr ""
+
+#: authenticator/main.qml:94
+msgid "Fail to load account information."
+msgstr ""
+
+#: ../src/sync-account.cpp:761
+msgid "Fail to run \"two-way\" sync"
+msgstr ""
+
+#: authenticator/main.qml:119
+msgid "Fail to sync"
+msgstr ""
+
+#: ../src/sync-daemon.cpp:749
+msgid ""
+"Fail to sync calendar %1 from account %2.\n"
+"%3"
+msgstr ""
+
+#: ../src/sync-account.cpp:759
+msgid "Fail to sync due some remote problem"
+msgstr ""
+
+#: ../src/sync-account.cpp:763
+msgid "Fail to sync some items"
+msgstr "አንዳንድ እቃዎችን ማስማማት አልተቻለም"
+
+#: ../src/sync-account.cpp:748
+msgid "Forbidden / access denied"
+msgstr "የ ተከለከለ / ፍቃግ ተከልክሏል"
+
+#: src/notify-message.cpp:88
+msgid "No"
+msgstr ""
+
+#: ../src/sync-account.cpp:750
+msgid "Object not found / unassigned field"
+msgstr "እቃው አልተገኘም / ያልተመደበ ሜዳ"
+
+#: ../src/sync-account.cpp:765
+msgid "Process unexpected die."
+msgstr ""
+
+#: ../src/sync-account.cpp:755
+msgid "Proxy authentication required"
+msgstr "የ ወኪል ማረጋገጫ ያስፈልጋል"
+
+#: authenticator/main.qml:88 authenticator/main.qml:123
+msgid "Quit"
+msgstr ""
+
+#: ../src/sync-account.cpp:783
+msgid "Server not found"
+msgstr "ሰርቨሩ አልተገኘም"
+
+#: ../src/sync-account.cpp:768
+msgid "Server sent bad content"
+msgstr ""
+
+#: ../src/sync-daemon.cpp:642
+msgid "Start sync: %1 (Calendar)"
+msgstr ""
+
+#: ../src/sync-account.cpp:770
+msgid "Sync canceled"
+msgstr "ማስማማቱ ተሰርዟል"
+
+#: ../src/sync-daemon.cpp:768
+msgid "Sync done: %1 (Calendar)"
+msgstr ""
+
+#: ../src/sync-daemon.cpp:619 ../src/sync-daemon.cpp:641
+#: ../src/sync-daemon.cpp:748 ../src/sync-daemon.cpp:767
+msgid "Synchronization"
+msgstr "ማስማሚያ"
+
+#: ../src/sync-account.cpp:785
+msgid "Unknown status"
+msgstr "ያልታወቀ ሁኔታ"
+
+#: src/notify-message.cpp:83
+msgid "Yes"
+msgstr ""
+
+#: ../src/sync-daemon.cpp:620
+msgid ""
+"Your access key is not valid anymore. Do you want to re-authenticate it?."
+msgstr ""
+
+#: authenticator/main.qml:160
+msgid ""
+"Your account failed to authenticate while syncing. Please click below to re-"
+"authenticate."
+msgstr ""
