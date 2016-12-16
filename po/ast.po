@@ -1,0 +1,148 @@
+# Asturian translation for sync-monitor
+# Copyright (c) 2016 Rosetta Contributors and Canonical Ltd 2016
+# This file is distributed under the same license as the sync-monitor package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2016.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: sync-monitor\n"
+"Report-Msgid-Bugs-To: FULL NAME <EMAIL@ADDRESS>\n"
+"POT-Creation-Date: 2016-08-30 17:13-0300\n"
+"PO-Revision-Date: 2016-12-16 02:07+0000\n"
+"Last-Translator: enolp <enolp@softastur.org>\n"
+"Language-Team: Asturian <ast@li.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"X-Launchpad-Export-Date: 2016-12-16 05:54+0000\n"
+"X-Generator: Launchpad (build 18293)\n"
+
+#: authenticator/main.qml:66 authenticator/main.qml:84
+msgid "Accounts"
+msgstr "Cuentes"
+
+#: ../src/sync-account.cpp:752
+msgid "Command not allowed"
+msgstr "Comandu non permitíu"
+
+#: ../src/sync-account.cpp:774
+msgid "Connection certificate has expired"
+msgstr "Caducó'l certificáu de la conexón"
+
+#: ../src/sync-account.cpp:776
+msgid "Connection certificate is invalid"
+msgstr "El certificáu de la conexón nun ye válidu"
+
+#: ../src/sync-account.cpp:772
+msgid "Connection timeout"
+msgstr "Escosóse'l tiempu de la conexón"
+
+#: ../src/sync-account.cpp:757
+msgid "Disk full"
+msgstr "Discu enllén"
+
+#: ../src/sync-account.cpp:739
+msgid "Fail to configure account"
+msgstr "Fallu al configurar la cuenta"
+
+#: ../src/sync-account.cpp:780
+msgid "Fail to connect with the server"
+msgstr "Fallu al coneutase col sirvidor"
+
+#: authenticator/main.qml:94
+msgid "Fail to load account information."
+msgstr "Fallu al cargar la información de la cuenta"
+
+#: ../src/sync-account.cpp:761
+msgid "Fail to run \"two-way\" sync"
+msgstr "Fallu al executar la sincronización «two-way»"
+
+#: authenticator/main.qml:119
+msgid "Fail to sync"
+msgstr "Fallu al sincronizar"
+
+#: ../src/sync-daemon.cpp:749
+msgid ""
+"Fail to sync calendar %1 from account %2.\n"
+"%3"
+msgstr ""
+"Fallu al sincronizar el calendariu %1 de la cuenta %2.\n"
+"%3"
+
+#: ../src/sync-account.cpp:759
+msgid "Fail to sync due some remote problem"
+msgstr "Fallu al sincronizar pola mor de problemes remotos"
+
+#: ../src/sync-account.cpp:763
+msgid "Fail to sync some items"
+msgstr "Fallu al sincronizar dellos elementos"
+
+#: ../src/sync-account.cpp:748
+msgid "Forbidden / access denied"
+msgstr "Accesu prohibíu/ñegáu"
+
+#: src/notify-message.cpp:88
+msgid "No"
+msgstr "Non"
+
+#: ../src/sync-account.cpp:750
+msgid "Object not found / unassigned field"
+msgstr "Nun s'alcontró l'oxetu/campu non asignáu"
+
+#: ../src/sync-account.cpp:765
+msgid "Process unexpected die."
+msgstr "El procesu morrió inesperadamente."
+
+#: ../src/sync-account.cpp:755
+msgid "Proxy authentication required"
+msgstr "Ríquese l'autenticación del proxy"
+
+#: authenticator/main.qml:88 authenticator/main.qml:123
+msgid "Quit"
+msgstr "Colar"
+
+#: ../src/sync-account.cpp:783
+msgid "Server not found"
+msgstr "Nun s'alcontró'l sirvidor"
+
+#: ../src/sync-account.cpp:768
+msgid "Server sent bad content"
+msgstr "El sirvidor unvió conteníu incorreutu"
+
+#: ../src/sync-daemon.cpp:642
+msgid "Start sync: %1 (Calendar)"
+msgstr "Aniciar sincronización: %1 (Calendariu)"
+
+#: ../src/sync-account.cpp:770
+msgid "Sync canceled"
+msgstr "Encaboxóse la sincronización"
+
+#: ../src/sync-daemon.cpp:768
+msgid "Sync done: %1 (Calendar)"
+msgstr "Sincronización fecha: %1 (Calendariu)"
+
+#: ../src/sync-daemon.cpp:619 ../src/sync-daemon.cpp:641
+#: ../src/sync-daemon.cpp:748 ../src/sync-daemon.cpp:767
+msgid "Synchronization"
+msgstr "Sincronización"
+
+#: ../src/sync-account.cpp:785
+msgid "Unknown status"
+msgstr "Estáu desconocíu"
+
+#: src/notify-message.cpp:83
+msgid "Yes"
+msgstr "Sí"
+
+#: ../src/sync-daemon.cpp:620
+msgid ""
+"Your access key is not valid anymore. Do you want to re-authenticate it?."
+msgstr "La to clave d'accesu yá nun ye válida. ¿Quies reautenticala?"
+
+#: authenticator/main.qml:160
+msgid ""
+"Your account failed to authenticate while syncing. Please click below to re-"
+"authenticate."
+msgstr ""
+"La to cuenta falló al autenticase entrín se sincronizaba. Primi embaxo pa "
+"reautenticar, por favor."
