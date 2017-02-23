@@ -1,0 +1,146 @@
+# Hebrew translation for sync-monitor
+# Copyright (c) 2017 Rosetta Contributors and Canonical Ltd 2017
+# This file is distributed under the same license as the sync-monitor package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2017.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: sync-monitor\n"
+"Report-Msgid-Bugs-To: FULL NAME <EMAIL@ADDRESS>\n"
+"POT-Creation-Date: 2016-08-30 17:13-0300\n"
+"PO-Revision-Date: 2017-02-22 09:13+0000\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: Hebrew <he@li.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"X-Launchpad-Export-Date: 2017-02-23 06:46+0000\n"
+"X-Generator: Launchpad (build 18326)\n"
+
+#: authenticator/main.qml:66 authenticator/main.qml:84
+msgid "Accounts"
+msgstr ""
+
+#: ../src/sync-account.cpp:752
+msgid "Command not allowed"
+msgstr "הפקודה אינה מורשית"
+
+#: ../src/sync-account.cpp:774
+msgid "Connection certificate has expired"
+msgstr "אישור החיבור פג"
+
+#: ../src/sync-account.cpp:776
+msgid "Connection certificate is invalid"
+msgstr "אישור החיבור שגוי"
+
+#: ../src/sync-account.cpp:772
+msgid "Connection timeout"
+msgstr "תם הזמן המוקצב לחיבור"
+
+#: ../src/sync-account.cpp:757
+msgid "Disk full"
+msgstr "הכונן מלא"
+
+#: ../src/sync-account.cpp:739
+msgid "Fail to configure account"
+msgstr "הגדרת החשבון נכשלה"
+
+#: ../src/sync-account.cpp:780
+msgid "Fail to connect with the server"
+msgstr "ההתחברות לשרת נכשלה"
+
+#: authenticator/main.qml:94
+msgid "Fail to load account information."
+msgstr ""
+
+#: ../src/sync-account.cpp:761
+msgid "Fail to run \"two-way\" sync"
+msgstr "הסנכרון הדו־כיווני נכשל."
+
+#: authenticator/main.qml:119
+msgid "Fail to sync"
+msgstr ""
+
+#: ../src/sync-daemon.cpp:749
+msgid ""
+"Fail to sync calendar %1 from account %2.\n"
+"%3"
+msgstr ""
+"סנכרון היומן %1 מהחשבון %2 נכשל.\n"
+"%3"
+
+#: ../src/sync-account.cpp:759
+msgid "Fail to sync due some remote problem"
+msgstr "הסנכרון נכשל עקב בעיה מרוחקת"
+
+#: ../src/sync-account.cpp:763
+msgid "Fail to sync some items"
+msgstr "סנכרון חלק מהפריטים נכשל"
+
+#: ../src/sync-account.cpp:748
+msgid "Forbidden / access denied"
+msgstr "הגישה נדחתה / נחסמה"
+
+#: src/notify-message.cpp:88
+msgid "No"
+msgstr ""
+
+#: ../src/sync-account.cpp:750
+msgid "Object not found / unassigned field"
+msgstr "הפריט לא נמצא / שדה לא מוקצה"
+
+#: ../src/sync-account.cpp:765
+msgid "Process unexpected die."
+msgstr "התהליך נהרג במפתיע."
+
+#: ../src/sync-account.cpp:755
+msgid "Proxy authentication required"
+msgstr "נדרשת הזדהות מול המחשב המתווך"
+
+#: authenticator/main.qml:88 authenticator/main.qml:123
+msgid "Quit"
+msgstr ""
+
+#: ../src/sync-account.cpp:783
+msgid "Server not found"
+msgstr "השרת לא נמצא"
+
+#: ../src/sync-account.cpp:768
+msgid "Server sent bad content"
+msgstr "השרת שלח תוכן פגום"
+
+#: ../src/sync-daemon.cpp:642
+msgid "Start sync: %1 (Calendar)"
+msgstr "התחלת הסנכרון: %1 (יומן)"
+
+#: ../src/sync-account.cpp:770
+msgid "Sync canceled"
+msgstr "הסנכרון בוטל"
+
+#: ../src/sync-daemon.cpp:768
+msgid "Sync done: %1 (Calendar)"
+msgstr "הסנכרון הושלם: %1 (יומן)"
+
+#: ../src/sync-daemon.cpp:619 ../src/sync-daemon.cpp:641
+#: ../src/sync-daemon.cpp:748 ../src/sync-daemon.cpp:767
+msgid "Synchronization"
+msgstr "סנכרון"
+
+#: ../src/sync-account.cpp:785
+msgid "Unknown status"
+msgstr "מצב בלתי ידוע"
+
+#: src/notify-message.cpp:83
+msgid "Yes"
+msgstr ""
+
+#: ../src/sync-daemon.cpp:620
+msgid ""
+"Your access key is not valid anymore. Do you want to re-authenticate it?."
+msgstr "מפתח הגישה שלך לא תקין עוד. לאמת אותו מחדש?"
+
+#: authenticator/main.qml:160
+msgid ""
+"Your account failed to authenticate while syncing. Please click below to re-"
+"authenticate."
+msgstr ""
