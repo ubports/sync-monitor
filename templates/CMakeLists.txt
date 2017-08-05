@@ -1,4 +1,5 @@
 set(TEMPLATE_FILES
+     generic-caldav.conf
      google.conf
      yahoo.conf
      owncloud.conf 

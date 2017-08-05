@@ -1,9 +1,11 @@
 set(SERVICE_FILES
+    generic-caldav.service
     google-caldav.service
     owncloud-caldav.service 
 )
 
 set(SERVICE_OUTPUT_FILES
+     ${CMAKE_CURRENT_BINARY_DIR}/generic-caldav.service
      ${CMAKE_CURRENT_BINARY_DIR}/google-caldav.service
      ${CMAKE_CURRENT_BINARY_DIR}/owncloud-caldav.service
 )
