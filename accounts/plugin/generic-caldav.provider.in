@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<provider id="generic-caldav">
+  <name>Generic CalDAV</name>
+  <icon>online-accounts-caldav</icon>
+  <translations>sync-monitor</translations>
+
+  <template>
+    <group name="auth">
+      <setting name="method">password</setting>
+      <setting name="mechanism">password</setting>
+    </group>
+  </template>
+</provider>
