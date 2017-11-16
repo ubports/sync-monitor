@@ -2,7 +2,8 @@ set(TEMPLATE_FILES
      generic-caldav.conf
      google.conf
      yahoo.conf
-     owncloud.conf 
+     owncloud.conf
+     nextcloud.conf
 )
 
 install(FILES ${TEMPLATE_FILES}

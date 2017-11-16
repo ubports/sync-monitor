@@ -3,5 +3,6 @@ usr/share/accounts/qml-plugins/generic-caldav/
 usr/share/accounts/services/generic-caldav.service
 usr/share/accounts/services/google-caldav.service
 usr/share/accounts/services/owncloud-caldav.service
+usr/share/accounts/services/nextcloud-caldav.service
 usr/share/applications/sync-monitor-calendar.desktop
 usr/share/icons/suru/apps/128/online-accounts-caldav.png
