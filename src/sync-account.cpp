@@ -905,7 +905,8 @@ void SyncAccount::fetchRemoteCalendarsFromCommand(const QString &username, const
     QString syncUrl(host());
 
     // Use well-known url that will re-direct to the correct path
-    if (providerName().toLower() == "owncloud") {
+    if (providerName().toLower() == "owncloud" ||
+        providerName().toLower() == "nextcloud") {
         syncUrl += QStringLiteral("/remote.php/caldav");
     }
 
