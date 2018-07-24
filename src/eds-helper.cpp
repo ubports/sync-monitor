@@ -70,7 +70,7 @@ QString EdsHelper::createSource(const QString &sourceName,
     collection.setExtendedMetaData(COLLECTION_SYNC_READONLY_METADATA, !writable);
 
     if (!m_organizerEngine->saveCollection(&collection)) {
-        qWarning() << "Fail to create collection" << sourceName;
+        qWarning() << "Fail to create collection" << sourceName << m_organizerEngine->error();
         return QString();
     } else {
         return collection.id().toString();

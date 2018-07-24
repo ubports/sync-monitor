@@ -1,3 +1,9 @@
+sync-monitor (0.3+ubports1) xenial; urgency=medium
+
+  * No change rebuild
+
+ -- Alberto Mardegan <mardy@users.sourceforge.net>  Tue, 24 Jul 2018 10:46:38 +0300
+
 sync-monitor (0.3+ubports) vivid; urgency=medium
 
   * Imported to UBports
