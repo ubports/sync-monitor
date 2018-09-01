@@ -70,7 +70,7 @@ QString EdsHelper::createSource(const QString &sourceName,
     collection.setExtendedMetaData(COLLECTION_SYNC_READONLY_METADATA, !writable);
 
     if (!m_organizerEngine->saveCollection(&collection)) {
-        qWarning() << "Fail to create collection" << sourceName;
+        qWarning() << "Fail to create collection" << sourceName << m_organizerEngine->error();
         return QString();
     } else {
         return collection.id().toString();
@@ -167,15 +167,12 @@ void EdsHelper::setEnabled(bool enabled)
 {
     if (enabled) {
         if (m_organizerEngine) {
-            connect(m_organizerEngine,
-                    SIGNAL(itemsAdded(QList<QOrganizerItemId>)),
-                    SLOT(calendarChanged(QList<QOrganizerItemId>)), Qt::QueuedConnection);
-            connect(m_organizerEngine,
-                    SIGNAL(itemsRemoved(QList<QOrganizerItemId>)),
-                    SLOT(calendarChanged(QList<QOrganizerItemId>)), Qt::QueuedConnection);
-            connect(m_organizerEngine,
-                    SIGNAL(itemsChanged(QList<QOrganizerItemId>)),
-                    SLOT(calendarChanged(QList<QOrganizerItemId>)), Qt::QueuedConnection);
+            connect(m_organizerEngine, &QOrganizerManager::itemsAdded,
+                    this, &EdsHelper::calendarChanged, Qt::QueuedConnection);
+            connect(m_organizerEngine, &QOrganizerManager::itemsRemoved,
+                    this, &EdsHelper::calendarChanged, Qt::QueuedConnection);
+            connect(m_organizerEngine, &QOrganizerManager::itemsChanged,
+                    this, &EdsHelper::calendarChanged, Qt::QueuedConnection);
         }
     } else {
         if (m_organizerEngine) {

@@ -14,7 +14,7 @@ Build-Depends: cmake,
                qt5-default,
                qtbase5-dev,
                qtdeclarative5-dev,
-               qtpim5-dev,
+               qtpim5-dev (>= 5.0~git20171109~0bd985b),
 Standards-Version: 3.9.5
 Homepage: https://launchpad.net/sync-monitor
 # if you don't have have commit access to this branch but would like to upload
