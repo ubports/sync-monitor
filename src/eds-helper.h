@@ -63,6 +63,9 @@ public:
     EdsSource sourceByRemoteId(const QString &remoteId, uint account);
     EdsSource sourceById(const QString &id);
 
+    QString sourceFromCollectionId(const QOrganizerCollectionId &collectionId) const;
+    QOrganizerCollectionId sourceToCollectionId(const QString &sourceId) const;
+
     void freezeNotify();
     void unfreezeNotify();
     void flush();

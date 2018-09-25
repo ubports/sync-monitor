@@ -73,7 +73,7 @@ QString EdsHelper::createSource(const QString &sourceName,
         qWarning() << "Fail to create collection" << sourceName << m_organizerEngine->error();
         return QString();
     } else {
-        return collection.id().toString();
+        return sourceFromCollectionId(collection.id());
     }
 }
 
@@ -85,7 +85,7 @@ void EdsHelper::removeSource(const QString &sourceId)
         return;
     }
 
-    QOrganizerCollectionId id = QOrganizerCollectionId::fromString(sourceId);
+    QOrganizerCollectionId id(sourceToCollectionId(sourceId));
 
     if (!m_organizerEngine->removeCollection(id)) {
         qWarning() << "Fail to remove source" << id;
@@ -102,7 +102,7 @@ QString EdsHelper::sourceIdByName(const QString &sourceName, uint account)
     Q_FOREACH(const QOrganizerCollection &c, m_organizerEngine->collections()) {
         if ((c.extendedMetaData(COLLECTION_ACCOUNT_ID_METADATA) == account) &&
             (c.metaData(QOrganizerCollection::KeyName).toString() == sourceName)) {
-            return c.id().toString();
+            return sourceFromCollectionId(c.id());
         }
     }
     return QString();
@@ -114,7 +114,7 @@ EdsSource EdsHelper::sourceByRemoteId(const QString &remoteId, uint account)
         if ((c.extendedMetaData(COLLECTION_ACCOUNT_ID_METADATA) == account) &&
             (c.extendedMetaData(COLLECTION_REMOTE_ID_METADATA).toString() == remoteId)) {
             EdsSource s;
-            s.id = c.id().toString();
+            s.id = sourceFromCollectionId(c.id());
             s.name = c.metaData(QOrganizerCollection::KeyName).toString();
             s.account = account;
             s.remoteId = remoteId;
@@ -129,7 +129,7 @@ EdsSource EdsHelper::sourceById(const QString &id)
     Q_FOREACH(const QOrganizerCollection &c, m_organizerEngine->collections()) {
         if (c.id().toString() == id) {
             EdsSource s;
-            s.id = c.id().toString();
+            s.id = sourceFromCollectionId(c.id());
             s.name = c.metaData(QOrganizerCollection::KeyName).toString();
             s.account = c.extendedMetaData(COLLECTION_ACCOUNT_ID_METADATA).toUInt();
             s.remoteId = c.extendedMetaData(COLLECTION_REMOTE_ID_METADATA).toString();
@@ -137,6 +137,18 @@ EdsSource EdsHelper::sourceById(const QString &id)
         }
     }
     return EdsSource();
+}
+
+QString
+EdsHelper::sourceFromCollectionId(const QOrganizerCollectionId &collectionId) const
+{
+    return QString::fromUtf8(collectionId.localId());
+}
+
+QOrganizerCollectionId
+EdsHelper::sourceToCollectionId(const QString &sourceId) const
+{
+    return QOrganizerCollectionId(m_organizerEngine->managerUri(), sourceId.toUtf8());
 }
 
 void EdsHelper::freezeNotify()
@@ -192,7 +204,7 @@ QMap<int, QStringList> EdsHelper::sources()
             accountId = -1;
         }
         QStringList sources  = result.value(accountId);
-        sources << collection.id().toString();
+        sources << sourceFromCollectionId(collection.id());
         result.insert(accountId, sources);
     }
 
@@ -201,7 +213,7 @@ QMap<int, QStringList> EdsHelper::sources()
 
 QString EdsHelper::getCollectionIdFromItemId(const QOrganizerItemId &itemId) const
 {
-    return itemId.toString().split("/").first();
+    return QString::fromUtf8(itemId.localId().split('/').first());
 }
 
 void EdsHelper::calendarChanged(const QList<QOrganizerItemId> &itemIds)
