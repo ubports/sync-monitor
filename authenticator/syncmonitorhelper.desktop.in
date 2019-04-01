@@ -6,5 +6,6 @@ Terminal=false
 Type=Application
 Version=1.0
 Icon=account
+NoDisplay=true
 X-Ubuntu-Single-Instance=true
 X-Ubuntu-Splash-Show-Header=false
