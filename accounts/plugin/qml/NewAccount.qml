@@ -1,4 +1,4 @@
-import QtQuick 2.0
+import QtQuick 2.4
 import Ubuntu.Components 1.3
 import Ubuntu.OnlineAccounts 0.1
 
@@ -87,7 +87,6 @@ Item {
             Button {
                 id: btnCancel
                 text: i18n.dtr("sync-monitor", "Cancel")
-                height: parent.height
                 width: (parent.width / 2) - 0.5 * parent.spacing
                 onClicked: finished()
             }
@@ -95,7 +94,6 @@ Item {
                 id: btnContinue
                 text: i18n.dtr("sync-monitor", "Continue")
                 color: UbuntuColors.green
-                height: parent.height
                 width: (parent.width / 2) - 0.5 * parent.spacing
                 onClicked: login()
                 enabled: !__busy
