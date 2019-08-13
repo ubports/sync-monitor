@@ -1,3 +1,9 @@
+sync-monitor (0.4~0ubports2) xenial; urgency=medium
+
+  * Change to using full AppID like the click hooks
+
+ -- Dalton Durst <dalton@ubports.com>  Tue, 13 Aug 2019 14:25:14 -0500
+
 sync-monitor (0.4~0ubports1) xenial; urgency=medium
 
   * Version bump
