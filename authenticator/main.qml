@@ -17,7 +17,7 @@ MainView {
         id: accountModel
 
         serviceId: ONLINE_ACCOUNT.serviceName
-        applicationId: "com.ubuntu.calendar"
+        applicationId: "com.ubuntu.calendar_calendar"
         onReadyChanged:  {
             console.debug("Model is Ready:" + ready)
             console.debug("Model count:" + count)
