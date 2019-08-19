@@ -128,7 +128,7 @@ EdsSource EdsHelper::sourceByRemoteId(const QString &remoteId, uint account)
 EdsSource EdsHelper::sourceById(const QString &id)
 {
     Q_FOREACH(const QOrganizerCollection &c, m_organizerEngine->collections()) {
-        if (c.id().toString() == id) {
+        if (c.id().localId() == id) {
             EdsSource s;
             s.id = sourceFromCollectionId(c.id());
             s.name = c.metaData(QOrganizerCollection::KeyName).toString();
