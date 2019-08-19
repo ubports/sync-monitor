@@ -29,6 +29,7 @@ EdsHelper::EdsHelper(QObject *parent, const QString &organizerManager)
       m_freezed(false)
 {
     qRegisterMetaType<QList<QOrganizerItemId> >("QList<QOrganizerItemId>");
+    qRegisterMetaType<QList<QOrganizerItemDetail::DetailType>>("QList<QOrganizerItemDetail::DetailType>");
 
     if (!organizerManager.isEmpty()) {
         m_organizerEngine = new QOrganizerManager(organizerManager, QMap<QString, QString>());
