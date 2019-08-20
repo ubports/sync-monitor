@@ -15,7 +15,7 @@ add_executable(${SYNC_MONITOR_HELPER_BIN}
     ${SYNC_MONITOR_HELPER_RC}
 )
 
-qt5_use_modules(${SYNC_MONITOR_HELPER_BIN} Core Gui Quick)
+qt5_use_modules(${SYNC_MONITOR_HELPER_BIN} Core DBus Gui Quick)
 
 set(SYNC_MONITOR_HELPER_QMLS
     main.qml

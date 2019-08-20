@@ -8,6 +8,7 @@ MainView {
     id: root
 
     property bool accountFound: false
+    property bool wasAuthenticated: false
 
     width: units.gu(40)
     height: units.gu(71)
@@ -118,6 +119,7 @@ MainView {
                 } else {
                     accountPage.loginInProcess = false
                     console.debug("Authentication sucess.")
+                    root.wasAuthenticated = true
                     Qt.quit()
                 }
             }
