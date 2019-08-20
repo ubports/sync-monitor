@@ -18,9 +18,13 @@
 
 #include <QUrlQuery>
 #include <QGuiApplication>
+#include <QQuickItem>
 #include <QQuickView>
 #include <QQmlEngine>
 #include <QQmlContext>
+#include <QDBusConnection>
+#include <QDBusMessage>
+#include <QDBusPendingCall>
 #include <QDebug>
 
 QVariantMap parseAccountArg(QStringList args)
@@ -84,6 +88,18 @@ int main(int argc, char **argv)
     qDebug() << accountInfo;
     view->show();
     app->exec();
+
+    if (view->rootObject()->property("wasAuthenticated").toBool()) {
+        qDebug() << "Was authenticated, sending signal";
+        QDBusConnection connection = QDBusConnection::sessionBus();
+        QDBusMessage msg =
+            QDBusMessage::createMethodCall("com.canonical.SyncMonitor",
+                                           "/com/canonical/SyncMonitor",
+                                           "com.canonical.SyncMonitor",
+                                           "syncAll");
+        connection.asyncCall(msg);
+    }
+
     delete view;
     delete app;
     return 0;
