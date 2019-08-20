@@ -49,6 +49,7 @@ SyncDaemon::SyncDaemon()
       m_eds(0),
       m_dbusAddaptor(0),
       m_syncing(false),
+      m_wentOffline(false),
       m_aboutToQuit(false),
       m_firstClient(true)
 {
@@ -181,6 +182,8 @@ void SyncDaemon::onClientAttached()
 
 void SyncDaemon::onOnlineStatusChanged(SyncNetwork::NetworkState state)
 {
+    m_wentOffline = state == SyncNetwork::NetworkOffline;
+
     Q_EMIT isOnlineChanged(state != SyncNetwork::NetworkOffline);
     if (state == SyncNetwork::NetworkOnline) {
         qDebug() << "Device is online sync pending changes" << m_offlineQueue->count();
@@ -325,6 +328,7 @@ void SyncDaemon::syncFinishedImpl()
 
     m_timeout->stop();
     m_currentJob.clear();
+    m_wentOffline = false;
     m_syncing = false;
     Q_EMIT done();
 }
@@ -664,9 +668,9 @@ void SyncDaemon::onAccountSyncError(const QString &serviceName, const QString &e
     qWarning() << "Account sync error" << acc->displayName() << serviceName << error;
 
     // If auth error (403) we ask the user to re-authenticate
-    // Only ask for re-authentication if the error happened twice
+    // Only ask for re-authentication if the network was stable
     // (avoid problems with disconnection during the authentication)
-    if ((acc->lastError() == 403) && (error == "403")) {
+    if (!m_wentOffline && error == "403") {
         authenticateAccount(acc, serviceName);
     } else {
         Q_EMIT syncError(acc, serviceName, error);
@@ -714,7 +718,6 @@ void SyncDaemon::onAccountSyncFinished(const QString &serviceName,
         // "error code from SyncEvolution access denied (remote, status 403): could not obtain OAuth2 token:
         // this can happen if the network goes off during the sync, or syc started before the network stabilished
         whiteListStatus << QStringLiteral("10403");
-        whiteListStatus << QStringLiteral("403");
 
         // error code from SyncEvolution fatal error (local, status 10500): no sources active, check configuration"
         // this is a bug on SyncEvolution sometimes it fail to read the correct address book
@@ -732,7 +735,10 @@ void SyncDaemon::onAccountSyncFinished(const QString &serviceName,
         errorCode = status.toUInt();
         bool saveLog = accountEnabled;
 
-        if ((acc->lastError() == 0) && !errorMessage.isEmpty() && whiteListStatus.contains(status)) {
+        /* If the network status changed during the sync operation, we always
+         * retry it instead of reporting errors to the user. */
+        if (m_wentOffline ||
+            (acc->lastError() == 0 && !errorMessage.isEmpty() && whiteListStatus.contains(status))) {
             fail = true;
             saveLog = false;
             // white list error retry the sync
