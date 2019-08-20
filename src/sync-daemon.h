@@ -105,6 +105,7 @@ private:
     SyncNetwork *m_networkStatus;
     PowerdProxy *m_powerd;
     bool m_syncing;
+    bool m_wentOffline;
     bool m_aboutToQuit;
     QElapsedTimer m_syncElapsedTime;
     bool m_firstClient;
