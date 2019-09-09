@@ -244,6 +244,10 @@ void SyncDaemon::cancel(quint32 accountId, const QStringList &sourceNames)
     }
 }
 
+void SyncDaemon::syncAllNowAndOnMobile() {
+    syncAll(true, true);
+}
+
 void SyncDaemon::continueSync()
 {
     SyncJob newJob = m_syncQueue->popNext();

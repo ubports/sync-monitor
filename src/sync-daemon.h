@@ -69,6 +69,8 @@ public Q_SLOTS:
     void syncAll(bool runNow, bool syncOnMobile);
     void syncAccount(quint32 accountId, const QStringList &calendars, bool runNow = true, bool syncOnMobile = false);
     void cancel(uint accountId = 0, const QStringList &sources = QStringList());
+    // Used for the --sync option
+    void syncAllNowAndOnMobile();
 
 private Q_SLOTS:
     void continueSync();
