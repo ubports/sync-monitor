@@ -59,8 +59,10 @@ int main(int argc, char** argv)
     daemon->run();
 
     if ((argc == 2) && (strcmp(argv[1], "--sync") == 0)) {
-        qDebug() << "Start manual sync";
-        QTimer::singleShot(1000, daemon, SLOT(syncAll()));
+        // We need to wait a little bit so we realize that we're connected to
+        // the internet
+        qDebug() << "Starting manual sync in 10 seconds.";
+        QTimer::singleShot(10000, daemon, SLOT(syncAllNowAndOnMobile()));
     }
     return app.exec();
 }
