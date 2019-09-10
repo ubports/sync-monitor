@@ -4,7 +4,8 @@ Priority: optional
 Maintainer: Ubuntu Developers <ubuntu-devel-discuss@lists.ubuntu.com>
 Build-Depends: cmake,
                debhelper (>= 9),
-               dh-translations,
+# :all is a workaround for dh-translations not having Multi-Arch set in xenial
+               dh-translations:all,
                google-mock,
                libaccounts-qt5-dev,
                libnotify-dev,
