@@ -625,7 +625,7 @@ void SyncDaemon::authenticateAccount(const SyncAccount *account, const QString &
     notify->setProperty("SERVICE", QVariant::fromValue<QString>(serviceName));
     connect(notify, SIGNAL(questionAccepted()), SLOT(runAuthentication()));
     notify->askYesOrNo(_("Synchronization"),
-                       QString(_("Your access key is not valid anymore. Do you want to re-authenticate it?.")),
+                       QString(_("An account failed to sync. Would you like to sign in again?")),
                        account->iconName(serviceName));
 
 }
@@ -647,7 +647,8 @@ void SyncDaemon::onAccountSyncStart()
     if (isFirstSync(acc->id()) && (acc->lastError() == 0)) {
         NotifyMessage *notify = new NotifyMessage(true, this);
         notify->show(_("Synchronization"),
-                     QString(_("Start sync: %1 (Calendar)")).arg(acc->displayName()),
+                     //TRANSLATORS: %1 is an account username, such as an email address
+                     QString(_("Syncing %1 (Calendar)")).arg(acc->displayName()),
                      acc->iconName(CALENDAR_SERVICE_TYPE));
     }
 }
@@ -659,7 +660,7 @@ void SyncDaemon::onAccountSourceSyncStarted(const QString &serviceName,
 {
     SyncAccount *acc = qobject_cast<SyncAccount*>(QObject::sender());
     m_syncElapsedTime.restart();
-    qDebug() << QString("[%3] Start sync: %1 (%2)")
+    qDebug() << QString("[%3] Syncing %1 (%2)")
                 .arg(acc->displayName())
                 .arg(serviceName + "/" + sourceName)
                 .arg(QDateTime::currentDateTime().toString(Qt::SystemLocaleShortDate));
@@ -775,7 +776,8 @@ void SyncDaemon::onAccountSyncFinished(const QString &serviceName,
         if (accountEnabled && firstSync) {
             NotifyMessage *notify = new NotifyMessage(true, this);
             notify->show(_("Synchronization"),
-                         QString(_("Sync done: %1 (Calendar)")).arg(acc->displayName()),
+                         //TRANSLATORS: %1 is an account username, such as an email address
+                         QString(_("Finished syncing %1 (Calendar)")).arg(acc->displayName()),
                          acc->iconName(CALENDAR_SERVICE_TYPE));
         }
     }
