@@ -87,7 +87,7 @@ MainView {
 
             Label {
                 anchors.centerIn: parent
-                text: i18n.tr("Fail to load account information.")
+                text: i18n.tr("Failed to load account information.")
             }
         }
     }
@@ -118,14 +118,14 @@ MainView {
 
                 } else {
                     accountPage.loginInProcess = false
-                    console.debug("Authentication sucess.")
                     root.wasAuthenticated = true
+                    console.debug("Authentication successful.")
                     Qt.quit()
                 }
             }
 
 
-            title: accountPage.loginInProcess ? i18n.tr("Wait..") : i18n.tr("Fail to sync")
+            title: accountPage.loginInProcess ? i18n.tr("Logging in...") : i18n.tr("Sign in to sync")
 
             head.backAction: Action {
                 iconName: "back"
@@ -152,7 +152,7 @@ MainView {
                         right: parent.right
                     }
 
-                    text: i18n.tr("Your account failed to authenticate while syncing. Please click below to re-authenticate.")
+                    text: i18n.tr("Account sign-in failed. Please select your account to sign back in.")
                     wrapMode: Text.WordWrap
                     horizontalAlignment: Text.AlignHCenter
                     fontSize: "large"
@@ -184,7 +184,7 @@ MainView {
                 if (account) {
                     account.onAuthenticationReply.connect(accountAuthenticationReply)
                 } else {
-                    console.warn("No accoun sett")
+                    console.warn("No account set")
                 }
             }
         }

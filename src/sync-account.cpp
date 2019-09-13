@@ -289,16 +289,16 @@ QString SyncAccount::syncMode(const QString &sourceName,
     case 420:
         // "Disk full";
     case 506:
-        // "Fail to sync due some remote problem";
+        // "Failed to sync due to a remote problem";
     case 514:
         // "Remote problem, not way to recovery";
     case 20023:
         // "Unknown status"
         return "refresh-from-remote";
     case 22001:
-        // "Fail to sync some items";
+        // "Failed to sync some items";
     case 22002:
-        // "Last process unexpected die.";
+        // "Process died unexpectedly";
     case 20006:
     case 20007:
         // "Server sent bad content";
@@ -313,12 +313,12 @@ QString SyncAccount::syncMode(const QString &sourceName,
     case 20026:
     case 20027:
     case 20028:
-        // "Fail to connect with the server";
+        // "Failed to connect to the server";
     case 20046:
     case 20047:
         // "Server not found";
     case 22000:
-        // "Fail to run \"two-way\" sync";
+        // "Failed to run \"two-way\" sync";
     default:
         return "slow";
     }
@@ -396,7 +396,7 @@ void SyncAccount::removeOldConfig() const
         if (configDir.removeRecursively()) {
             qDebug() << "\tConfig dir removed" << configPath;
         } else {
-            qWarning() << "\tFail to remove config dir" << configPath;
+            qWarning() << "\tFailed to remove config dir" << configPath;
         }
     } else {
         qDebug() << "\tOld config dir not found" << configDir.absolutePath();
@@ -685,7 +685,7 @@ void SyncAccount::onAccountConfigureError(int error)
     m_config->deleteLater();
     m_config = 0;
 
-    qWarning() << "Fail to configure account" << m_account->displayName() << error;
+    qWarning() << "Failed to configure account" << m_account->displayName() << error;
     setState(SyncAccount::Idle);
     Q_EMIT syncError(calendarServiceName(), QString::number(error));
 
@@ -736,7 +736,7 @@ QString SyncAccount::statusDescription(const QString &status)
     switch(status.toInt())
     {
     case -1:
-        return _("Fail to configure account");
+        return _("Failed to configure account");
     case 0:
     case 200:
     case 204:
@@ -756,13 +756,13 @@ QString SyncAccount::statusDescription(const QString &status)
     case 420:
         return _("Disk full");
     case 506:
-        return _("Fail to sync due some remote problem");
+        return _("Failed to sync due to a remote problem");
     case 22000:
-        return _("Fail to run \"two-way\" sync");
+        return _("Failed to run \"two-way\" sync");
     case 22001:
-        return _("Fail to sync some items");
+        return _("Failed to sync some items");
     case 22002:
-        return _("Process unexpected die.");
+        return _("Process died unexpectedly");
     case 20006:
     case 20007:
         return _("Server sent bad content");
@@ -777,10 +777,10 @@ QString SyncAccount::statusDescription(const QString &status)
     case 20026:
     case 20027:
     case 20028:
-        return _("Fail to connect with the server");
+        return _("Failed to connect to the server");
     case 20046:
     case 20047:
-        return _( "Server not found");
+        return _("Server not found");
     default:
         return _("Unknown status");
     }
