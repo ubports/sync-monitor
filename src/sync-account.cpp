@@ -66,6 +66,7 @@ void SyncAccount::setupServices()
         const ServiceList enabledServices = m_account->enabledServices();
         Q_FOREACH(Service service, m_account->services()) {
             if (supportedSevices.contains(service.serviceType())) {
+                m_syncServiceName = service.name();
                 const bool enabled = m_account->enabled() && enabledServices.contains(service);
                 m_availabeServices.insert(service.serviceType(), enabled);
             }
@@ -508,12 +509,7 @@ QString SyncAccount::providerName() const
 
 QString SyncAccount::calendarServiceName() const
 {
-    Q_FOREACH(Service service, m_account->services()) {
-        if (service.serviceType() == CALENDAR_SERVICE_TYPE) {
-            return service.name();
-        }
-    }
-    return QString();
+    return m_syncServiceName;
 }
 
 void SyncAccount::onAccountEnabledChanged(const QString &serviceName, bool enabled)
