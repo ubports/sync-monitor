@@ -128,6 +128,10 @@ private Q_SLOTS:
     void onAuthFailed();
     void onReplyFinished(QNetworkReply *reply);
 
+protected:
+    void fail(const QString &errorMessage);
+    void setFinished();
+
 private:
     Accounts::Account *m_account;
     QDateTime m_startSyncTime;
