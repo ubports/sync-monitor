@@ -219,9 +219,7 @@ void SyncAccount::continueSync()
         m_currentSession->sync("none", syncFlags);
     } else {
         qDebug() << "Nothing to sync!";
-        releaseSession();
-        setState(SyncAccount::Idle);
-        Q_EMIT syncFinished(m_syncServiceName, QMap<QString, QString>());
+        setFinished();
     }
 }
 
@@ -609,15 +607,33 @@ void SyncAccount::onSessionStatusChanged(const QString &status, quint32 error, c
         }
 
         if (done) {
-            m_sourcesOnSync.clear();
-            m_sourcesToSync.clear();
-            setState(SyncAccount::Idle);
-            releaseSession();
-
-            Q_EMIT syncFinished(m_syncServiceName, m_currentSyncResults);
-            m_currentSyncResults.clear();
-            qDebug() << "---------------------------------------------------------Sync finished:" << m_syncTime.elapsed() / 1000 << "secs";
+            setFinished();
         }
+    }
+}
+
+void SyncAccount::fail(const QString &errorMessage)
+{
+    if (m_state == SyncAccount::Idle) {
+        qWarning() << "Failure reported when idle:" << errorMessage;
+        return;
+    }
+    Q_EMIT syncError(calendarServiceName(), errorMessage);
+    setFinished();
+}
+
+void SyncAccount::setFinished()
+{
+    m_sourcesOnSync.clear();
+    m_sourcesToSync.clear();
+    setState(SyncAccount::Idle);
+    releaseSession();
+
+    Q_EMIT syncFinished(m_syncServiceName, m_currentSyncResults);
+    m_currentSyncResults.clear();
+    if (m_syncTime.isValid()) {
+        qDebug() << "---------------------------------------------------------Sync finished:"
+            << m_syncTime.elapsed() / 1000 << "secs";
     }
 }
 
@@ -667,13 +683,12 @@ void SyncAccount::onAccountConfigureError(int error)
     m_config = 0;
 
     qWarning() << "Failed to configure account" << m_account->displayName() << error;
-    setState(SyncAccount::Idle);
     Q_EMIT syncError(calendarServiceName(), QString::number(error));
 
     // Send sync finish due the config error there is nothing to do
-    QMap<QString, QString> errorMap;
-    errorMap.insert("", QString::number(error));
-    Q_EMIT syncFinished(m_syncServiceName, errorMap);
+    m_currentSyncResults.clear();
+    m_currentSyncResults.insert("", QString::number(error));
+    setFinished();
 }
 
 void SyncAccount::setState(SyncAccount::AccountState state)
