@@ -29,8 +29,8 @@ NotifyMessage::NotifyMessage(bool singleMessage, QObject *parent)
       m_notification(0),
       m_singleMessage(singleMessage)
 {
-    if (m_instanceCount == 0) {
-        m_instanceCount++;
+    m_instanceCount++;
+    if (m_instanceCount == 1) {
         notify_init(QCoreApplication::instance()->applicationName().toUtf8());
     }
 }
