@@ -1,4 +1,4 @@
-import QtQuick 2.0
+import QtQuick 2.9
 import Ubuntu.OnlineAccounts.Plugin 1.0
 
 Flickable {
