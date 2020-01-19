@@ -1,7 +1,7 @@
-import QtQuick 2.2
+import QtQuick 2.9
 
-import Ubuntu.Components 1.1
-import Ubuntu.Components.ListItems 1.0 as ListItem
+import Ubuntu.Components 1.3
+import Ubuntu.Components.ListItems 1.3 as ListItem
 import Ubuntu.OnlineAccounts 2.0
 
 MainView {
@@ -12,7 +12,6 @@ MainView {
 
     width: units.gu(40)
     height: units.gu(71)
-    useDeprecatedToolbar: false
 
     AccountModel {
         id: accountModel
@@ -28,7 +27,6 @@ MainView {
             }
         }
     }
-
 
     PageStack {
         id: pageStack

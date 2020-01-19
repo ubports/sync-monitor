@@ -28,7 +28,7 @@ Item {
             id: errorLabel
             anchors { left: parent.left; right: parent.right }
             font.bold: true
-            color: UbuntuColors.red
+            color: theme.palette.normal.negative
             wrapMode: Text.Wrap
             visible: !__busy && text != ""
         }
@@ -93,7 +93,7 @@ Item {
             Button {
                 id: btnContinue
                 text: i18n.dtr("sync-monitor", "Continue")
-                color: UbuntuColors.green
+                color: theme.palette.normal.positive
                 width: (parent.width / 2) - 0.5 * parent.spacing
                 onClicked: login()
                 enabled: !__busy
