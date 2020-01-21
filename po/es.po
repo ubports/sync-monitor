@@ -8,18 +8,21 @@ msgstr ""
 "Project-Id-Version: sync-monitor\n"
 "Report-Msgid-Bugs-To: FULL NAME <EMAIL@ADDRESS>\n"
 "POT-Creation-Date: 2016-08-30 17:13-0300\n"
-"PO-Revision-Date: 2016-12-08 11:45+0000\n"
-"Last-Translator: Adolfo Jayme <fitoschido@gmail.com>\n"
-"Language-Team: Spanish <es@li.org>\n"
+"PO-Revision-Date: 2020-01-22 13:20+0000\n"
+"Last-Translator: RedXXIII <redxxiii@zaclys.net>\n"
+"Language-Team: Spanish <https://translate.ubports.com/projects/ubports/"
+"sync-monitor/es/>\n"
+"Language: es\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=n != 1;\n"
+"X-Generator: Weblate 3.8\n"
 "X-Launchpad-Export-Date: 2016-12-09 05:39+0000\n"
-"X-Generator: Launchpad (build 18292)\n"
 
 #: authenticator/main.qml:66 authenticator/main.qml:84
 msgid "Accounts"
-msgstr ""
+msgstr "Cuentas"
 
 #: ../src/sync-account.cpp:752
 msgid "Command not allowed"
@@ -81,7 +84,7 @@ msgstr "Prohibido/acceso denegado"
 
 #: src/notify-message.cpp:88
 msgid "No"
-msgstr ""
+msgstr "No"
 
 #: ../src/sync-account.cpp:750
 msgid "Object not found / unassigned field"
@@ -97,7 +100,7 @@ msgstr ""
 
 #: authenticator/main.qml:88 authenticator/main.qml:123
 msgid "Quit"
-msgstr ""
+msgstr "Salir"
 
 #: ../src/sync-account.cpp:783
 msgid "Server not found"
@@ -130,7 +133,7 @@ msgstr "Estado desconocido"
 
 #: src/notify-message.cpp:83
 msgid "Yes"
-msgstr ""
+msgstr "Sí"
 
 #: ../src/sync-daemon.cpp:620
 msgid ""
