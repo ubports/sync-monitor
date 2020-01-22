@@ -8,58 +8,61 @@ msgstr ""
 "Project-Id-Version: sync-monitor\n"
 "Report-Msgid-Bugs-To: FULL NAME <EMAIL@ADDRESS>\n"
 "POT-Creation-Date: 2016-08-30 17:13-0300\n"
-"PO-Revision-Date: 2016-08-30 19:20+0000\n"
-"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
-"Language-Team: Chinese (Traditional) <zh_TW@li.org>\n"
+"PO-Revision-Date: 2020-01-24 02:21+0000\n"
+"Last-Translator: louies0623 <louies0623@gmail.com>\n"
+"Language-Team: Chinese (Traditional) <https://translate.ubports.com/projects/"
+"ubports/sync-monitor/zh_Hant/>\n"
+"Language: zh_TW\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=1; plural=0;\n"
+"X-Generator: Weblate 3.8\n"
 "X-Launchpad-Export-Date: 2016-08-31 06:38+0000\n"
-"X-Generator: Launchpad (build 18179)\n"
 
 #: authenticator/main.qml:66 authenticator/main.qml:84
 msgid "Accounts"
-msgstr ""
+msgstr "帳戶"
 
 #: src/sync-account.cpp:740
 msgid "Command not allowed"
-msgstr ""
+msgstr "命令不被允許"
 
 #: src/sync-account.cpp:762
 msgid "Connection certificate has expired"
-msgstr ""
+msgstr "連接憑證過期"
 
 #: src/sync-account.cpp:764
 msgid "Connection certificate is invalid"
-msgstr ""
+msgstr "連接憑證無效"
 
 #: src/sync-account.cpp:760
 msgid "Connection timeout"
-msgstr ""
+msgstr "連結超時"
 
 #: src/sync-account.cpp:745
 msgid "Disk full"
-msgstr ""
+msgstr "硬碟已滿"
 
 #: src/sync-account.cpp:727
 msgid "Fail to configure account"
-msgstr ""
+msgstr "配置帳戶失敗"
 
 #: src/sync-account.cpp:768
 msgid "Fail to connect with the server"
-msgstr ""
+msgstr "連接伺服器失敗"
 
 #: authenticator/main.qml:94
 msgid "Fail to load account information."
-msgstr ""
+msgstr "載入帳戶資訊失敗。"
 
 #: src/sync-account.cpp:749
 msgid "Fail to run \"two-way\" sync"
-msgstr ""
+msgstr "執行雙向同步失敗"
 
 #: authenticator/main.qml:119
 msgid "Fail to sync"
-msgstr ""
+msgstr "同步失敗"
 
 #: src/sync-daemon.cpp:736
 #, qt-format
@@ -70,70 +73,70 @@ msgstr ""
 
 #: src/sync-account.cpp:747
 msgid "Fail to sync due some remote problem"
-msgstr ""
+msgstr "某些遠程問題導致同步失敗"
 
 #: src/sync-account.cpp:751
 msgid "Fail to sync some items"
-msgstr ""
+msgstr "無法同步一些項目"
 
 #: src/sync-account.cpp:736
 msgid "Forbidden / access denied"
-msgstr ""
+msgstr "禁止/拒絕存取"
 
 #: src/notify-message.cpp:88
 msgid "No"
-msgstr ""
+msgstr "否"
 
 #: src/sync-account.cpp:738
 msgid "Object not found / unassigned field"
-msgstr ""
+msgstr "找不到對象/未分配領域"
 
 #: src/sync-account.cpp:753
 msgid "Process unexpected die."
-msgstr ""
+msgstr "處理時意外結束。"
 
 #: src/sync-account.cpp:743
 msgid "Proxy authentication required"
-msgstr ""
+msgstr "代理需要身份驗證"
 
 #: authenticator/main.qml:88 authenticator/main.qml:123
 msgid "Quit"
-msgstr ""
+msgstr "結束"
 
 #: src/sync-account.cpp:771
 msgid "Server not found"
-msgstr ""
+msgstr "找不到伺服器"
 
 #: src/sync-account.cpp:756
 msgid "Server sent bad content"
-msgstr ""
+msgstr "伺服器發送了錯誤內容"
 
 #: src/sync-daemon.cpp:642
 #, qt-format
 msgid "Start sync: %1 (Calendar)"
-msgstr ""
+msgstr "開始同步：%1（日曆）"
 
 #: src/sync-account.cpp:758
 msgid "Sync canceled"
-msgstr ""
+msgstr "同步已取消"
 
 #: src/sync-daemon.cpp:754
 #, qt-format
 msgid "Sync done: %1 (Calendar)"
-msgstr ""
+msgstr "完成同步：%1（日曆）"
 
 #: src/sync-daemon.cpp:619 src/sync-daemon.cpp:641 src/sync-daemon.cpp:735
 #: src/sync-daemon.cpp:753
 msgid "Synchronization"
-msgstr ""
+msgstr "同步處理"
 
 #: src/sync-account.cpp:773
 msgid "Unknown status"
-msgstr ""
+msgstr "未知狀態"
 
 #: src/notify-message.cpp:83
 msgid "Yes"
-msgstr ""
+msgstr "是"
 
 #: src/sync-daemon.cpp:620
 msgid ""
