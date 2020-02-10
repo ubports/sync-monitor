@@ -9,7 +9,7 @@ msgstr ""
 "Report-Msgid-Bugs-To: FULL NAME <EMAIL@ADDRESS>\n"
 "POT-Creation-Date: 2016-08-30 17:13-0300\n"
 "PO-Revision-Date: 2020-02-11 12:21+0000\n"
-"Last-Translator: Rodrigo Benedito <rodrigojob@yahoo.com.br>\n"
+"Last-Translator: Ivo Xavier <ivofernandes12@gmail.com>\n"
 "Language-Team: Portuguese <https://translate.ubports.com/projects/ubports/"
 "sync-monitor/pt/>\n"
 "Language: pt\n"
@@ -140,7 +140,7 @@ msgstr "Sim"
 #: ../src/sync-daemon.cpp:620
 msgid ""
 "Your access key is not valid anymore. Do you want to re-authenticate it?."
-msgstr "A sua chave de acesso já não é válida: Quer reautenticá-la?"
+msgstr "A sua chave de acesso já não é válida: Quer reautenticá-la?."
 
 #: authenticator/main.qml:160
 msgid ""
