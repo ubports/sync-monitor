@@ -1,3 +1,11 @@
+sync-monitor (0.4~0ubports3) xenial; urgency=medium
+
+  * debian/control:
+    - Replace the Galera backend with qtcontacts-sqlite
+    - remove dependency on address-book-service
+
+ -- Alberto Mardegan <mardy@users.sourceforge.net>  Tue, 11 Feb 2020 22:06:48 +0300
+
 sync-monitor (0.4~0ubports2) xenial; urgency=medium
 
   * Change to using full AppID like the click hooks

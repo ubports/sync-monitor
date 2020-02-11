@@ -31,11 +31,10 @@ Pre-Depends: ${misc:Pre-Depends},
 Depends: ${misc:Depends},
          ${shlibs:Depends},
          account-plugin-google,
-         address-book-service,
          syncevolution-dbus (>= 1.4),
          syncevolution-provider-uoa (>= 1.4),
          sync-monitor-helper (>= ${binary:Version}),
-         qtcontact5-galera,
+         qtcontacts-sqlite-qt5-extension,
          qtorganizer5-eds,
 Description: Ubuntu online account sync monitor plugin
  sync-monitor manages data synchronization of contacts and calendars
