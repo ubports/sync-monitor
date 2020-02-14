@@ -8,58 +8,61 @@ msgstr ""
 "Project-Id-Version: sync-monitor\n"
 "Report-Msgid-Bugs-To: FULL NAME <EMAIL@ADDRESS>\n"
 "POT-Creation-Date: 2016-08-30 17:13-0300\n"
-"PO-Revision-Date: 2016-08-30 19:20+0000\n"
-"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
-"Language-Team: Czech <cs@li.org>\n"
+"PO-Revision-Date: 2020-02-14 20:05+0000\n"
+"Last-Translator: Milan Korecký <milan.korecky@gmail.com>\n"
+"Language-Team: Czech <https://translate.ubports.com/projects/ubports/"
+"sync-monitor/cs/>\n"
+"Language: cs\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=3; plural=(n==1) ? 0 : (n>=2 && n<=4) ? 1 : 2;\n"
+"X-Generator: Weblate 3.8\n"
 "X-Launchpad-Export-Date: 2016-08-31 06:38+0000\n"
-"X-Generator: Launchpad (build 18179)\n"
 
 #: authenticator/main.qml:66 authenticator/main.qml:84
 msgid "Accounts"
-msgstr ""
+msgstr "Účty"
 
 #: src/sync-account.cpp:740
 msgid "Command not allowed"
-msgstr ""
+msgstr "Nepovolený příkaz"
 
 #: src/sync-account.cpp:762
 msgid "Connection certificate has expired"
-msgstr ""
+msgstr "Certifikát připojení vypršel"
 
 #: src/sync-account.cpp:764
 msgid "Connection certificate is invalid"
-msgstr ""
+msgstr "Neplatný certifikát připojení"
 
 #: src/sync-account.cpp:760
 msgid "Connection timeout"
-msgstr ""
+msgstr "Čas připojení vypršel"
 
 #: src/sync-account.cpp:745
 msgid "Disk full"
-msgstr ""
+msgstr "Plný disk"
 
 #: src/sync-account.cpp:727
 msgid "Fail to configure account"
-msgstr ""
+msgstr "Účet se nezdařilo nastavit"
 
 #: src/sync-account.cpp:768
 msgid "Fail to connect with the server"
-msgstr ""
+msgstr "Připojení k serveru se nezdařilo"
 
 #: authenticator/main.qml:94
 msgid "Fail to load account information."
-msgstr ""
+msgstr "Informace o účtu se nezdařilo stáhnout."
 
 #: src/sync-account.cpp:749
 msgid "Fail to run \"two-way\" sync"
-msgstr ""
+msgstr "Spuštění \"oboustranné\" synchronizace se nezdařilo"
 
 #: authenticator/main.qml:119
 msgid "Fail to sync"
-msgstr ""
+msgstr "Synchronizace selhala"
 
 #: src/sync-daemon.cpp:736
 #, qt-format
@@ -67,81 +70,85 @@ msgid ""
 "Fail to sync calendar %1 from account %2.\n"
 "%3"
 msgstr ""
+"Selhala synchronizace kalendáře %1 z účtu %2.\n"
+"%3"
 
 #: src/sync-account.cpp:747
 msgid "Fail to sync due some remote problem"
-msgstr ""
+msgstr "Synchronizace selhala kvůli vzdálenému problému"
 
 #: src/sync-account.cpp:751
 msgid "Fail to sync some items"
-msgstr ""
+msgstr "Některé položky se nepodařilo synchronizovat"
 
 #: src/sync-account.cpp:736
 msgid "Forbidden / access denied"
-msgstr ""
+msgstr "Zakázané / přístup odmítnut"
 
 #: src/notify-message.cpp:88
 msgid "No"
-msgstr ""
+msgstr "Ne"
 
 #: src/sync-account.cpp:738
 msgid "Object not found / unassigned field"
-msgstr ""
+msgstr "Objekt nenalezen / nepřiřazené pole"
 
 #: src/sync-account.cpp:753
 msgid "Process unexpected die."
-msgstr ""
+msgstr "Proces neočekávaně selhal."
 
 #: src/sync-account.cpp:743
 msgid "Proxy authentication required"
-msgstr ""
+msgstr "Je vyžadováno ověření proxy serveru"
 
 #: authenticator/main.qml:88 authenticator/main.qml:123
 msgid "Quit"
-msgstr ""
+msgstr "Ukončit"
 
 #: src/sync-account.cpp:771
 msgid "Server not found"
-msgstr ""
+msgstr "Server nenalezen"
 
 #: src/sync-account.cpp:756
 msgid "Server sent bad content"
-msgstr ""
+msgstr "Server zaslal špatný obsah"
 
 #: src/sync-daemon.cpp:642
 #, qt-format
 msgid "Start sync: %1 (Calendar)"
-msgstr ""
+msgstr "Zahájení synchronizace: %1 (Kalendáře)"
 
 #: src/sync-account.cpp:758
 msgid "Sync canceled"
-msgstr ""
+msgstr "Synchronizace zrušena"
 
 #: src/sync-daemon.cpp:754
 #, qt-format
 msgid "Sync done: %1 (Calendar)"
-msgstr ""
+msgstr "Dokončena synchronizace: %1 (Kalendáře)"
 
 #: src/sync-daemon.cpp:619 src/sync-daemon.cpp:641 src/sync-daemon.cpp:735
 #: src/sync-daemon.cpp:753
 msgid "Synchronization"
-msgstr ""
+msgstr "Synchronizace"
 
 #: src/sync-account.cpp:773
 msgid "Unknown status"
-msgstr ""
+msgstr "Neznámý status"
 
 #: src/notify-message.cpp:83
 msgid "Yes"
-msgstr ""
+msgstr "Ano"
 
 #: src/sync-daemon.cpp:620
 msgid ""
 "Your access key is not valid anymore. Do you want to re-authenticate it?."
-msgstr ""
+msgstr "Váš přístupový klíč je neplatný. Přejete si ho znovu ověřit?."
 
 #: authenticator/main.qml:160
 msgid ""
 "Your account failed to authenticate while syncing. Please click below to re-"
 "authenticate."
 msgstr ""
+"Váš účet se v průběhu synchronizace nezdařilo ověřit. Klikněte na odkaz níže "
+"pro ověření."
