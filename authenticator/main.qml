@@ -85,7 +85,7 @@ MainView {
 
             Label {
                 anchors.centerIn: parent
-                text: i18n.tr("Failed to load account information.")
+                text: i18n.tr("Could not load account info.")
             }
         }
     }
@@ -117,13 +117,13 @@ MainView {
                 } else {
                     accountPage.loginInProcess = false
                     root.wasAuthenticated = true
-                    console.debug("Authentication successful.")
+                    console.debug("Authenticated.")
                     Qt.quit()
                 }
             }
 
 
-            title: accountPage.loginInProcess ? i18n.tr("Logging in...") : i18n.tr("Sign in to sync")
+            title: accountPage.loginInProcess ? i18n.tr("Logging in…") : i18n.tr("Sign in to sync")
 
             head.backAction: Action {
                 iconName: "back"
