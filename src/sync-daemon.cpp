@@ -483,7 +483,7 @@ void SyncDaemon::addAccount(const AccountId &accountId, bool startSync)
 {
     Account *acc = m_manager->account(accountId);
     if (!acc) {
-        qWarning() << "Fail to retrieve accounts:" << m_manager->lastError().message();
+        qWarning() << "Could not retrieve accounts:" << m_manager->lastError().message();
     } else if (m_provider->contains(acc->providerName())) {
         qDebug() << "Found account:" << acc->displayName();
         SyncAccount *syncAcc = new SyncAccount(acc,
@@ -747,7 +747,7 @@ void SyncDaemon::onAccountSyncFinished(const QString &serviceName,
             fail = true;
             saveLog = false;
             // white list error retry the sync
-            qDebug() << "Trying a second sync due error:" << errorMessage;
+            qDebug() << "Attempting to sync again:" << errorMessage;
             m_syncQueue->push(acc, QStringList(), false);
             break;
         } else if (!errorMessage.isEmpty()) {
@@ -757,7 +757,7 @@ void SyncDaemon::onAccountSyncFinished(const QString &serviceName,
             if (firstSync || !whiteListStatus.contains(status)) {
                 NotifyMessage *notify = new NotifyMessage(true, this);
                 notify->show(_("Synchronization"),
-                             QString(_("Fail to sync calendar %1 from account %2.\n%3"))
+                             QString(_("Could not sync calendar %1 from account %2.\n%3"))
                                  .arg(source)
                                  .arg(acc->displayName())
                                  .arg(errorMessage),

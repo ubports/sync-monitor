@@ -136,7 +136,7 @@ bool SyncAccount::prepareSession(const QString &session)
         attachSession(sessionProxy);
         return true;
     } else {
-        qWarning() << "Fail to open session" << sessionName;
+        qWarning() << "Could not open session" << sessionName;
         return false;
     }
 }
@@ -398,7 +398,7 @@ void SyncAccount::removeOldConfig() const
         if (configDir.removeRecursively()) {
             qDebug() << "\tsource dir removed" << configPath;
         } else {
-            qWarning() << "\tFail to remove source dir" << configPath;
+            qWarning() << "\tCould not remove source dir" << configPath;
         }
     } else {
         qDebug() << "\tOld config dir not found" << configDir.absolutePath();
@@ -417,7 +417,7 @@ void SyncAccount::removeOldConfig() const
         if (configDir.removeRecursively()) {
             qDebug() << "\tpeer dir removed" << configPath;
         } else {
-            qWarning() << "\tFail to remove peer dir" << configPath;
+            qWarning() << "\tCould not remove peer dir" << configPath;
         }
     } else {
         qDebug() << "\tOld config dir not found" << configDir.absolutePath();
@@ -440,7 +440,7 @@ void SyncAccount::removeConfig()
             if (configDir.removeRecursively()) {
                 qDebug() << "Config dir removed" << configPath;
             } else {
-                qWarning() << "Fail to remove config dir" << configPath;
+                qWarning() << "Could not remove config dir" << configPath;
             }
         }
     }
@@ -752,11 +752,11 @@ QString SyncAccount::statusDescription(const QString &status)
     case 420:
         return _("Disk full");
     case 506:
-        return _("Failed to sync due to a remote problem");
+        return _("Could not sync due to a remote problem");
     case 22000:
-        return _("Failed to run \"two-way\" sync");
+        return _("Could not run \"two-way\" sync");
     case 22001:
-        return _("Failed to sync some items");
+        return _("Could not sync some items");
     case 22002:
         return _("Process died unexpectedly");
     case 20006:
@@ -773,7 +773,7 @@ QString SyncAccount::statusDescription(const QString &status)
     case 20026:
     case 20027:
     case 20028:
-        return _("Failed to connect to the server");
+        return _("Could not connect to the server");
     case 20046:
     case 20047:
         return _("Server not found");
@@ -792,7 +792,7 @@ void SyncAccount::fetchRemoteSources(const QString &serviceName)
     connect(auth, SIGNAL(fail()), SLOT(onAuthFailed()));
     if (!auth->authenticate()) {
         auth->deleteLater();
-        qWarning() << "fail to authenticate account!";
+        qWarning() << "Could not authenticate account!";
         Q_EMIT remoteSourcesAvailable(m_remoteSources, 304);
     }
 }
@@ -838,14 +838,14 @@ void SyncAccount::onReplyFinished(QNetworkReply *reply)
     reply->deleteLater();
 
     if (reply->error() != QNetworkReply::NoError) {
-        qWarning() << "Fail to fetch remote sources:" << reply->errorString();
+        qWarning() << "Could not fetch remote sources:" << reply->errorString();
         Q_EMIT remoteSourcesAvailable(m_remoteSources, reply->error() == QNetworkReply::AuthenticationRequiredError ? 403 : 20007);
         return;
     }
 
     int responseCode = reply->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt();
     if (responseCode != 200) {
-        qWarning() << "Fail to fetch remote sources response:" << responseCode;
+        qWarning() << "Could not fetch remote source response:" << responseCode;
         Q_EMIT remoteSourcesAvailable(m_remoteSources, 20007);
         return;
     }
@@ -916,7 +916,7 @@ void SyncAccount::fetchRemoteCalendarsFromCommand(const QString &username, const
     syncEvo->start("syncevolution", args);
     connect(syncEvo, SIGNAL(finished(int,QProcess::ExitStatus)),
             SLOT(fetchRemoteCalendarsProcessDone(int,QProcess::ExitStatus)));
-    qDebug() << "Fetching remote calendars (wait...)";
+    qDebug() << "Fetching remote calendars…)";
 }
 
 void SyncAccount::fetchRemoteCalendarsProcessDone(int exitCode, QProcess::ExitStatus exitStatus)

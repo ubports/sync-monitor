@@ -38,6 +38,7 @@ if(XGETTEXT_EXECUTABLE)
                 --keyword=dtr:2 --keyword=dtr:2,3
                 --package-name=${DOMAIN}
                 --copyright-holder='Canonical Ltd.'
+                --from-code=utf-8
                 -D ${CMAKE_SOURCE_DIR} ${I18N_QMLS}
                 -D ${CMAKE_SOURCE_DIR} ${I18N_SRCS}
                 -s -p ${CMAKE_CURRENT_SOURCE_DIR} ${I18N_SRCS}

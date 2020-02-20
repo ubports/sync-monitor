@@ -1,115 +1,150 @@
 # SOME DESCRIPTIVE TITLE.
-# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
-# This file is distributed under the same license as the PACKAGE package.
+# Copyright (C) YEAR Canonical Ltd.
+# This file is distributed under the same license as the sync-monitor package.
 # FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
 #
 #, fuzzy
 msgid ""
 msgstr ""
-"Project-Id-Version: PACKAGE VERSION\n"
+"Project-Id-Version: sync-monitor\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2019-09-10 18:43+0000\n"
+"POT-Creation-Date: 2020-02-20 15:14-0600\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "Language: \n"
 "MIME-Version: 1.0\n"
-"Content-Type: text/plain; charset=CHARSET\n"
+"Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-#: ../src/sync-account.cpp:739
-msgid "Failed to configure account"
+#: authenticator/main.qml:153
+msgid "Account sign-in failed. Please select your account to sign back in."
 msgstr ""
 
-#: ../src/sync-account.cpp:748
-msgid "Forbidden / access denied"
+#: authenticator/main.qml:60 authenticator/main.qml:78
+msgid "Accounts"
 msgstr ""
 
-#: ../src/sync-account.cpp:750
-msgid "Object not found / unassigned field"
-msgstr ""
-
-#: ../src/sync-account.cpp:752
-msgid "Command not allowed"
-msgstr ""
-
-#: ../src/sync-account.cpp:755
-msgid "Proxy authentication required"
-msgstr ""
-
-#: ../src/sync-account.cpp:757
-msgid "Disk full"
-msgstr ""
-
-#: ../src/sync-account.cpp:759
-msgid "Failed to sync due to a remote problem"
-msgstr ""
-
-#: ../src/sync-account.cpp:761
-msgid "Failed to run \"two-way\" sync"
-msgstr ""
-
-#: ../src/sync-account.cpp:763
-msgid "Failed to sync some items"
-msgstr ""
-
-#: ../src/sync-account.cpp:765
-msgid "Process died unexpectedly"
-msgstr ""
-
-#: ../src/sync-account.cpp:768
-msgid "Server sent bad content"
-msgstr ""
-
-#: ../src/sync-account.cpp:770
-msgid "Sync canceled"
-msgstr ""
-
-#: ../src/sync-account.cpp:772
-msgid "Connection timeout"
-msgstr ""
-
-#: ../src/sync-account.cpp:774
-msgid "Connection certificate has expired"
-msgstr ""
-
-#: ../src/sync-account.cpp:776
-msgid "Connection certificate is invalid"
-msgstr ""
-
-#: ../src/sync-account.cpp:780
-msgid "Failed to connect to the server"
-msgstr ""
-
-#: ../src/sync-account.cpp:783
-msgid "Server not found"
-msgstr ""
-
-#: ../src/sync-account.cpp:785
-msgid "Unknown status"
-msgstr ""
-
-#: ../src/sync-daemon.cpp:623 ../src/sync-daemon.cpp:645
-#: ../src/sync-daemon.cpp:753 ../src/sync-daemon.cpp:772
-msgid "Synchronization"
-msgstr ""
-
-#: ../src/sync-daemon.cpp:624
+#: src/sync-daemon.cpp:628
 msgid "An account failed to sync. Would you like to sign in again?"
 msgstr ""
 
-#. TRANSLATORS: %1 is an account username, such as an email address
-#: ../src/sync-daemon.cpp:647
-msgid "Syncing %1 (Calendar)"
+#: src/sync-account.cpp:748
+msgid "Command not allowed"
 msgstr ""
 
-#: ../src/sync-daemon.cpp:754
+#: src/sync-account.cpp:770
+msgid "Connection certificate has expired"
+msgstr ""
+
+#: src/sync-account.cpp:772
+msgid "Connection certificate is invalid"
+msgstr ""
+
+#: src/sync-account.cpp:768
+msgid "Connection timeout"
+msgstr ""
+
+#: src/sync-account.cpp:776
+msgid "Could not connect to the server"
+msgstr ""
+
+#: authenticator/main.qml:88
+msgid "Could not load account info."
+msgstr ""
+
+#: src/sync-account.cpp:757
+msgid "Could not run \"two-way\" sync"
+msgstr ""
+
+#: src/sync-daemon.cpp:760
+#, qt-format
 msgid ""
-"Fail to sync calendar %1 from account %2.\n"
+"Could not sync calendar %1 from account %2.\n"
 "%3"
 msgstr ""
 
+#: src/sync-account.cpp:755
+msgid "Could not sync due to a remote problem"
+msgstr ""
+
+#: src/sync-account.cpp:759
+msgid "Could not sync some items"
+msgstr ""
+
+#: src/sync-account.cpp:753
+msgid "Disk full"
+msgstr ""
+
+#: src/sync-account.cpp:735
+msgid "Failed to configure account"
+msgstr ""
+
 #. TRANSLATORS: %1 is an account username, such as an email address
-#: ../src/sync-daemon.cpp:774
+#: src/sync-daemon.cpp:780
+#, qt-format
 msgid "Finished syncing %1 (Calendar)"
+msgstr ""
+
+#: src/sync-account.cpp:744
+msgid "Forbidden / access denied"
+msgstr ""
+
+#: authenticator/main.qml:126
+msgid "Logging in…"
+msgstr ""
+
+#: src/notify-message.cpp:88
+msgid "No"
+msgstr ""
+
+#: src/sync-account.cpp:746
+msgid "Object not found / unassigned field"
+msgstr ""
+
+#: src/sync-account.cpp:761
+msgid "Process died unexpectedly"
+msgstr ""
+
+#: src/sync-account.cpp:751
+msgid "Proxy authentication required"
+msgstr ""
+
+#: authenticator/main.qml:82 authenticator/main.qml:130
+msgid "Quit"
+msgstr ""
+
+#: src/sync-account.cpp:779
+msgid "Server not found"
+msgstr ""
+
+#: src/sync-account.cpp:764
+msgid "Server sent bad content"
+msgstr ""
+
+#: authenticator/main.qml:126
+msgid "Sign in to sync"
+msgstr ""
+
+#: src/sync-account.cpp:766
+msgid "Sync canceled"
+msgstr ""
+
+#: src/sync-daemon.cpp:627 src/sync-daemon.cpp:649 src/sync-daemon.cpp:759
+#: src/sync-daemon.cpp:778
+msgid "Synchronization"
+msgstr ""
+
+#. TRANSLATORS: %1 is an account username, such as an email address
+#: src/sync-daemon.cpp:651
+#, qt-format
+msgid "Syncing %1 (Calendar)"
+msgstr ""
+
+#: src/sync-account.cpp:781
+msgid "Unknown status"
+msgstr ""
+
+#: src/notify-message.cpp:83
+msgid "Yes"
 msgstr ""
