@@ -42,7 +42,7 @@ msgid "Connection certificate is invalid"
 msgstr ""
 
 #: src/sync-account.cpp:768
-msgid "Connection timeout"
+msgid "Connection timed out"
 msgstr ""
 
 #: src/sync-account.cpp:776
