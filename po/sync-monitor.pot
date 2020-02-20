@@ -38,7 +38,7 @@ msgid "Expired connection certificate"
 msgstr ""
 
 #: src/sync-account.cpp:772
-msgid "Connection certificate is invalid"
+msgid "Invalid connection certificate"
 msgstr ""
 
 #: src/sync-account.cpp:768
