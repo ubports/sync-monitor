@@ -34,7 +34,7 @@ msgid "Command not allowed"
 msgstr ""
 
 #: src/sync-account.cpp:770
-msgid "Connection certificate has expired"
+msgid "Expired connection certificate"
 msgstr ""
 
 #: src/sync-account.cpp:772
