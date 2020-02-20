@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: sync-monitor\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2020-02-20 12:20-0600\n"
+"POT-Creation-Date: 2020-02-20 15:14-0600\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -34,15 +34,15 @@ msgid "Command not allowed"
 msgstr ""
 
 #: src/sync-account.cpp:770
-msgid "Expired connection certificate"
+msgid "Connection certificate has expired"
 msgstr ""
 
 #: src/sync-account.cpp:772
-msgid "Invalid connection certificate"
+msgid "Connection certificate is invalid"
 msgstr ""
 
 #: src/sync-account.cpp:768
-msgid "Connection timed out"
+msgid "Connection timeout"
 msgstr ""
 
 #: src/sync-account.cpp:776
