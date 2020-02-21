@@ -8,8 +8,8 @@ msgstr ""
 "Project-Id-Version: sync-monitor\n"
 "Report-Msgid-Bugs-To: FULL NAME <EMAIL@ADDRESS>\n"
 "POT-Creation-Date: 2016-08-30 17:13-0300\n"
-"PO-Revision-Date: 2020-02-16 19:21+0000\n"
-"Last-Translator: Eugene <uralhistory@gmail.com>\n"
+"PO-Revision-Date: 2020-02-22 13:21+0000\n"
+"Last-Translator: Eugene Markoff <uralhistory@gmail.com>\n"
 "Language-Team: Russian <https://translate.ubports.com/projects/ubports/"
 "sync-monitor/ru/>\n"
 "Language: ru\n"
@@ -106,7 +106,7 @@ msgstr "Закончить"
 
 #: src/sync-account.cpp:771
 msgid "Server not found"
-msgstr ""
+msgstr "Сервер не найден"
 
 #: src/sync-account.cpp:756
 msgid "Server sent bad content"
@@ -119,7 +119,7 @@ msgstr ""
 
 #: src/sync-account.cpp:758
 msgid "Sync canceled"
-msgstr ""
+msgstr "Синхронизация отменена"
 
 #: src/sync-daemon.cpp:754
 #, qt-format
@@ -129,7 +129,7 @@ msgstr ""
 #: src/sync-daemon.cpp:619 src/sync-daemon.cpp:641 src/sync-daemon.cpp:735
 #: src/sync-daemon.cpp:753
 msgid "Synchronization"
-msgstr ""
+msgstr "Синхронизация"
 
 #: src/sync-account.cpp:773
 msgid "Unknown status"
