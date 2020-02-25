@@ -8,7 +8,7 @@ msgstr ""
 "Project-Id-Version: sync-monitor\n"
 "Report-Msgid-Bugs-To: FULL NAME <EMAIL@ADDRESS>\n"
 "POT-Creation-Date: 2016-08-30 17:13-0300\n"
-"PO-Revision-Date: 2020-02-22 13:21+0000\n"
+"PO-Revision-Date: 2020-02-26 05:21+0000\n"
 "Last-Translator: Eugene Markoff <uralhistory@gmail.com>\n"
 "Language-Team: Russian <https://translate.ubports.com/projects/ubports/"
 "sync-monitor/ru/>\n"
@@ -113,9 +113,9 @@ msgid "Server sent bad content"
 msgstr ""
 
 #: src/sync-daemon.cpp:642
-#, qt-format
+#, fuzzy, qt-format
 msgid "Start sync: %1 (Calendar)"
-msgstr ""
+msgstr "Начало синхронизации: %1 (Календарь)"
 
 #: src/sync-account.cpp:758
 msgid "Sync canceled"
