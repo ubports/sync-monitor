@@ -8,14 +8,17 @@ msgstr ""
 "Project-Id-Version: sync-monitor\n"
 "Report-Msgid-Bugs-To: FULL NAME <EMAIL@ADDRESS>\n"
 "POT-Creation-Date: 2016-08-30 17:13-0300\n"
-"PO-Revision-Date: 2016-08-30 19:20+0000\n"
-"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
-"Language-Team: French (Canada) <fr_CA@li.org>\n"
+"PO-Revision-Date: 2020-02-20 21:44+0000\n"
+"Last-Translator: Ryan Argente <rargente@lonerider.one>\n"
+"Language-Team: French (Canada) <https://translate.ubports.com/projects/"
+"ubports/sync-monitor/fr_CA/>\n"
+"Language: fr_CA\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=n > 1;\n"
+"X-Generator: Weblate 3.8\n"
 "X-Launchpad-Export-Date: 2016-08-31 06:38+0000\n"
-"X-Generator: Launchpad (build 18179)\n"
 
 #: authenticator/main.qml:66 authenticator/main.qml:84
 msgid "Accounts"
@@ -82,7 +85,7 @@ msgstr ""
 
 #: src/notify-message.cpp:88
 msgid "No"
-msgstr ""
+msgstr "Non"
 
 #: src/sync-account.cpp:738
 msgid "Object not found / unassigned field"
@@ -133,7 +136,7 @@ msgstr ""
 
 #: src/notify-message.cpp:83
 msgid "Yes"
-msgstr ""
+msgstr "Oui"
 
 #: src/sync-daemon.cpp:620
 msgid ""

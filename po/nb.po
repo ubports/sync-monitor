@@ -8,18 +8,21 @@ msgstr ""
 "Project-Id-Version: sync-monitor\n"
 "Report-Msgid-Bugs-To: FULL NAME <EMAIL@ADDRESS>\n"
 "POT-Creation-Date: 2016-08-30 17:13-0300\n"
-"PO-Revision-Date: 2016-09-12 06:32+0000\n"
-"Last-Translator: Åka Sikrom <Unknown>\n"
-"Language-Team: Norwegian Bokmal <nb@li.org>\n"
+"PO-Revision-Date: 2020-02-20 11:21+0000\n"
+"Last-Translator: Allan Nordhøy <epost@anotheragency.no>\n"
+"Language-Team: Norwegian Bokmål <https://translate.ubports.com/projects/"
+"ubports/sync-monitor/nb/>\n"
+"Language: nb\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=n != 1;\n"
+"X-Generator: Weblate 3.8\n"
 "X-Launchpad-Export-Date: 2016-09-13 06:30+0000\n"
-"X-Generator: Launchpad (build 18186)\n"
 
 #: authenticator/main.qml:66 authenticator/main.qml:84
 msgid "Accounts"
-msgstr ""
+msgstr "Kontoer"
 
 #: ../src/sync-account.cpp:752
 msgid "Command not allowed"
@@ -42,30 +45,36 @@ msgid "Disk full"
 msgstr "Disken er full"
 
 #: ../src/sync-account.cpp:739
+#, fuzzy
 msgid "Fail to configure account"
-msgstr ""
+msgstr "Kunne ikke sette opp konto."
 
 #: ../src/sync-account.cpp:780
 msgid "Fail to connect with the server"
 msgstr "Klarte ikke å koble til tjener"
 
 #: authenticator/main.qml:94
+#, fuzzy
 msgid "Fail to load account information."
-msgstr ""
+msgstr "Kunne ikke laste inn kontoinfo."
 
 #: ../src/sync-account.cpp:761
 msgid "Fail to run \"two-way\" sync"
 msgstr "Toveissynkronisering mislyktes"
 
 #: authenticator/main.qml:119
+#, fuzzy
 msgid "Fail to sync"
-msgstr ""
+msgstr "Klarte ikke å synkronisere"
 
 #: ../src/sync-daemon.cpp:749
+#, fuzzy
 msgid ""
 "Fail to sync calendar %1 from account %2.\n"
 "%3"
 msgstr ""
+"Klarte ikke å synkronisere kalender %1 fra konto %2.\n"
+"%3"
 
 #: ../src/sync-account.cpp:759
 msgid "Fail to sync due some remote problem"
@@ -81,7 +90,7 @@ msgstr "Ingen tilgang"
 
 #: src/notify-message.cpp:88
 msgid "No"
-msgstr ""
+msgstr "Nei"
 
 #: ../src/sync-account.cpp:750
 msgid "Object not found / unassigned field"
@@ -97,7 +106,7 @@ msgstr "Mellomtjener må godkjennes"
 
 #: authenticator/main.qml:88 authenticator/main.qml:123
 msgid "Quit"
-msgstr ""
+msgstr "Avslutt"
 
 #: ../src/sync-account.cpp:783
 msgid "Server not found"
@@ -109,15 +118,16 @@ msgstr "Ugyldig innhold fra tjener"
 
 #: ../src/sync-daemon.cpp:642
 msgid "Start sync: %1 (Calendar)"
-msgstr ""
+msgstr "Start synkronisering: %1 (kalender)"
 
 #: ../src/sync-account.cpp:770
 msgid "Sync canceled"
 msgstr "Synkronisering avbrutt"
 
 #: ../src/sync-daemon.cpp:768
+#, fuzzy
 msgid "Sync done: %1 (Calendar)"
-msgstr ""
+msgstr "Synkronisert: %1 (kalender)"
 
 #: ../src/sync-daemon.cpp:619 ../src/sync-daemon.cpp:641
 #: ../src/sync-daemon.cpp:748 ../src/sync-daemon.cpp:767
@@ -130,7 +140,7 @@ msgstr "Ukjent status"
 
 #: src/notify-message.cpp:83
 msgid "Yes"
-msgstr ""
+msgstr "Ja"
 
 #: ../src/sync-daemon.cpp:620
 msgid ""
@@ -138,7 +148,10 @@ msgid ""
 msgstr "Tilgangsnøkkelen din er utgått. Vil du fornye den nå?"
 
 #: authenticator/main.qml:160
+#, fuzzy
 msgid ""
 "Your account failed to authenticate while syncing. Please click below to re-"
 "authenticate."
 msgstr ""
+"Kontoen din klarte ikke å identitetsbekrefte seg under synkronisering. Klikk "
+"nedenfor for å identitetsbekrefte på ny."
