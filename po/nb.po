@@ -8,7 +8,7 @@ msgstr ""
 "Project-Id-Version: sync-monitor\n"
 "Report-Msgid-Bugs-To: FULL NAME <EMAIL@ADDRESS>\n"
 "POT-Creation-Date: 2016-08-30 17:13-0300\n"
-"PO-Revision-Date: 2020-03-26 18:22+0000\n"
+"PO-Revision-Date: 2020-04-12 12:23+0000\n"
 "Last-Translator: Ari Börde Kröyer <ari.kroyer@online.no>\n"
 "Language-Team: Norwegian Bokmål <https://translate.ubports.com/projects/"
 "ubports/sync-monitor/nb/>\n"
@@ -46,7 +46,7 @@ msgstr "Disken er full"
 
 #: ../src/sync-account.cpp:739
 msgid "Fail to configure account"
-msgstr "Kunne ikke sette opp konto."
+msgstr "Kunne ikke sette opp konto"
 
 #: ../src/sync-account.cpp:780
 msgid "Fail to connect with the server"
