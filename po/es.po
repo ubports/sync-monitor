@@ -8,7 +8,7 @@ msgstr ""
 "Project-Id-Version: sync-monitor\n"
 "Report-Msgid-Bugs-To: FULL NAME <EMAIL@ADDRESS>\n"
 "POT-Creation-Date: 2016-08-30 17:13-0300\n"
-"PO-Revision-Date: 2020-02-07 12:21+0000\n"
+"PO-Revision-Date: 2020-04-17 06:23+0000\n"
 "Last-Translator: Josué <j2g2rp@gmail.com>\n"
 "Language-Team: Spanish <https://translate.ubports.com/projects/ubports/"
 "sync-monitor/es/>\n"
@@ -50,10 +50,9 @@ msgstr "Error al configurar la cuenta"
 
 #: ../src/sync-account.cpp:780
 msgid "Fail to connect with the server"
-msgstr "Falló la concexión con el servidor"
+msgstr "Falló la conexión con el servidor"
 
 #: authenticator/main.qml:94
-#, fuzzy
 msgid "Fail to load account information."
 msgstr "Fallo al cargar información de la cuenta."
 
@@ -62,7 +61,6 @@ msgid "Fail to run \"two-way\" sync"
 msgstr "Fallo al realizar la sincronización «de dos vías»"
 
 #: authenticator/main.qml:119
-#, fuzzy
 msgid "Fail to sync"
 msgstr "Fallo al sincronizar"
 
@@ -97,7 +95,6 @@ msgid "Process unexpected die."
 msgstr "El proceso terminó de forma inesperada."
 
 #: ../src/sync-account.cpp:755
-#, fuzzy
 msgid "Proxy authentication required"
 msgstr "Requerida autenticación del Proxy"
 
@@ -110,7 +107,6 @@ msgid "Server not found"
 msgstr "Servidor no encontrado"
 
 #: ../src/sync-account.cpp:768
-#, fuzzy
 msgid "Server sent bad content"
 msgstr "El servidor envió contenido erróneo"
 
@@ -142,13 +138,12 @@ msgstr "Sí"
 #: ../src/sync-daemon.cpp:620
 msgid ""
 "Your access key is not valid anymore. Do you want to re-authenticate it?."
-msgstr ""
+msgstr "Su clave de acceso ya no es válida. ¿Desea volver a autenticar?"
 
 #: authenticator/main.qml:160
-#, fuzzy
 msgid ""
 "Your account failed to authenticate while syncing. Please click below to re-"
 "authenticate."
 msgstr ""
-"Su cuenta falló para identificarse mientras sincronizaba. Por favor haga "
-"clic abajo para volver a identificarse"
+"Su cuenta falló para autenticarse mientras sincronizaba. Por favor haga clic "
+"abajo para volver a autenticarse."
