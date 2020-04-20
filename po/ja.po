@@ -8,58 +8,61 @@ msgstr ""
 "Project-Id-Version: sync-monitor\n"
 "Report-Msgid-Bugs-To: FULL NAME <EMAIL@ADDRESS>\n"
 "POT-Creation-Date: 2016-08-30 17:13-0300\n"
-"PO-Revision-Date: 2016-08-30 19:20+0000\n"
-"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
-"Language-Team: Japanese <ja@li.org>\n"
+"PO-Revision-Date: 2020-04-01 11:22+0000\n"
+"Last-Translator: M.Sugahara <equaaqua@hotmail.com>\n"
+"Language-Team: Japanese <https://translate.ubports.com/projects/ubports/"
+"sync-monitor/ja/>\n"
+"Language: ja\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=1; plural=0;\n"
+"X-Generator: Weblate 3.8\n"
 "X-Launchpad-Export-Date: 2016-08-31 06:38+0000\n"
-"X-Generator: Launchpad (build 18179)\n"
 
 #: authenticator/main.qml:66 authenticator/main.qml:84
 msgid "Accounts"
-msgstr ""
+msgstr "アカウント"
 
 #: src/sync-account.cpp:740
 msgid "Command not allowed"
-msgstr ""
+msgstr "コマンドが許可されませんでした"
 
 #: src/sync-account.cpp:762
 msgid "Connection certificate has expired"
-msgstr ""
+msgstr "接続証明書が期限切れです"
 
 #: src/sync-account.cpp:764
 msgid "Connection certificate is invalid"
-msgstr ""
+msgstr "接続証明書が不正です"
 
 #: src/sync-account.cpp:760
 msgid "Connection timeout"
-msgstr ""
+msgstr "接続がタイムアウトしました"
 
 #: src/sync-account.cpp:745
 msgid "Disk full"
-msgstr ""
+msgstr "ディスクがいっぱいです"
 
 #: src/sync-account.cpp:727
 msgid "Fail to configure account"
-msgstr ""
+msgstr "アカウントの設定ができませんでした"
 
 #: src/sync-account.cpp:768
 msgid "Fail to connect with the server"
-msgstr ""
+msgstr "サーバーに接続できません"
 
 #: authenticator/main.qml:94
 msgid "Fail to load account information."
-msgstr ""
+msgstr "アカウント情報が取得できません。"
 
 #: src/sync-account.cpp:749
 msgid "Fail to run \"two-way\" sync"
-msgstr ""
+msgstr "双方向同期に失敗しました"
 
 #: authenticator/main.qml:119
 msgid "Fail to sync"
-msgstr ""
+msgstr "同期に失敗しました"
 
 #: src/sync-daemon.cpp:736
 #, qt-format
@@ -67,10 +70,12 @@ msgid ""
 "Fail to sync calendar %1 from account %2.\n"
 "%3"
 msgstr ""
+"%2 のカレンダー %1 が同期できませんでした。\n"
+"%3"
 
 #: src/sync-account.cpp:747
 msgid "Fail to sync due some remote problem"
-msgstr ""
+msgstr "サービス側の問題で同期できませんでした"
 
 #: src/sync-account.cpp:751
 msgid "Fail to sync some items"

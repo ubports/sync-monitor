@@ -8,7 +8,7 @@ msgstr ""
 "Project-Id-Version: sync-monitor\n"
 "Report-Msgid-Bugs-To: FULL NAME <EMAIL@ADDRESS>\n"
 "POT-Creation-Date: 2016-08-30 17:13-0300\n"
-"PO-Revision-Date: 2020-03-06 10:22+0000\n"
+"PO-Revision-Date: 2020-04-12 12:23+0000\n"
 "Last-Translator: Neutrum N <neutro@tutanota.com>\n"
 "Language-Team: Galician <https://translate.ubports.com/projects/ubports/"
 "sync-monitor/gl/>\n"
@@ -46,23 +46,23 @@ msgstr "Disco cheo"
 
 #: src/sync-account.cpp:727
 msgid "Fail to configure account"
-msgstr "Fallo a configurar a conta"
+msgstr "Non se puido configurar a conta"
 
 #: src/sync-account.cpp:768
 msgid "Fail to connect with the server"
-msgstr "Fallo a conectar co servidor"
+msgstr "Non se puido conectar co servidor"
 
 #: authenticator/main.qml:94
 msgid "Fail to load account information."
-msgstr "Fallo a cargar a información da conta."
+msgstr "Non se puido cargar a información da conta."
 
 #: src/sync-account.cpp:749
 msgid "Fail to run \"two-way\" sync"
-msgstr "Fallo a sincronizar a dous xeitos"
+msgstr "Non se puido sincronizar a dous xeitos"
 
 #: authenticator/main.qml:119
 msgid "Fail to sync"
-msgstr "Fallo a sincronizar"
+msgstr "Non se puido sincronizar"
 
 #: src/sync-daemon.cpp:736
 #, qt-format
@@ -70,16 +70,16 @@ msgid ""
 "Fail to sync calendar %1 from account %2.\n"
 "%3"
 msgstr ""
-"Fallo a sincronizar o calendario %1 da conta %2.\n"
+"Non se puido sincronizar o calendario %1 da conta %2.\n"
 "%3"
 
 #: src/sync-account.cpp:747
 msgid "Fail to sync due some remote problem"
-msgstr "Fallo a sincronizar debido a un problema remoto"
+msgstr "Non se puido sincronizar debido a un problema remoto"
 
 #: src/sync-account.cpp:751
 msgid "Fail to sync some items"
-msgstr "Fallo a sincronizar algún elemento"
+msgstr "Non se puideron sincronizar algúns elementos"
 
 #: src/sync-account.cpp:736
 msgid "Forbidden / access denied"
@@ -116,7 +116,7 @@ msgstr "O servidor enviou contido malo"
 #: src/sync-daemon.cpp:642
 #, qt-format
 msgid "Start sync: %1 (Calendar)"
-msgstr "Enpezar a sincronización: %1 (Calendario)"
+msgstr "Empezar a sincronización: %1 (Calendario)"
 
 #: src/sync-account.cpp:758
 msgid "Sync canceled"
@@ -150,5 +150,5 @@ msgid ""
 "Your account failed to authenticate while syncing. Please click below to re-"
 "authenticate."
 msgstr ""
-"A autenticación da súa conta fallou ao sincronizar. Prema debaixo pra "
+"Ao sincronizar, non se puido autenticar a súa conta. Prema embaixo para "
 "reautenticar."
