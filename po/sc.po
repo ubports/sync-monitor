@@ -8,7 +8,7 @@ msgstr ""
 "Project-Id-Version: sync-monitor\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2020-02-20 15:14-0600\n"
-"PO-Revision-Date: 2020-05-21 09:24+0000\n"
+"PO-Revision-Date: 2020-06-18 19:25+0000\n"
 "Last-Translator: Adrià <adriamartinmor@gmail.com>\n"
 "Language-Team: Sardinian <https://translate.ubports.com/projects/ubports/"
 "sync-monitor/sc/>\n"
@@ -17,47 +17,50 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=n != 1;\n"
-"X-Generator: Weblate 3.8\n"
+"X-Generator: Weblate 3.11.3\n"
 
 #: authenticator/main.qml:153
 msgid "Account sign-in failed. Please select your account to sign back in."
 msgstr ""
+"Identificatzione faddida. Seletziona su contu tuo pro ti torrare a "
+"identificare."
 
 #: authenticator/main.qml:60 authenticator/main.qml:78
 msgid "Accounts"
-msgstr ""
+msgstr "Contos"
 
 #: src/sync-daemon.cpp:628
 msgid "An account failed to sync. Would you like to sign in again?"
 msgstr ""
+"Faddina in sa sincronizatzione de unu contu. Boles torrare a ti identificare?"
 
 #: src/sync-account.cpp:748
 msgid "Command not allowed"
-msgstr ""
+msgstr "Òrdine non permìtida"
 
 #: src/sync-account.cpp:770
 msgid "Connection certificate has expired"
-msgstr ""
+msgstr "Tzertificadu de conessione iscàdidu"
 
 #: src/sync-account.cpp:772
 msgid "Connection certificate is invalid"
-msgstr ""
+msgstr "Tzertificadu de connessione non vàlidu"
 
 #: src/sync-account.cpp:768
 msgid "Connection timeout"
-msgstr ""
+msgstr "Connessione iscàdida"
 
 #: src/sync-account.cpp:776
 msgid "Could not connect to the server"
-msgstr ""
+msgstr "Impossìbile connètere a su server"
 
 #: authenticator/main.qml:88
 msgid "Could not load account info."
-msgstr ""
+msgstr "Impossìbile carrigare informatzione de su contu."
 
 #: src/sync-account.cpp:757
 msgid "Could not run \"two-way\" sync"
-msgstr ""
+msgstr "Impossìbile aviare sa sincronizatzione bidiretzionale"
 
 #: src/sync-daemon.cpp:760
 #, qt-format
