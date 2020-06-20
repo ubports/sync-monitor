@@ -8,7 +8,7 @@ msgstr ""
 "Project-Id-Version: sync-monitor\n"
 "Report-Msgid-Bugs-To: FULL NAME <EMAIL@ADDRESS>\n"
 "POT-Creation-Date: 2016-08-30 17:13-0300\n"
-"PO-Revision-Date: 2020-06-20 15:47+0000\n"
+"PO-Revision-Date: 2020-06-21 10:54+0000\n"
 "Last-Translator: Eugene Markoff <uralhistory@gmail.com>\n"
 "Language-Team: Russian <https://translate.ubports.com/projects/ubports/"
 "sync-monitor/ru/>\n"
@@ -38,8 +38,9 @@ msgid "Connection certificate is invalid"
 msgstr "Неправильный сертификат соединения"
 
 #: src/sync-account.cpp:760
+#, fuzzy
 msgid "Connection timeout"
-msgstr ""
+msgstr "Превышено время установления соединения"
 
 #: src/sync-account.cpp:745
 msgid "Disk full"
@@ -113,7 +114,7 @@ msgstr "Сервер не найден"
 
 #: src/sync-account.cpp:756
 msgid "Server sent bad content"
-msgstr ""
+msgstr "Сервер отправил некорректные данные"
 
 #: src/sync-daemon.cpp:642
 #, fuzzy, qt-format
