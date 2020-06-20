@@ -8,7 +8,7 @@ msgstr ""
 "Project-Id-Version: sync-monitor\n"
 "Report-Msgid-Bugs-To: FULL NAME <EMAIL@ADDRESS>\n"
 "POT-Creation-Date: 2016-08-30 17:13-0300\n"
-"PO-Revision-Date: 2020-02-26 05:21+0000\n"
+"PO-Revision-Date: 2020-06-20 15:47+0000\n"
 "Last-Translator: Eugene Markoff <uralhistory@gmail.com>\n"
 "Language-Team: Russian <https://translate.ubports.com/projects/ubports/"
 "sync-monitor/ru/>\n"
@@ -18,7 +18,7 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=3; plural=n%10==1 && n%100!=11 ? 0 : n%10>=2 && n%10<="
 "4 && (n%100<10 || n%100>=20) ? 1 : 2;\n"
-"X-Generator: Weblate 3.8\n"
+"X-Generator: Weblate 3.11.3\n"
 "X-Launchpad-Export-Date: 2016-08-31 06:38+0000\n"
 
 #: authenticator/main.qml:66 authenticator/main.qml:84
@@ -47,42 +47,45 @@ msgstr "Диск переполнен"
 
 #: src/sync-account.cpp:727
 msgid "Fail to configure account"
-msgstr ""
+msgstr "Не удалось настроить учётную запись"
 
 #: src/sync-account.cpp:768
 msgid "Fail to connect with the server"
-msgstr ""
+msgstr "Не удалось соединение с сервером"
 
 #: authenticator/main.qml:94
 msgid "Fail to load account information."
-msgstr ""
+msgstr "Не удалось загрузить информацию об учётной записи."
 
 #: src/sync-account.cpp:749
 msgid "Fail to run \"two-way\" sync"
-msgstr ""
+msgstr "Не удалось запустить \"двухстороннюю\" синхронизацию"
 
 #: authenticator/main.qml:119
 msgid "Fail to sync"
-msgstr ""
+msgstr "Синхронизация не удалась"
 
 #: src/sync-daemon.cpp:736
-#, qt-format
+#, fuzzy, qt-format
 msgid ""
 "Fail to sync calendar %1 from account %2.\n"
 "%3"
 msgstr ""
+"Не удалось синхронизировать календарь %1 из учетной записи %2.\n"
+"%3"
 
 #: src/sync-account.cpp:747
 msgid "Fail to sync due some remote problem"
-msgstr ""
+msgstr "Синхронизация не удалась из-за проблем на удалённой стороне"
 
 #: src/sync-account.cpp:751
+#, fuzzy
 msgid "Fail to sync some items"
-msgstr ""
+msgstr "Не удалось синхронизировать несколько вещей"
 
 #: src/sync-account.cpp:736
 msgid "Forbidden / access denied"
-msgstr ""
+msgstr "Доступ запрещен"
 
 #: src/notify-message.cpp:88
 msgid "No"
@@ -90,19 +93,19 @@ msgstr "Нет"
 
 #: src/sync-account.cpp:738
 msgid "Object not found / unassigned field"
-msgstr ""
+msgstr "Объект не найден / строка не назначена"
 
 #: src/sync-account.cpp:753
 msgid "Process unexpected die."
-msgstr ""
+msgstr "Неожиданная остановка процесса."
 
 #: src/sync-account.cpp:743
 msgid "Proxy authentication required"
-msgstr ""
+msgstr "Требуется авторизация proxy-сервера"
 
 #: authenticator/main.qml:88 authenticator/main.qml:123
 msgid "Quit"
-msgstr "Закончить"
+msgstr "Выйти"
 
 #: src/sync-account.cpp:771
 msgid "Server not found"
@@ -124,7 +127,7 @@ msgstr "Синхронизация отменена"
 #: src/sync-daemon.cpp:754
 #, qt-format
 msgid "Sync done: %1 (Calendar)"
-msgstr ""
+msgstr "Синхронизация выполнена: %1 (Календарь)"
 
 #: src/sync-daemon.cpp:619 src/sync-daemon.cpp:641 src/sync-daemon.cpp:735
 #: src/sync-daemon.cpp:753
@@ -133,7 +136,7 @@ msgstr "Синхронизация"
 
 #: src/sync-account.cpp:773
 msgid "Unknown status"
-msgstr ""
+msgstr "Неизвестный статус"
 
 #: src/notify-message.cpp:83
 msgid "Yes"
@@ -142,10 +145,12 @@ msgstr "Да"
 #: src/sync-daemon.cpp:620
 msgid ""
 "Your access key is not valid anymore. Do you want to re-authenticate it?."
-msgstr ""
+msgstr "Ваш ключ доступа больше не действителен. Авторизовать его снова?"
 
 #: authenticator/main.qml:160
 msgid ""
 "Your account failed to authenticate while syncing. Please click below to re-"
 "authenticate."
 msgstr ""
+"Ваша учетная запись не смогла пройти авторизацию во время синхронизации. "
+"Пожалуйста нажмите на кнопку ниже для повторной аутентификации."
