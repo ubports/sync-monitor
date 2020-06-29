@@ -8,8 +8,8 @@ msgstr ""
 "Project-Id-Version: sync-monitor\n"
 "Report-Msgid-Bugs-To: FULL NAME <EMAIL@ADDRESS>\n"
 "POT-Creation-Date: 2016-08-30 17:13-0300\n"
-"PO-Revision-Date: 2020-05-25 06:24+0000\n"
-"Last-Translator: Somnuk Limsiroratana <mailsomnuk@yahoo.com>\n"
+"PO-Revision-Date: 2020-06-29 14:52+0000\n"
+"Last-Translator: PPNplus <ppnplus@protonmail.com>\n"
 "Language-Team: Thai <https://translate.ubports.com/projects/ubports/"
 "sync-monitor/th/>\n"
 "Language: th\n"
@@ -17,7 +17,7 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=1; plural=0;\n"
-"X-Generator: Weblate 3.8\n"
+"X-Generator: Weblate 3.11.3\n"
 "X-Launchpad-Export-Date: 2016-08-31 06:38+0000\n"
 
 #: authenticator/main.qml:66 authenticator/main.qml:84
@@ -101,7 +101,7 @@ msgstr ""
 
 #: authenticator/main.qml:88 authenticator/main.qml:123
 msgid "Quit"
-msgstr "เลิก"
+msgstr "ปิด"
 
 #: src/sync-account.cpp:771
 msgid "Server not found"
