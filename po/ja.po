@@ -8,7 +8,7 @@ msgstr ""
 "Project-Id-Version: sync-monitor\n"
 "Report-Msgid-Bugs-To: FULL NAME <EMAIL@ADDRESS>\n"
 "POT-Creation-Date: 2016-08-30 17:13-0300\n"
-"PO-Revision-Date: 2020-04-01 11:22+0000\n"
+"PO-Revision-Date: 2020-07-10 07:31+0000\n"
 "Last-Translator: M.Sugahara <equaaqua@hotmail.com>\n"
 "Language-Team: Japanese <https://translate.ubports.com/projects/ubports/"
 "sync-monitor/ja/>\n"
@@ -17,7 +17,7 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=1; plural=0;\n"
-"X-Generator: Weblate 3.8\n"
+"X-Generator: Weblate 3.11.3\n"
 "X-Launchpad-Export-Date: 2016-08-31 06:38+0000\n"
 
 #: authenticator/main.qml:66 authenticator/main.qml:84
@@ -107,7 +107,7 @@ msgstr ""
 
 #: src/sync-account.cpp:771
 msgid "Server not found"
-msgstr ""
+msgstr "サーバが見つかりません"
 
 #: src/sync-account.cpp:756
 msgid "Server sent bad content"
@@ -120,30 +120,30 @@ msgstr ""
 
 #: src/sync-account.cpp:758
 msgid "Sync canceled"
-msgstr ""
+msgstr "同期をキャンセルしました"
 
 #: src/sync-daemon.cpp:754
 #, qt-format
 msgid "Sync done: %1 (Calendar)"
-msgstr ""
+msgstr "同期完了: %1 (カレンダー)"
 
 #: src/sync-daemon.cpp:619 src/sync-daemon.cpp:641 src/sync-daemon.cpp:735
 #: src/sync-daemon.cpp:753
 msgid "Synchronization"
-msgstr ""
+msgstr "同期"
 
 #: src/sync-account.cpp:773
 msgid "Unknown status"
-msgstr ""
+msgstr "不明なステータス"
 
 #: src/notify-message.cpp:83
 msgid "Yes"
-msgstr ""
+msgstr "はい"
 
 #: src/sync-daemon.cpp:620
 msgid ""
 "Your access key is not valid anymore. Do you want to re-authenticate it?."
-msgstr ""
+msgstr "アクセスキーが無効になっています。再度認証しますか？"
 
 #: authenticator/main.qml:160
 msgid ""
