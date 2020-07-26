@@ -6,8 +6,8 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: sync-monitor\n"
-"Report-Msgid-Bugs-To: FULL NAME <EMAIL@ADDRESS>\n"
-"POT-Creation-Date: 2016-08-30 17:13-0300\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2020-02-20 15:14-0600\n"
 "PO-Revision-Date: 2020-02-17 19:43+0000\n"
 "Last-Translator: Riccardo Riccio <rickyriccio@tiscali.it>\n"
 "Language-Team: Slovenian <https://translate.ubports.com/projects/ubports/"
@@ -16,138 +16,160 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Plural-Forms: nplurals=4; plural=n%100==1 ? 0 : n%100==2 ? 1 : n%100==3 || "
-"n%100==4 ? 2 : 3;\n"
+"Plural-Forms: nplurals=4; plural=n%100==1 ? 0 : n%100==2 ? 1 : n%100==3 || n"
+"%100==4 ? 2 : 3;\n"
 "X-Generator: Weblate 3.8\n"
 "X-Launchpad-Export-Date: 2016-08-31 06:38+0000\n"
 
-#: authenticator/main.qml:66 authenticator/main.qml:84
+#: authenticator/main.qml:153
+msgid "Account sign-in failed. Please select your account to sign back in."
+msgstr ""
+
+#: authenticator/main.qml:60 authenticator/main.qml:78
 msgid "Accounts"
 msgstr "Računi"
 
-#: src/sync-account.cpp:740
+#: src/sync-daemon.cpp:628
+msgid "An account failed to sync. Would you like to sign in again?"
+msgstr ""
+
+#: src/sync-account.cpp:748
 msgid "Command not allowed"
 msgstr "Ukaz ni dovoljen"
 
-#: src/sync-account.cpp:762
+#: src/sync-account.cpp:770
 msgid "Connection certificate has expired"
 msgstr "Potrdilo povezave je izteklo"
 
-#: src/sync-account.cpp:764
+#: src/sync-account.cpp:772
 msgid "Connection certificate is invalid"
 msgstr "Potrdilo povezave ni veljavno"
 
-#: src/sync-account.cpp:760
+#: src/sync-account.cpp:768
 msgid "Connection timeout"
 msgstr ""
 
-#: src/sync-account.cpp:745
-msgid "Disk full"
-msgstr "Disk je poln"
-
-#: src/sync-account.cpp:727
-msgid "Fail to configure account"
-msgstr "Neuspešno nastavljanje računa"
-
-#: src/sync-account.cpp:768
-msgid "Fail to connect with the server"
+#: src/sync-account.cpp:776
+#, fuzzy
+#| msgid "Fail to connect with the server"
+msgid "Could not connect to the server"
 msgstr "Neuspešna povezava na strežniku"
 
-#: authenticator/main.qml:94
-msgid "Fail to load account information."
+#: authenticator/main.qml:88
+#, fuzzy
+#| msgid "Fail to load account information."
+msgid "Could not load account info."
 msgstr "Nemogoče pridobiti informacije o računu."
 
-#: src/sync-account.cpp:749
-msgid "Fail to run \"two-way\" sync"
+#: src/sync-account.cpp:757
+#, fuzzy
+#| msgid "Fail to run \"two-way\" sync"
+msgid "Could not run \"two-way\" sync"
 msgstr "Neuspešna dvostranska sinhronizacija"
 
-#: authenticator/main.qml:119
-msgid "Fail to sync"
-msgstr "Neuspešna sinhronizacija"
-
-#: src/sync-daemon.cpp:736
-#, qt-format
+#: src/sync-daemon.cpp:760
+#, fuzzy, qt-format
+#| msgid ""
+#| "Fail to sync calendar %1 from account %2.\n"
+#| "%3"
 msgid ""
-"Fail to sync calendar %1 from account %2.\n"
+"Could not sync calendar %1 from account %2.\n"
 "%3"
 msgstr ""
 "Nemogoče sinhronizirati koledar %1 iz računa %2.\n"
 "%3"
 
-#: src/sync-account.cpp:747
-msgid "Fail to sync due some remote problem"
+#: src/sync-account.cpp:755
+#, fuzzy
+#| msgid "Fail to sync due some remote problem"
+msgid "Could not sync due to a remote problem"
 msgstr "Neuspešno sinhorniziranje zaradi problema na strežniku"
 
-#: src/sync-account.cpp:751
-msgid "Fail to sync some items"
+#: src/sync-account.cpp:759
+#, fuzzy
+#| msgid "Fail to sync some items"
+msgid "Could not sync some items"
 msgstr "Neuspešna sinhronizacija nekaterih elementov"
 
-#: src/sync-account.cpp:736
+#: src/sync-account.cpp:753
+msgid "Disk full"
+msgstr "Disk je poln"
+
+#: src/sync-account.cpp:735
+#, fuzzy
+#| msgid "Fail to configure account"
+msgid "Failed to configure account"
+msgstr "Neuspešno nastavljanje računa"
+
+#. TRANSLATORS: %1 is an account username, such as an email address
+#: src/sync-daemon.cpp:780
+#, fuzzy, qt-format
+#| msgid "Start sync: %1 (Calendar)"
+msgid "Finished syncing %1 (Calendar)"
+msgstr "Začni sinhronizacijo: %1 (Koledar)"
+
+#: src/sync-account.cpp:744
 msgid "Forbidden / access denied"
 msgstr "Dostop prepovedan"
+
+#: authenticator/main.qml:126
+msgid "Logging in…"
+msgstr ""
 
 #: src/notify-message.cpp:88
 msgid "No"
 msgstr "Ne"
 
-#: src/sync-account.cpp:738
+#: src/sync-account.cpp:746
 msgid "Object not found / unassigned field"
 msgstr ""
 
-#: src/sync-account.cpp:753
-msgid "Process unexpected die."
+#: src/sync-account.cpp:761
+msgid "Process died unexpectedly"
 msgstr ""
 
-#: src/sync-account.cpp:743
+#: src/sync-account.cpp:751
 msgid "Proxy authentication required"
 msgstr ""
 
-#: authenticator/main.qml:88 authenticator/main.qml:123
+#: authenticator/main.qml:82 authenticator/main.qml:130
 msgid "Quit"
 msgstr "Izhod"
 
-#: src/sync-account.cpp:771
+#: src/sync-account.cpp:779
 msgid "Server not found"
 msgstr "Strežnik ne odgovarja"
 
-#: src/sync-account.cpp:756
+#: src/sync-account.cpp:764
 msgid "Server sent bad content"
 msgstr ""
 
-#: src/sync-daemon.cpp:642
-#, qt-format
-msgid "Start sync: %1 (Calendar)"
-msgstr "Začni sinhronizacijo: %1 (Koledar)"
+#: authenticator/main.qml:126
+#, fuzzy
+#| msgid "Fail to sync"
+msgid "Sign in to sync"
+msgstr "Neuspešna sinhronizacija"
 
-#: src/sync-account.cpp:758
+#: src/sync-account.cpp:766
 msgid "Sync canceled"
 msgstr ""
 
-#: src/sync-daemon.cpp:754
-#, qt-format
-msgid "Sync done: %1 (Calendar)"
-msgstr ""
-
-#: src/sync-daemon.cpp:619 src/sync-daemon.cpp:641 src/sync-daemon.cpp:735
-#: src/sync-daemon.cpp:753
+#: src/sync-daemon.cpp:627 src/sync-daemon.cpp:649 src/sync-daemon.cpp:759
+#: src/sync-daemon.cpp:778
 msgid "Synchronization"
 msgstr "Sinhronizacija"
 
-#: src/sync-account.cpp:773
+#. TRANSLATORS: %1 is an account username, such as an email address
+#: src/sync-daemon.cpp:651
+#, fuzzy, qt-format
+#| msgid "Start sync: %1 (Calendar)"
+msgid "Syncing %1 (Calendar)"
+msgstr "Začni sinhronizacijo: %1 (Koledar)"
+
+#: src/sync-account.cpp:781
 msgid "Unknown status"
 msgstr "Ne-zaznano stanje"
 
 #: src/notify-message.cpp:83
 msgid "Yes"
 msgstr "Da"
-
-#: src/sync-daemon.cpp:620
-msgid ""
-"Your access key is not valid anymore. Do you want to re-authenticate it?."
-msgstr ""
-
-#: authenticator/main.qml:160
-msgid ""
-"Your account failed to authenticate while syncing. Please click below to re-"
-"authenticate."
-msgstr ""

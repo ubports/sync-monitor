@@ -8,8 +8,8 @@ msgstr ""
 "Project-Id-Version: sync-monitor\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2020-02-20 15:14-0600\n"
-"PO-Revision-Date: 2020-06-18 19:25+0000\n"
-"Last-Translator: Adrià <adriamartinmor@gmail.com>\n"
+"PO-Revision-Date: 2020-07-17 13:49+0000\n"
+"Last-Translator: Adria <adriamartinmor@gmail.com>\n"
 "Language-Team: Sardinian <https://translate.ubports.com/projects/ubports/"
 "sync-monitor/sc/>\n"
 "Language: sc\n"
@@ -68,36 +68,38 @@ msgid ""
 "Could not sync calendar %1 from account %2.\n"
 "%3"
 msgstr ""
+"Impossìbile sincronizare su calendàriu %1 dae su contu %2.\n"
+"%3"
 
 #: src/sync-account.cpp:755
 msgid "Could not sync due to a remote problem"
-msgstr ""
+msgstr "Impossìbile sincronizare pro more de unu problema remotu"
 
 #: src/sync-account.cpp:759
 msgid "Could not sync some items"
-msgstr ""
+msgstr "Impossìbile sincronizare elementos"
 
 #: src/sync-account.cpp:753
 msgid "Disk full"
-msgstr ""
+msgstr "Su discu est prenu"
 
 #: src/sync-account.cpp:735
 msgid "Failed to configure account"
-msgstr ""
+msgstr "Faddina in sa cunfiguratzione de su contu"
 
 #. TRANSLATORS: %1 is an account username, such as an email address
 #: src/sync-daemon.cpp:780
 #, qt-format
 msgid "Finished syncing %1 (Calendar)"
-msgstr ""
+msgstr "Sincronizatzione cumpleta: %1 (calendàriu)"
 
 #: src/sync-account.cpp:744
 msgid "Forbidden / access denied"
-msgstr ""
+msgstr "Proibidu / atzessu denegadu"
 
 #: authenticator/main.qml:126
 msgid "Logging in…"
-msgstr ""
+msgstr "Identificatzione…"
 
 #: src/notify-message.cpp:88
 msgid "No"
@@ -105,7 +107,7 @@ msgstr "Nono"
 
 #: src/sync-account.cpp:746
 msgid "Object not found / unassigned field"
-msgstr ""
+msgstr "Ogetu no agatadu / campu no assignadu"
 
 #: src/sync-account.cpp:761
 msgid "Process died unexpectedly"
@@ -113,42 +115,42 @@ msgstr ""
 
 #: src/sync-account.cpp:751
 msgid "Proxy authentication required"
-msgstr ""
+msgstr "Autenticatzione rechèdida pro su server intermediàriu"
 
 #: authenticator/main.qml:82 authenticator/main.qml:130
 msgid "Quit"
-msgstr ""
+msgstr "Essi"
 
 #: src/sync-account.cpp:779
 msgid "Server not found"
-msgstr ""
+msgstr "Server no agatadu"
 
 #: src/sync-account.cpp:764
 msgid "Server sent bad content"
-msgstr ""
+msgstr "Su server at imbiadu cuntenutos non curretos"
 
 #: authenticator/main.qml:126
 msgid "Sign in to sync"
-msgstr ""
+msgstr "Identìfica·ti pro sincronizare"
 
 #: src/sync-account.cpp:766
 msgid "Sync canceled"
-msgstr ""
+msgstr "Sincronizatzione annullada"
 
 #: src/sync-daemon.cpp:627 src/sync-daemon.cpp:649 src/sync-daemon.cpp:759
 #: src/sync-daemon.cpp:778
 msgid "Synchronization"
-msgstr ""
+msgstr "Sincronizatzione"
 
 #. TRANSLATORS: %1 is an account username, such as an email address
 #: src/sync-daemon.cpp:651
 #, qt-format
 msgid "Syncing %1 (Calendar)"
-msgstr ""
+msgstr "Sincronizende %1 (calendàriu)"
 
 #: src/sync-account.cpp:781
 msgid "Unknown status"
-msgstr ""
+msgstr "Istadu disconnotu"
 
 #: src/notify-message.cpp:83
 msgid "Yes"

@@ -6,127 +6,162 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: sync-monitor\n"
-"Report-Msgid-Bugs-To: FULL NAME <EMAIL@ADDRESS>\n"
-"POT-Creation-Date: 2016-08-30 17:13-0300\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2020-02-20 15:14-0600\n"
 "PO-Revision-Date: 2017-02-22 09:13+0000\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: Hebrew <he@li.org>\n"
+"Language: he\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "X-Launchpad-Export-Date: 2017-02-23 06:46+0000\n"
 "X-Generator: Launchpad (build 18326)\n"
 
-#: authenticator/main.qml:66 authenticator/main.qml:84
+#: authenticator/main.qml:153
+msgid "Account sign-in failed. Please select your account to sign back in."
+msgstr ""
+
+#: authenticator/main.qml:60 authenticator/main.qml:78
 msgid "Accounts"
 msgstr ""
 
-#: ../src/sync-account.cpp:752
+#: src/sync-daemon.cpp:628
+msgid "An account failed to sync. Would you like to sign in again?"
+msgstr ""
+
+#: src/sync-account.cpp:748
 msgid "Command not allowed"
 msgstr "הפקודה אינה מורשית"
 
-#: ../src/sync-account.cpp:774
+#: src/sync-account.cpp:770
 msgid "Connection certificate has expired"
 msgstr "אישור החיבור פג"
 
-#: ../src/sync-account.cpp:776
+#: src/sync-account.cpp:772
 msgid "Connection certificate is invalid"
 msgstr "אישור החיבור שגוי"
 
-#: ../src/sync-account.cpp:772
+#: src/sync-account.cpp:768
 msgid "Connection timeout"
 msgstr "תם הזמן המוקצב לחיבור"
 
-#: ../src/sync-account.cpp:757
-msgid "Disk full"
-msgstr "הכונן מלא"
-
-#: ../src/sync-account.cpp:739
-msgid "Fail to configure account"
-msgstr "הגדרת החשבון נכשלה"
-
-#: ../src/sync-account.cpp:780
-msgid "Fail to connect with the server"
+#: src/sync-account.cpp:776
+#, fuzzy
+#| msgid "Fail to connect with the server"
+msgid "Could not connect to the server"
 msgstr "ההתחברות לשרת נכשלה"
 
-#: authenticator/main.qml:94
-msgid "Fail to load account information."
+#: authenticator/main.qml:88
+msgid "Could not load account info."
 msgstr ""
 
-#: ../src/sync-account.cpp:761
-msgid "Fail to run \"two-way\" sync"
+#: src/sync-account.cpp:757
+#, fuzzy
+#| msgid "Fail to run \"two-way\" sync"
+msgid "Could not run \"two-way\" sync"
 msgstr "הסנכרון הדו־כיווני נכשל."
 
-#: authenticator/main.qml:119
-msgid "Fail to sync"
-msgstr ""
-
-#: ../src/sync-daemon.cpp:749
+#: src/sync-daemon.cpp:760
+#, fuzzy, qt-format
+#| msgid ""
+#| "Fail to sync calendar %1 from account %2.\n"
+#| "%3"
 msgid ""
-"Fail to sync calendar %1 from account %2.\n"
+"Could not sync calendar %1 from account %2.\n"
 "%3"
 msgstr ""
 "סנכרון היומן %1 מהחשבון %2 נכשל.\n"
 "%3"
 
-#: ../src/sync-account.cpp:759
-msgid "Fail to sync due some remote problem"
+#: src/sync-account.cpp:755
+#, fuzzy
+#| msgid "Fail to sync due some remote problem"
+msgid "Could not sync due to a remote problem"
 msgstr "הסנכרון נכשל עקב בעיה מרוחקת"
 
-#: ../src/sync-account.cpp:763
-msgid "Fail to sync some items"
+#: src/sync-account.cpp:759
+#, fuzzy
+#| msgid "Fail to sync some items"
+msgid "Could not sync some items"
 msgstr "סנכרון חלק מהפריטים נכשל"
 
-#: ../src/sync-account.cpp:748
+#: src/sync-account.cpp:753
+msgid "Disk full"
+msgstr "הכונן מלא"
+
+#: src/sync-account.cpp:735
+#, fuzzy
+#| msgid "Fail to configure account"
+msgid "Failed to configure account"
+msgstr "הגדרת החשבון נכשלה"
+
+#. TRANSLATORS: %1 is an account username, such as an email address
+#: src/sync-daemon.cpp:780
+#, fuzzy, qt-format
+#| msgid "Start sync: %1 (Calendar)"
+msgid "Finished syncing %1 (Calendar)"
+msgstr "התחלת הסנכרון: %1 (יומן)"
+
+#: src/sync-account.cpp:744
 msgid "Forbidden / access denied"
 msgstr "הגישה נדחתה / נחסמה"
+
+#: authenticator/main.qml:126
+msgid "Logging in…"
+msgstr ""
 
 #: src/notify-message.cpp:88
 msgid "No"
 msgstr ""
 
-#: ../src/sync-account.cpp:750
+#: src/sync-account.cpp:746
 msgid "Object not found / unassigned field"
 msgstr "הפריט לא נמצא / שדה לא מוקצה"
 
-#: ../src/sync-account.cpp:765
-msgid "Process unexpected die."
+#: src/sync-account.cpp:761
+#, fuzzy
+#| msgid "Process unexpected die."
+msgid "Process died unexpectedly"
 msgstr "התהליך נהרג במפתיע."
 
-#: ../src/sync-account.cpp:755
+#: src/sync-account.cpp:751
 msgid "Proxy authentication required"
 msgstr "נדרשת הזדהות מול המחשב המתווך"
 
-#: authenticator/main.qml:88 authenticator/main.qml:123
+#: authenticator/main.qml:82 authenticator/main.qml:130
 msgid "Quit"
 msgstr ""
 
-#: ../src/sync-account.cpp:783
+#: src/sync-account.cpp:779
 msgid "Server not found"
 msgstr "השרת לא נמצא"
 
-#: ../src/sync-account.cpp:768
+#: src/sync-account.cpp:764
 msgid "Server sent bad content"
 msgstr "השרת שלח תוכן פגום"
 
-#: ../src/sync-daemon.cpp:642
-msgid "Start sync: %1 (Calendar)"
-msgstr "התחלת הסנכרון: %1 (יומן)"
+#: authenticator/main.qml:126
+msgid "Sign in to sync"
+msgstr ""
 
-#: ../src/sync-account.cpp:770
+#: src/sync-account.cpp:766
 msgid "Sync canceled"
 msgstr "הסנכרון בוטל"
 
-#: ../src/sync-daemon.cpp:768
-msgid "Sync done: %1 (Calendar)"
-msgstr "הסנכרון הושלם: %1 (יומן)"
-
-#: ../src/sync-daemon.cpp:619 ../src/sync-daemon.cpp:641
-#: ../src/sync-daemon.cpp:748 ../src/sync-daemon.cpp:767
+#: src/sync-daemon.cpp:627 src/sync-daemon.cpp:649 src/sync-daemon.cpp:759
+#: src/sync-daemon.cpp:778
 msgid "Synchronization"
 msgstr "סנכרון"
 
-#: ../src/sync-account.cpp:785
+#. TRANSLATORS: %1 is an account username, such as an email address
+#: src/sync-daemon.cpp:651
+#, fuzzy, qt-format
+#| msgid "Sync done: %1 (Calendar)"
+msgid "Syncing %1 (Calendar)"
+msgstr "הסנכרון הושלם: %1 (יומן)"
+
+#: src/sync-account.cpp:781
 msgid "Unknown status"
 msgstr "מצב בלתי ידוע"
 
@@ -134,13 +169,6 @@ msgstr "מצב בלתי ידוע"
 msgid "Yes"
 msgstr ""
 
-#: ../src/sync-daemon.cpp:620
-msgid ""
-"Your access key is not valid anymore. Do you want to re-authenticate it?."
-msgstr "מפתח הגישה שלך לא תקין עוד. לאמת אותו מחדש?"
-
-#: authenticator/main.qml:160
-msgid ""
-"Your account failed to authenticate while syncing. Please click below to re-"
-"authenticate."
-msgstr ""
+#~ msgid ""
+#~ "Your access key is not valid anymore. Do you want to re-authenticate it?."
+#~ msgstr "מפתח הגישה שלך לא תקין עוד. לאמת אותו מחדש?"
