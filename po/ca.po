@@ -6,10 +6,10 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: sync-monitor\n"
-"Report-Msgid-Bugs-To: FULL NAME <EMAIL@ADDRESS>\n"
-"POT-Creation-Date: 2016-08-30 17:13-0300\n"
-"PO-Revision-Date: 2020-01-21 00:20+0000\n"
-"Last-Translator: Joan CiberSheep <cibersheep@gmail.com>\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2020-02-20 15:14-0600\n"
+"PO-Revision-Date: 2020-07-26 17:18+0000\n"
+"Last-Translator: Adolfo Jayme Barrientos <fitojb@ubuntu.com>\n"
 "Language-Team: Catalan <https://translate.ubports.com/projects/ubports/"
 "sync-monitor/ca/>\n"
 "Language: ca\n"
@@ -17,119 +17,139 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=n != 1;\n"
-"X-Generator: Weblate 3.8\n"
+"X-Generator: Weblate 3.11.3\n"
 "X-Launchpad-Export-Date: 2016-12-08 05:08+0000\n"
 
-#: authenticator/main.qml:66 authenticator/main.qml:84
+#: authenticator/main.qml:153
+msgid "Account sign-in failed. Please select your account to sign back in."
+msgstr ""
+"Ha fallat l'inici de sessió amb el compte. Seleccioneu el vostre compte per "
+"a iniciar una sessió nova."
+
+#: authenticator/main.qml:60 authenticator/main.qml:78
 msgid "Accounts"
 msgstr "Comptes"
 
-#: ../src/sync-account.cpp:752
+#: src/sync-daemon.cpp:628
+msgid "An account failed to sync. Would you like to sign in again?"
+msgstr ""
+"Ha fallat la sincronització d'un compte. Voleu iniciar la sessió novament?"
+
+#: src/sync-account.cpp:748
 msgid "Command not allowed"
 msgstr "Ordre no permesa"
 
-#: ../src/sync-account.cpp:774
+#: src/sync-account.cpp:770
 msgid "Connection certificate has expired"
 msgstr "Ha vençut el certificat de la connexió"
 
-#: ../src/sync-account.cpp:776
+#: src/sync-account.cpp:772
 msgid "Connection certificate is invalid"
 msgstr "El certificat de la connexió no és vàlid"
 
-#: ../src/sync-account.cpp:772
+#: src/sync-account.cpp:768
 msgid "Connection timeout"
 msgstr "S'ha excedit el temps màxim de connexió"
 
-#: ../src/sync-account.cpp:757
+#: src/sync-account.cpp:776
+msgid "Could not connect to the server"
+msgstr "No s'ha pogut connectar amb el servidor"
+
+#: authenticator/main.qml:88
+msgid "Could not load account info."
+msgstr "No s'ha pogut carregar la informació del compte."
+
+#: src/sync-account.cpp:757
+msgid "Could not run \"two-way\" sync"
+msgstr "No s'ha pogut executar la sincronització «doble via»"
+
+#: src/sync-daemon.cpp:760
+#, qt-format
+msgid ""
+"Could not sync calendar %1 from account %2.\n"
+"%3"
+msgstr ""
+"No s'ha pogut sincronitzar el calendari %1 des del compte %2.\n"
+"%3"
+
+#: src/sync-account.cpp:755
+msgid "Could not sync due to a remote problem"
+msgstr "No s'ha pogut sincronitzar a causa d'errors al servidor remot"
+
+#: src/sync-account.cpp:759
+msgid "Could not sync some items"
+msgstr "No s'han pogut sincronitzar alguns elements"
+
+#: src/sync-account.cpp:753
 msgid "Disk full"
 msgstr "El disc està ple"
 
-#: ../src/sync-account.cpp:739
-msgid "Fail to configure account"
-msgstr "No s'ha pogut configurar el compte"
+#: src/sync-account.cpp:735
+msgid "Failed to configure account"
+msgstr "Ha fallat la configuració del compte"
 
-#: ../src/sync-account.cpp:780
-msgid "Fail to connect with the server"
-msgstr "Ha fallat la connexió amb el servidor"
+#. TRANSLATORS: %1 is an account username, such as an email address
+#: src/sync-daemon.cpp:780
+#, qt-format
+msgid "Finished syncing %1 (Calendar)"
+msgstr "Ha finalitzat la sincronització de: %1 (calendari)"
 
-#: authenticator/main.qml:94
-msgid "Fail to load account information."
-msgstr "No s'ha pogut carregar la informació del compte."
-
-#: ../src/sync-account.cpp:761
-msgid "Fail to run \"two-way\" sync"
-msgstr "No s'ha pogut executar sincronització «doble-via»"
-
-#: authenticator/main.qml:119
-msgid "Fail to sync"
-msgstr "No s'ha pogut sincronitzar"
-
-#: ../src/sync-daemon.cpp:749
-msgid ""
-"Fail to sync calendar %1 from account %2.\n"
-"%3"
-msgstr ""
-"Ha fallat la sincronització del calendari %1 des del compte %2.\n"
-"%3"
-
-#: ../src/sync-account.cpp:759
-msgid "Fail to sync due some remote problem"
-msgstr "Ha fallat la sincronització degut a errors al servidor remot"
-
-#: ../src/sync-account.cpp:763
-msgid "Fail to sync some items"
-msgstr "No s'han pogut sincronitzar alguns elements"
-
-#: ../src/sync-account.cpp:748
+#: src/sync-account.cpp:744
 msgid "Forbidden / access denied"
 msgstr "No és permés/accés denegat"
+
+#: authenticator/main.qml:126
+msgid "Logging in…"
+msgstr "S'està iniciant la sessió…"
 
 #: src/notify-message.cpp:88
 msgid "No"
 msgstr "No"
 
-#: ../src/sync-account.cpp:750
+#: src/sync-account.cpp:746
 msgid "Object not found / unassigned field"
 msgstr "Objecte no trobat / camp no assignat"
 
-#: ../src/sync-account.cpp:765
-msgid "Process unexpected die."
-msgstr "El procés ha mort inesperadament."
+#: src/sync-account.cpp:761
+msgid "Process died unexpectedly"
+msgstr "El procés ha mort inesperadament"
 
-#: ../src/sync-account.cpp:755
+#: src/sync-account.cpp:751
 msgid "Proxy authentication required"
 msgstr "Cal autenticació per al servidor intermediari"
 
-#: authenticator/main.qml:88 authenticator/main.qml:123
+#: authenticator/main.qml:82 authenticator/main.qml:130
 msgid "Quit"
 msgstr "Surt"
 
-#: ../src/sync-account.cpp:783
+#: src/sync-account.cpp:779
 msgid "Server not found"
 msgstr "No es troba el servidor"
 
-#: ../src/sync-account.cpp:768
+#: src/sync-account.cpp:764
 msgid "Server sent bad content"
 msgstr "El servidor ha enviat continguts incorrectes"
 
-#: ../src/sync-daemon.cpp:642
-msgid "Start sync: %1 (Calendar)"
-msgstr "Inicia la sincronització: %1 (Calendari)"
+#: authenticator/main.qml:126
+msgid "Sign in to sync"
+msgstr "Inicieu una sessió per a sincronitzar"
 
-#: ../src/sync-account.cpp:770
+#: src/sync-account.cpp:766
 msgid "Sync canceled"
 msgstr "Sincronització cancel·lada"
 
-#: ../src/sync-daemon.cpp:768
-msgid "Sync done: %1 (Calendar)"
-msgstr "Sincronització acabada: %1 (Calendari)"
-
-#: ../src/sync-daemon.cpp:619 ../src/sync-daemon.cpp:641
-#: ../src/sync-daemon.cpp:748 ../src/sync-daemon.cpp:767
+#: src/sync-daemon.cpp:627 src/sync-daemon.cpp:649 src/sync-daemon.cpp:759
+#: src/sync-daemon.cpp:778
 msgid "Synchronization"
 msgstr "Sincronització"
 
-#: ../src/sync-account.cpp:785
+#. TRANSLATORS: %1 is an account username, such as an email address
+#: src/sync-daemon.cpp:651
+#, qt-format
+msgid "Syncing %1 (Calendar)"
+msgstr "S'està sincronitzant %1 (calendari)"
+
+#: src/sync-account.cpp:781
 msgid "Unknown status"
 msgstr "Se'n desconeix l'estat"
 
@@ -137,16 +157,14 @@ msgstr "Se'n desconeix l'estat"
 msgid "Yes"
 msgstr "Sí"
 
-#: ../src/sync-daemon.cpp:620
-msgid ""
-"Your access key is not valid anymore. Do you want to re-authenticate it?."
-msgstr ""
-"La vostra clau d'accés ja no és vàlida. Voleu tornar-la a autenticar?"
+#~ msgid ""
+#~ "Your access key is not valid anymore. Do you want to re-authenticate it?."
+#~ msgstr ""
+#~ "La vostra clau d'accés ja no és vàlida. Voleu tornar-la a autenticar?"
 
-#: authenticator/main.qml:160
-msgid ""
-"Your account failed to authenticate while syncing. Please click below to re-"
-"authenticate."
-msgstr ""
-"Ha fallat l'autenticació del vostre compte a la sincronització. Si us plau "
-"cliqueu a sota per tornar-vos a autenticar."
+#~ msgid ""
+#~ "Your account failed to authenticate while syncing. Please click below to "
+#~ "re-authenticate."
+#~ msgstr ""
+#~ "Ha fallat l'autenticació del vostre compte a la sincronització. Si us "
+#~ "plau cliqueu a sota per tornar-vos a autenticar."
