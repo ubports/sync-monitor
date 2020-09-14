@@ -8,55 +8,59 @@ msgstr ""
 "Project-Id-Version: sync-monitor\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2020-02-20 15:14-0600\n"
-"PO-Revision-Date: 2016-08-30 19:20+0000\n"
-"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
-"Language-Team: Greek <el@li.org>\n"
+"PO-Revision-Date: 2020-08-16 08:17+0000\n"
+"Last-Translator: Efstathios Iosifidis <iefstathios@gmail.com>\n"
+"Language-Team: Greek <https://translate.ubports.com/projects/ubports/"
+"sync-monitor/el/>\n"
 "Language: el\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=n != 1;\n"
+"X-Generator: Weblate 3.11.3\n"
 "X-Launchpad-Export-Date: 2016-08-31 06:38+0000\n"
-"X-Generator: Launchpad (build 18179)\n"
 
 #: authenticator/main.qml:153
 msgid "Account sign-in failed. Please select your account to sign back in."
 msgstr ""
+"Η σύνδεση λογαριασμού απέτυχε. Επιλέξτε τον λογαριασμό σας για να συνδεθείτε "
+"ξανά."
 
 #: authenticator/main.qml:60 authenticator/main.qml:78
 msgid "Accounts"
-msgstr ""
+msgstr "Λογαριασμοί"
 
 #: src/sync-daemon.cpp:628
 msgid "An account failed to sync. Would you like to sign in again?"
-msgstr ""
+msgstr "Ο λογαριασμός απέτυχε να συγχρονιστεί. Θέλετε να συνδεθείτε ξανά;"
 
 #: src/sync-account.cpp:748
 msgid "Command not allowed"
-msgstr ""
+msgstr "Η εντολή δεν επιτρέπεται"
 
 #: src/sync-account.cpp:770
 msgid "Connection certificate has expired"
-msgstr ""
+msgstr "Το πιστοποιητικό σύνδεσης έχει λήξει"
 
 #: src/sync-account.cpp:772
 msgid "Connection certificate is invalid"
-msgstr ""
+msgstr "Το πιστοποιητικό σύνδεσης δεν είναι έγκυρο"
 
 #: src/sync-account.cpp:768
 msgid "Connection timeout"
-msgstr ""
+msgstr "Λήξη χρονικού ορίου σύνδεσης"
 
 #: src/sync-account.cpp:776
 msgid "Could not connect to the server"
-msgstr ""
+msgstr "Αδυναμία σύνδεσης στον διακομιστή"
 
 #: authenticator/main.qml:88
 msgid "Could not load account info."
-msgstr ""
+msgstr "Αδυναμία φόρτωσης των πληροφοριών λογαριασμού."
 
 #: src/sync-account.cpp:757
 msgid "Could not run \"two-way\" sync"
-msgstr ""
+msgstr "Δεν ήταν δυνατή η εκτέλεση «αμφίδρομου» συγχρονισμού"
 
 #: src/sync-daemon.cpp:760
 #, qt-format
@@ -64,88 +68,90 @@ msgid ""
 "Could not sync calendar %1 from account %2.\n"
 "%3"
 msgstr ""
+"Αδυναμία συγχρονισμού του ημερολογίου %1 από το λογαριασμό%2.\n"
+"%3"
 
 #: src/sync-account.cpp:755
 msgid "Could not sync due to a remote problem"
-msgstr ""
+msgstr "Αδυναμία συγχρονισμού λόγω απομακρυσμένου προβλήματος"
 
 #: src/sync-account.cpp:759
 msgid "Could not sync some items"
-msgstr ""
+msgstr "Αδυναμία συγχρονισμού ορισμένων στοιχείων"
 
 #: src/sync-account.cpp:753
 msgid "Disk full"
-msgstr ""
+msgstr "Πλήρης δίσκος"
 
 #: src/sync-account.cpp:735
 msgid "Failed to configure account"
-msgstr ""
+msgstr "Αποτυχία ρύθμισης λογαριασμού"
 
 #. TRANSLATORS: %1 is an account username, such as an email address
 #: src/sync-daemon.cpp:780
 #, qt-format
 msgid "Finished syncing %1 (Calendar)"
-msgstr ""
+msgstr "Ολοκληρώθηκε ο συγχρονισμός %1 (Ημερολόγιο)"
 
 #: src/sync-account.cpp:744
 msgid "Forbidden / access denied"
-msgstr ""
+msgstr "Απαγορεύεται / δεν επιτρέπεται η πρόσβαση"
 
 #: authenticator/main.qml:126
 msgid "Logging in…"
-msgstr ""
+msgstr "Γίνεται σύνδεση…"
 
 #: src/notify-message.cpp:88
 msgid "No"
-msgstr ""
+msgstr "Όχι"
 
 #: src/sync-account.cpp:746
 msgid "Object not found / unassigned field"
-msgstr ""
+msgstr "Το αντικείμενο δεν βρέθηκε / το πεδίο δεν έχει εκχωρηθεί"
 
 #: src/sync-account.cpp:761
 msgid "Process died unexpectedly"
-msgstr ""
+msgstr "Η διεργασία τερματίστηκε απρόσμενα"
 
 #: src/sync-account.cpp:751
 msgid "Proxy authentication required"
-msgstr ""
+msgstr "Απαιτείται έλεγχος ταυτότητας διακομιστή μεσολάβησης"
 
 #: authenticator/main.qml:82 authenticator/main.qml:130
 msgid "Quit"
-msgstr ""
+msgstr "'Εξοδος"
 
 #: src/sync-account.cpp:779
 msgid "Server not found"
-msgstr ""
+msgstr "Ο διακομιστής δεν βρέθηκε"
 
 #: src/sync-account.cpp:764
 msgid "Server sent bad content"
-msgstr ""
+msgstr "Ο διακομιστής έστειλε εσφαλμένο περιεχόμενο"
 
 #: authenticator/main.qml:126
 msgid "Sign in to sync"
-msgstr ""
+msgstr "Συνδεθείτε για συγχρονισμό"
 
 #: src/sync-account.cpp:766
 msgid "Sync canceled"
-msgstr ""
+msgstr "Ο συγχρονισμός ακυρώθηκε"
 
 #: src/sync-daemon.cpp:627 src/sync-daemon.cpp:649 src/sync-daemon.cpp:759
 #: src/sync-daemon.cpp:778
 msgid "Synchronization"
-msgstr ""
+msgstr "Συγχρονισμός"
 
 #. TRANSLATORS: %1 is an account username, such as an email address
 #: src/sync-daemon.cpp:651
 #, qt-format
 msgid "Syncing %1 (Calendar)"
-msgstr ""
+msgstr "Γίνεται συγχρονισμός %1 (Ημερολόγιο)"
 
 #: src/sync-account.cpp:781
 msgid "Unknown status"
-msgstr ""
+msgstr "Άγνωστη κατάσταση"
 
 #: src/notify-message.cpp:83
 msgid "Yes"
-msgstr ""
+msgstr "Ναι"

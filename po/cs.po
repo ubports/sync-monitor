@@ -8,8 +8,8 @@ msgstr ""
 "Project-Id-Version: sync-monitor\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2020-02-20 15:14-0600\n"
-"PO-Revision-Date: 2020-07-26 09:36+0000\n"
-"Last-Translator: Milan Korecký <milan.korecky@gmail.com>\n"
+"PO-Revision-Date: 2020-08-02 05:03+0000\n"
+"Last-Translator: c4pp4 <c4pp4@seznam.cz>\n"
 "Language-Team: Czech <https://translate.ubports.com/projects/ubports/"
 "sync-monitor/cs/>\n"
 "Language: cs\n"
@@ -109,7 +109,7 @@ msgstr "Objekt nenalezen / nepřiřazená kolonka"
 
 #: src/sync-account.cpp:761
 msgid "Process died unexpectedly"
-msgstr "Proces byl neočekávaně ukončen."
+msgstr "Proces byl neočekávaně ukončen"
 
 #: src/sync-account.cpp:751
 msgid "Proxy authentication required"
