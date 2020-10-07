@@ -8,8 +8,8 @@ msgstr ""
 "Project-Id-Version: sync-monitor\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2020-02-20 15:14-0600\n"
-"PO-Revision-Date: 2020-04-12 12:23+0000\n"
-"Last-Translator: Ari Börde Kröyer <ari.kroyer@online.no>\n"
+"PO-Revision-Date: 2020-08-09 07:30+0000\n"
+"Last-Translator: Allan Nordhøy <epost@anotheragency.no>\n"
 "Language-Team: Norwegian Bokmål <https://translate.ubports.com/projects/"
 "ubports/sync-monitor/nb/>\n"
 "Language: nb\n"
@@ -17,12 +17,12 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=n != 1;\n"
-"X-Generator: Weblate 3.8\n"
+"X-Generator: Weblate 3.11.3\n"
 "X-Launchpad-Export-Date: 2016-09-13 06:30+0000\n"
 
 #: authenticator/main.qml:153
 msgid "Account sign-in failed. Please select your account to sign back in."
-msgstr ""
+msgstr "Innlogging med konto mislyktes. Velg kontoen du ønsker å logge inn med."
 
 #: authenticator/main.qml:60 authenticator/main.qml:78
 msgid "Accounts"
@@ -30,7 +30,7 @@ msgstr "Kontoer"
 
 #: src/sync-daemon.cpp:628
 msgid "An account failed to sync. Would you like to sign in again?"
-msgstr ""
+msgstr "Klarte ikke å synkronisere konto. Ønsker du å logge inn igjen?"
 
 #: src/sync-account.cpp:748
 msgid "Command not allowed"
@@ -49,28 +49,19 @@ msgid "Connection timeout"
 msgstr "Tidsavbrudd på tilkobling"
 
 #: src/sync-account.cpp:776
-#, fuzzy
-#| msgid "Fail to connect with the server"
 msgid "Could not connect to the server"
 msgstr "Klarte ikke å koble til tjener"
 
 #: authenticator/main.qml:88
-#, fuzzy
-#| msgid "Fail to load account information."
 msgid "Could not load account info."
 msgstr "Kunne ikke laste inn kontoinfo."
 
 #: src/sync-account.cpp:757
-#, fuzzy
-#| msgid "Fail to run \"two-way\" sync"
 msgid "Could not run \"two-way\" sync"
 msgstr "Toveissynkronisering mislyktes"
 
 #: src/sync-daemon.cpp:760
-#, fuzzy, qt-format
-#| msgid ""
-#| "Fail to sync calendar %1 from account %2.\n"
-#| "%3"
+#, qt-format
 msgid ""
 "Could not sync calendar %1 from account %2.\n"
 "%3"
@@ -79,14 +70,10 @@ msgstr ""
 "%3"
 
 #: src/sync-account.cpp:755
-#, fuzzy
-#| msgid "Fail to sync due some remote problem"
 msgid "Could not sync due to a remote problem"
 msgstr "Synkronisering mislyktes på grunn av eksternt problem"
 
 #: src/sync-account.cpp:759
-#, fuzzy
-#| msgid "Fail to sync some items"
 msgid "Could not sync some items"
 msgstr "Noen elementer ble ikke synkronisert"
 
@@ -95,8 +82,6 @@ msgid "Disk full"
 msgstr "Disken er full"
 
 #: src/sync-account.cpp:735
-#, fuzzy
-#| msgid "Fail to configure account"
 msgid "Failed to configure account"
 msgstr "Kunne ikke sette opp konto"
 
@@ -113,7 +98,7 @@ msgstr "Ingen tilgang"
 
 #: authenticator/main.qml:126
 msgid "Logging in…"
-msgstr ""
+msgstr "Logger inn …"
 
 #: src/notify-message.cpp:88
 msgid "No"
@@ -124,8 +109,6 @@ msgid "Object not found / unassigned field"
 msgstr "Fant ikke objekt / felt ikke tildelt"
 
 #: src/sync-account.cpp:761
-#, fuzzy
-#| msgid "Process unexpected die."
 msgid "Process died unexpectedly"
 msgstr "Uventet prosessavbrudd."
 
@@ -146,10 +129,8 @@ msgid "Server sent bad content"
 msgstr "Ugyldig innhold fra tjener"
 
 #: authenticator/main.qml:126
-#, fuzzy
-#| msgid "Fail to sync"
 msgid "Sign in to sync"
-msgstr "Klarte ikke å synkronisere"
+msgstr "Logg inn for å synkronisere"
 
 #: src/sync-account.cpp:766
 msgid "Sync canceled"
@@ -165,7 +146,7 @@ msgstr "Synkronisering"
 #, fuzzy, qt-format
 #| msgid "Sync done: %1 (Calendar)"
 msgid "Syncing %1 (Calendar)"
-msgstr "Synkronisering fullført: %1 (kalender)"
+msgstr "Synkroniserer %1 (Kalender)"
 
 #: src/sync-account.cpp:781
 msgid "Unknown status"
