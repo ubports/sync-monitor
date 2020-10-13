@@ -8,10 +8,10 @@ msgstr ""
 "Project-Id-Version: sync-monitor\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2020-02-20 15:14-0600\n"
-"PO-Revision-Date: 2020-07-18 19:25+0000\n"
-"Last-Translator: Josué <j2g2rp@gmail.com>\n"
-"Language-Team: Spanish <https://translate.ubports.com/projects/ubports/sync-"
-"monitor/es/>\n"
+"PO-Revision-Date: 2020-10-08 20:16+0000\n"
+"Last-Translator: Adolfo Jayme Barrientos <fitojb@ubuntu.com>\n"
+"Language-Team: Spanish <https://translate.ubports.com/projects/ubports/"
+"sync-monitor/es/>\n"
 "Language: es\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -23,6 +23,7 @@ msgstr ""
 #: authenticator/main.qml:153
 msgid "Account sign-in failed. Please select your account to sign back in."
 msgstr ""
+"Falló el acceso a la cuenta. Seleccione su cuenta para volver a acceder."
 
 #: authenticator/main.qml:60 authenticator/main.qml:78
 msgid "Accounts"
@@ -30,7 +31,7 @@ msgstr "Cuentas"
 
 #: src/sync-daemon.cpp:628
 msgid "An account failed to sync. Would you like to sign in again?"
-msgstr ""
+msgstr "No se pudo sincronizar una cuenta. ¿Quiere acceder de nuevo?"
 
 #: src/sync-account.cpp:748
 msgid "Command not allowed"
@@ -49,61 +50,47 @@ msgid "Connection timeout"
 msgstr "Expiró la conexión"
 
 #: src/sync-account.cpp:776
-#, fuzzy
-#| msgid "Fail to connect with the server"
 msgid "Could not connect to the server"
-msgstr "Falló la conexión con el servidor"
+msgstr "No se pudo conectar con el servidor"
 
 #: authenticator/main.qml:88
-#, fuzzy
-#| msgid "Fail to load account information."
 msgid "Could not load account info."
-msgstr "Fallo al cargar información de la cuenta."
+msgstr "No se pudo cargar la información de la cuenta."
 
 #: src/sync-account.cpp:757
-#, fuzzy
-#| msgid "Fail to run \"two-way\" sync"
 msgid "Could not run \"two-way\" sync"
-msgstr "Fallo al realizar la sincronización «de dos vías»"
+msgstr "No se pudo ejecutar la sincronización «de dos vías»"
 
 #: src/sync-daemon.cpp:760
-#, fuzzy, qt-format
-#| msgid ""
-#| "Fail to sync calendar %1 from account %2.\n"
-#| "%3"
+#, qt-format
 msgid ""
 "Could not sync calendar %1 from account %2.\n"
 "%3"
-msgstr "Fallo al sincronizar el calendario %1 desde la cuenta %2"
+msgstr ""
+"No se pudo sincronizar el calendario %1 desde la cuenta %2.\n"
+"%3"
 
 #: src/sync-account.cpp:755
-#, fuzzy
-#| msgid "Fail to sync due some remote problem"
 msgid "Could not sync due to a remote problem"
-msgstr "Falló al sincronizar debido a un problema remoto"
+msgstr "No se pudo sincronizar debido a un problema remoto"
 
 #: src/sync-account.cpp:759
-#, fuzzy
-#| msgid "Fail to sync some items"
 msgid "Could not sync some items"
-msgstr "Fallo al sincronizar algunos elementos"
+msgstr "No se pudieron sincronizar algunos elementos"
 
 #: src/sync-account.cpp:753
 msgid "Disk full"
 msgstr "Disco lleno"
 
 #: src/sync-account.cpp:735
-#, fuzzy
-#| msgid "Fail to configure account"
 msgid "Failed to configure account"
-msgstr "Error al configurar la cuenta"
+msgstr "No se pudo configurar la cuenta"
 
 #. TRANSLATORS: %1 is an account username, such as an email address
 #: src/sync-daemon.cpp:780
-#, fuzzy, qt-format
-#| msgid "Start sync: %1 (Calendar)"
+#, qt-format
 msgid "Finished syncing %1 (Calendar)"
-msgstr "Sincronización iniciada: %1 (Calendario)"
+msgstr "Finalizó la sincronización de %1 (calendario)"
 
 #: src/sync-account.cpp:744
 msgid "Forbidden / access denied"
@@ -111,7 +98,7 @@ msgstr "Prohibido/acceso denegado"
 
 #: authenticator/main.qml:126
 msgid "Logging in…"
-msgstr ""
+msgstr "Accediendo…"
 
 #: src/notify-message.cpp:88
 msgid "No"
@@ -122,14 +109,12 @@ msgid "Object not found / unassigned field"
 msgstr "Objeto no encontrado/campo sin asignar"
 
 #: src/sync-account.cpp:761
-#, fuzzy
-#| msgid "Process unexpected die."
 msgid "Process died unexpectedly"
-msgstr "El proceso terminó de forma inesperada."
+msgstr "El proceso terminó de forma inesperada"
 
 #: src/sync-account.cpp:751
 msgid "Proxy authentication required"
-msgstr "Requerida autenticación del Proxy"
+msgstr "Se necesita autenticación del «proxy»"
 
 #: authenticator/main.qml:82 authenticator/main.qml:130
 msgid "Quit"
@@ -144,10 +129,8 @@ msgid "Server sent bad content"
 msgstr "El servidor envió contenido erróneo"
 
 #: authenticator/main.qml:126
-#, fuzzy
-#| msgid "Fail to sync"
 msgid "Sign in to sync"
-msgstr "Fallo al sincronizar"
+msgstr "Acceder para sincronizar"
 
 #: src/sync-account.cpp:766
 msgid "Sync canceled"
@@ -160,10 +143,9 @@ msgstr "Sincronización"
 
 #. TRANSLATORS: %1 is an account username, such as an email address
 #: src/sync-daemon.cpp:651
-#, fuzzy, qt-format
-#| msgid "Sync done: %1 (Calendar)"
+#, qt-format
 msgid "Syncing %1 (Calendar)"
-msgstr "Sincronizacion finalizada: %1 (Calendario)"
+msgstr "Sincronizando %1 (calendario)"
 
 #: src/sync-account.cpp:781
 msgid "Unknown status"
