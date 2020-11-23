@@ -8,21 +8,21 @@ msgstr ""
 "Project-Id-Version: sync-monitor\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2020-02-20 15:14-0600\n"
-"PO-Revision-Date: 2020-02-11 12:21+0000\n"
-"Last-Translator: Oi Suomi On! <oisuomion@protonmail.com>\n"
-"Language-Team: Finnish <https://translate.ubports.com/projects/ubports/sync-"
-"monitor/fi/>\n"
+"PO-Revision-Date: 2020-11-23 18:30+0000\n"
+"Last-Translator: Jiri Grönroos <jiri.gronroos@iki.fi>\n"
+"Language-Team: Finnish <https://translate.ubports.com/projects/ubports/"
+"sync-monitor/fi/>\n"
 "Language: fi\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=n != 1;\n"
-"X-Generator: Weblate 3.8\n"
+"X-Generator: Weblate 3.11.3\n"
 "X-Launchpad-Export-Date: 2016-08-31 06:38+0000\n"
 
 #: authenticator/main.qml:153
 msgid "Account sign-in failed. Please select your account to sign back in."
-msgstr ""
+msgstr "Tilin kirjautuminen epäonnistui. Valitse tili kirjautuaksesi uudelleen."
 
 #: authenticator/main.qml:60 authenticator/main.qml:78
 msgid "Accounts"
@@ -30,7 +30,7 @@ msgstr "Tilit"
 
 #: src/sync-daemon.cpp:628
 msgid "An account failed to sync. Would you like to sign in again?"
-msgstr ""
+msgstr "Tilin synkronointi epäonnistui. Haluatko kirjautua uudelleen?"
 
 #: src/sync-account.cpp:748
 msgid "Command not allowed"
@@ -49,63 +49,47 @@ msgid "Connection timeout"
 msgstr "Yhteyden aikakatkaisu"
 
 #: src/sync-account.cpp:776
-#, fuzzy
-#| msgid "Fail to connect with the server"
 msgid "Could not connect to the server"
-msgstr "Palvelimeen yhdistäminen epäonnistui"
+msgstr "Palvelimeen ei voitu yhdistää"
 
 #: authenticator/main.qml:88
-#, fuzzy
-#| msgid "Fail to load account information."
 msgid "Could not load account info."
-msgstr "Tilin tietojen lataaminen epäonnistui."
+msgstr "Tilin tietoja ei voitu ladata."
 
 #: src/sync-account.cpp:757
-#, fuzzy
-#| msgid "Fail to run \"two-way\" sync"
 msgid "Could not run \"two-way\" sync"
-msgstr "\"kaksisuuntaisen\" synkkaamisen ajo epäonnistui"
+msgstr "\"Kaksisuuntaisen\" synkronoinnin suorittaminen ei onnistu"
 
 #: src/sync-daemon.cpp:760
-#, fuzzy, qt-format
-#| msgid ""
-#| "Fail to sync calendar %1 from account %2.\n"
-#| "%3"
+#, qt-format
 msgid ""
 "Could not sync calendar %1 from account %2.\n"
 "%3"
 msgstr ""
-"Virhe kalenterisynkkaamisessa %1 tililtä %2\n"
+"Ei voitu synkronoida kalenteria %1 tililtä %2.\n"
 "%3"
 
 #: src/sync-account.cpp:755
-#, fuzzy
-#| msgid "Fail to sync due some remote problem"
 msgid "Could not sync due to a remote problem"
-msgstr "Synkkaamisvirhe jonkinlaisen etäongelman johdosta"
+msgstr "Synkronointi ei onnistunut jonkinlaisen vastapuolen ongelman vuoksi"
 
 #: src/sync-account.cpp:759
-#, fuzzy
-#| msgid "Fail to sync some items"
 msgid "Could not sync some items"
-msgstr "Joidenkin kohteiden synkkaaminen epäonnistui"
+msgstr "Joidenkin tietueiden synkronointi ei onnistu"
 
 #: src/sync-account.cpp:753
 msgid "Disk full"
 msgstr "Levy on täynnä"
 
 #: src/sync-account.cpp:735
-#, fuzzy
-#| msgid "Fail to configure account"
 msgid "Failed to configure account"
-msgstr "Tilin muokkaaminen epäonnistui"
+msgstr "Tilin määrittäminen epäonnistui"
 
 #. TRANSLATORS: %1 is an account username, such as an email address
 #: src/sync-daemon.cpp:780
-#, fuzzy, qt-format
-#| msgid "Start sync: %1 (Calendar)"
+#, qt-format
 msgid "Finished syncing %1 (Calendar)"
-msgstr "Aloita synkkaaminen: %1 (Kalenteri)"
+msgstr "Kohteen %1 synkronointi valmistui (Kalenteri)"
 
 #: src/sync-account.cpp:744
 msgid "Forbidden / access denied"
@@ -113,7 +97,7 @@ msgstr "Kielletty / pääsy evätty"
 
 #: authenticator/main.qml:126
 msgid "Logging in…"
-msgstr ""
+msgstr "Kirjaudutaan…"
 
 #: src/notify-message.cpp:88
 msgid "No"
@@ -124,10 +108,8 @@ msgid "Object not found / unassigned field"
 msgstr "Kohdetta ei löytynyt / määräämätön kenttä"
 
 #: src/sync-account.cpp:761
-#, fuzzy
-#| msgid "Process unexpected die."
 msgid "Process died unexpectedly"
-msgstr "Prosessi lakkasi toimimasta odottamattomasti."
+msgstr "Prosessi lakkasi toimimasta odottamattomasti"
 
 #: src/sync-account.cpp:751
 msgid "Proxy authentication required"
@@ -146,10 +128,8 @@ msgid "Server sent bad content"
 msgstr "Palvelin lähetti epäkelpoa sisältöä"
 
 #: authenticator/main.qml:126
-#, fuzzy
-#| msgid "Fail to sync"
 msgid "Sign in to sync"
-msgstr "Virhe synkkaamisessa"
+msgstr "Kirjaudu synkronoidaksesi"
 
 #: src/sync-account.cpp:766
 msgid "Sync canceled"
@@ -162,10 +142,9 @@ msgstr "Synkkaaminen"
 
 #. TRANSLATORS: %1 is an account username, such as an email address
 #: src/sync-daemon.cpp:651
-#, fuzzy, qt-format
-#| msgid "Sync done: %1 (Calendar)"
+#, qt-format
 msgid "Syncing %1 (Calendar)"
-msgstr "Synkkaaminen valmis: %1 (Kalenteri)"
+msgstr "Synkronoidaan %1 (Kalenteri)"
 
 #: src/sync-account.cpp:781
 msgid "Unknown status"
