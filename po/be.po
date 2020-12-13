@@ -1,68 +1,64 @@
-# German translation for sync-monitor
-# Copyright (c) 2016 Rosetta Contributors and Canonical Ltd 2016
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR Canonical Ltd.
 # This file is distributed under the same license as the sync-monitor package.
-# FIRST AUTHOR <EMAIL@ADDRESS>, 2016.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
 #
 msgid ""
 msgstr ""
 "Project-Id-Version: sync-monitor\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2020-02-20 15:14-0600\n"
-"PO-Revision-Date: 2020-12-13 10:26+0000\n"
-"Last-Translator: Rüdiger Kupper <ruediger.kupper+launchpad@gmail.com>\n"
-"Language-Team: German <https://translate.ubports.com/projects/ubports/"
-"sync-monitor/de/>\n"
-"Language: de\n"
+"PO-Revision-Date: 2020-12-08 12:26+0000\n"
+"Last-Translator: Zmicer <nashtlumach@gmail.com>\n"
+"Language-Team: Belarusian <https://translate.ubports.com/projects/ubports/"
+"sync-monitor/be/>\n"
+"Language: be\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Plural-Forms: nplurals=2; plural=n != 1;\n"
+"Plural-Forms: nplurals=3; plural=n%10==1 && n%100!=11 ? 0 : n%10>=2 && n%10<="
+"4 && (n%100<10 || n%100>=20) ? 1 : 2;\n"
 "X-Generator: Weblate 3.11.3\n"
-"X-Launchpad-Export-Date: 2016-12-18 05:29+0000\n"
 
 #: authenticator/main.qml:153
 msgid "Account sign-in failed. Please select your account to sign back in."
-msgstr ""
-"Kontoanmeldung fehlgeschlagen. Wählen Sie bitte Ihr Konto aus, um sich "
-"erneut anzumelden."
+msgstr "Не атрымалася ўвайсці ў акаўнт. Калі ласка абярыце акаўнт, каб увайсці."
 
 #: authenticator/main.qml:60 authenticator/main.qml:78
 msgid "Accounts"
-msgstr "Konten"
+msgstr "Акаўнты"
 
 #: src/sync-daemon.cpp:628
 msgid "An account failed to sync. Would you like to sign in again?"
-msgstr ""
-"Ein Konto konnte nicht synchronisiert werden. Möchten Sie sich erneut "
-"anmelden?"
+msgstr "Не атрымалася сінхранізаваць акаўнт. Хочаце ўвайсці зноў?"
 
 #: src/sync-account.cpp:748
 msgid "Command not allowed"
-msgstr "Befehl nicht erlaubt"
+msgstr "Загад забаронены"
 
 #: src/sync-account.cpp:770
 msgid "Connection certificate has expired"
-msgstr "Verbindungszertifikat ist abgelaufen"
+msgstr "Сертыфікат злучэння пратэрмінаваны"
 
 #: src/sync-account.cpp:772
 msgid "Connection certificate is invalid"
-msgstr "Verbindungszertifikat ist ungültig"
+msgstr "Хібны сертыфікат злучэння"
 
 #: src/sync-account.cpp:768
 msgid "Connection timeout"
-msgstr "Zeitüberschreitung der Verbindung"
+msgstr "Час чакання злучэння сышоў"
 
 #: src/sync-account.cpp:776
 msgid "Could not connect to the server"
-msgstr "Verbinden mit Server fehlgeschlagen"
+msgstr "Не атрымалася падлучыцца да сервера"
 
 #: authenticator/main.qml:88
 msgid "Could not load account info."
-msgstr "Kontodaten konnten nicht geladen werden."
+msgstr "Не атрымалася загрузіць звесткі пра акаўнт."
 
 #: src/sync-account.cpp:757
 msgid "Could not run \"two-way\" sync"
-msgstr "Die wechselseitige Synchronisation ist fehlgeschlagen."
+msgstr "Не атрымалася запусціць двухбаковую сінхранізацыю"
 
 #: src/sync-daemon.cpp:760
 #, qt-format
@@ -70,103 +66,90 @@ msgid ""
 "Could not sync calendar %1 from account %2.\n"
 "%3"
 msgstr ""
-"Der Kalender %1 des Benutzerkontos %2 konnte nicht synchronisiert werden.\n"
+"Не атрымалася сінхранізаваць каляндар %1 з акаўнта %2.\n"
 "%3"
 
 #: src/sync-account.cpp:755
 msgid "Could not sync due to a remote problem"
-msgstr "Fehler beim Synchronisieren aufgrund von Problemen der Gegenstelle"
+msgstr "Не атрымалася сінхранізаваць праз адлеглую праблему"
 
 #: src/sync-account.cpp:759
 msgid "Could not sync some items"
-msgstr "Mehrere Elemente konnten nicht synchronisiert werden"
+msgstr "Не атрымалася сінхранізаваць некаторыя элементы"
 
 #: src/sync-account.cpp:753
 msgid "Disk full"
-msgstr "Datenträger voll"
+msgstr "Дыск запоўнены"
 
 #: src/sync-account.cpp:735
 msgid "Failed to configure account"
-msgstr "Konfiguration des Kontos fehlgeschlagen"
+msgstr "Не атрымалася наладзіць акаўнт"
 
 #. TRANSLATORS: %1 is an account username, such as an email address
 #: src/sync-daemon.cpp:780
 #, qt-format
 msgid "Finished syncing %1 (Calendar)"
-msgstr "Synchronisation abgeschlossen %1 (Kalender)"
+msgstr "Сінхранізацыя %1 (каляндар) завершаная"
 
 #: src/sync-account.cpp:744
 msgid "Forbidden / access denied"
-msgstr "Verboten / Zugriff verweigert"
+msgstr "Доступ забаронены"
 
 #: authenticator/main.qml:126
 msgid "Logging in…"
-msgstr "Anmelden …"
+msgstr "Уваход…"
 
 #: src/notify-message.cpp:88
 msgid "No"
-msgstr "Nein"
+msgstr "Не"
 
 #: src/sync-account.cpp:746
 msgid "Object not found / unassigned field"
-msgstr "Objekt nicht gefunden / nicht zugewiesenes Feld"
+msgstr "Аб'ект не знойдзены / поле не вызначана"
 
 #: src/sync-account.cpp:761
 msgid "Process died unexpectedly"
-msgstr "Unerwartetes Prozessende"
+msgstr "Працэс нечакана скончыўся"
 
 #: src/sync-account.cpp:751
 msgid "Proxy authentication required"
-msgstr "Proxy-Authentifizierung erforderlich"
+msgstr "Патрабуецца аўтэнтыфікацыя проксі"
 
 #: authenticator/main.qml:82 authenticator/main.qml:130
 msgid "Quit"
-msgstr "Beenden"
+msgstr "Выйсці"
 
 #: src/sync-account.cpp:779
 msgid "Server not found"
-msgstr "Server nicht gefunden"
+msgstr "Сервер не знойдзены"
 
 #: src/sync-account.cpp:764
 msgid "Server sent bad content"
-msgstr "Server sendet fehlerhafte Inhalte"
+msgstr "Сервер адправіў хібныя даныя"
 
 #: authenticator/main.qml:126
 msgid "Sign in to sync"
-msgstr "Anmelden zum synchronisieren"
+msgstr "Увайдзіце, каб сінхранізаваць"
 
 #: src/sync-account.cpp:766
 msgid "Sync canceled"
-msgstr "Synchronisation abgebrochen"
+msgstr "Сінхранізацыя скасаваная"
 
 #: src/sync-daemon.cpp:627 src/sync-daemon.cpp:649 src/sync-daemon.cpp:759
 #: src/sync-daemon.cpp:778
 msgid "Synchronization"
-msgstr "Synchronisierung"
+msgstr "Сінхранізацыя"
 
 #. TRANSLATORS: %1 is an account username, such as an email address
 #: src/sync-daemon.cpp:651
 #, qt-format
 msgid "Syncing %1 (Calendar)"
-msgstr "Synchronisiere %1 (Kalender)"
+msgstr "Сінхранізацыя %1 (каляндар)"
 
 #: src/sync-account.cpp:781
 msgid "Unknown status"
-msgstr "Unbekannter Status"
+msgstr "Невядомы статус"
 
 #: src/notify-message.cpp:83
 msgid "Yes"
-msgstr "Ja"
-
-#~ msgid ""
-#~ "Your access key is not valid anymore. Do you want to re-authenticate it?."
-#~ msgstr ""
-#~ "Der Zugangsschlüssel ist nicht mehr gültig. Wollen Sie sich erneut "
-#~ "authentifizieren?"
-
-#~ msgid ""
-#~ "Your account failed to authenticate while syncing. Please click below to "
-#~ "re-authenticate."
-#~ msgstr ""
-#~ "Ihr Account konnte während der Synchronisation nicht authentifiziert "
-#~ "werden. Bitte klicken Sie unten für eine Neu-Authentifizierung."
+msgstr "Так"
