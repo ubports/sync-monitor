@@ -1,66 +1,63 @@
-# French (Canada) translation for sync-monitor
-# Copyright (c) 2016 Rosetta Contributors and Canonical Ltd 2016
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR Canonical Ltd.
 # This file is distributed under the same license as the sync-monitor package.
-# FIRST AUTHOR <EMAIL@ADDRESS>, 2016.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
 #
 msgid ""
 msgstr ""
 "Project-Id-Version: sync-monitor\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2020-02-20 15:14-0600\n"
-"PO-Revision-Date: 2021-03-14 01:05+0000\n"
-"Last-Translator: Ryan Argente <rargente@lonerider.one>\n"
-"Language-Team: French (Canada) <https://translate.ubports.com/projects/"
-"ubports/sync-monitor/fr_CA/>\n"
-"Language: fr_CA\n"
+"PO-Revision-Date: 2021-03-09 19:27+0000\n"
+"Last-Translator: TigranKhachatryan0 <tigrank2008@gmail.com>\n"
+"Language-Team: Armenian <https://translate.ubports.com/projects/ubports/"
+"sync-monitor/hy/>\n"
+"Language: hy\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=n > 1;\n"
 "X-Generator: Weblate 3.11.3\n"
-"X-Launchpad-Export-Date: 2016-08-31 06:38+0000\n"
 
 #: authenticator/main.qml:153
 msgid "Account sign-in failed. Please select your account to sign back in."
 msgstr ""
-"La connexion au compte a échoué. Veuillez sélectionner votre compte pour "
-"vous reconnecter."
 
 #: authenticator/main.qml:60 authenticator/main.qml:78
 msgid "Accounts"
-msgstr "Comptes"
+msgstr "Հաշիվներ"
 
 #: src/sync-daemon.cpp:628
 msgid "An account failed to sync. Would you like to sign in again?"
-msgstr "Un compte ne s'est pas synchronisé. Voulez-vous vous reconnecter?"
+msgstr ""
 
 #: src/sync-account.cpp:748
 msgid "Command not allowed"
-msgstr "Commande non autorisée"
+msgstr "Հրահանգը արգելված է"
 
 #: src/sync-account.cpp:770
 msgid "Connection certificate has expired"
-msgstr "Le certificat de connexion a expiré"
+msgstr "Կապի վկայագիրը սպառվել է"
 
 #: src/sync-account.cpp:772
 msgid "Connection certificate is invalid"
-msgstr "Le certificat de connexion est invalide"
+msgstr "Կապի վկայագիրը վավեր չէ"
 
 #: src/sync-account.cpp:768
 msgid "Connection timeout"
-msgstr "Dépassement du délai de connexion"
+msgstr "Կապի ժամանակը սպառվել է"
 
 #: src/sync-account.cpp:776
 msgid "Could not connect to the server"
-msgstr "Échec de la connexion au serveur"
+msgstr "Չհաջողվեց կպնել սերվերին"
 
 #: authenticator/main.qml:88
 msgid "Could not load account info."
-msgstr "Impossible de charger les informations du compte."
+msgstr ""
 
 #: src/sync-account.cpp:757
 msgid "Could not run \"two-way\" sync"
-msgstr "Échec du lancement de la synchronisation bidirectionnelle"
+msgstr ""
 
 #: src/sync-daemon.cpp:760
 #, qt-format
@@ -68,90 +65,88 @@ msgid ""
 "Could not sync calendar %1 from account %2.\n"
 "%3"
 msgstr ""
-"Échec de la synchronisation de l'agenda %1 du compte %2.\n"
-"%3"
 
 #: src/sync-account.cpp:755
 msgid "Could not sync due to a remote problem"
-msgstr "Échec de synchronisation en raison d'un problème distant"
+msgstr ""
 
 #: src/sync-account.cpp:759
 msgid "Could not sync some items"
-msgstr "Échec de la synchronisation de certains éléments"
+msgstr ""
 
 #: src/sync-account.cpp:753
 msgid "Disk full"
-msgstr "Disque plein"
+msgstr ""
 
 #: src/sync-account.cpp:735
 msgid "Failed to configure account"
-msgstr "Échec de la configuration du compte"
+msgstr ""
 
 #. TRANSLATORS: %1 is an account username, such as an email address
 #: src/sync-daemon.cpp:780
 #, qt-format
 msgid "Finished syncing %1 (Calendar)"
-msgstr "Synchronisation de %1 (Agenda) terminée"
+msgstr ""
 
 #: src/sync-account.cpp:744
 msgid "Forbidden / access denied"
-msgstr "Accès interdit / refusé"
+msgstr "Արգելված է"
 
 #: authenticator/main.qml:126
 msgid "Logging in…"
-msgstr "Connexion…"
+msgstr ""
 
 #: src/notify-message.cpp:88
 msgid "No"
-msgstr "Non"
+msgstr "Ոչ"
 
 #: src/sync-account.cpp:746
 msgid "Object not found / unassigned field"
-msgstr "Objet non trouvé / champ non attribué"
+msgstr "Օբյեկտը չի գտնվել / դաշտը նշանակված չէ"
 
 #: src/sync-account.cpp:761
 msgid "Process died unexpectedly"
-msgstr "Arrêt inattendu d'un processus"
+msgstr ""
 
 #: src/sync-account.cpp:751
 msgid "Proxy authentication required"
-msgstr "L'authentification du proxy est requise"
+msgstr ""
 
 #: authenticator/main.qml:82 authenticator/main.qml:130
 msgid "Quit"
-msgstr "Quitter"
+msgstr "Ելք"
 
 #: src/sync-account.cpp:779
 msgid "Server not found"
-msgstr "Serveur introuvable"
+msgstr "Սերվերը չի գտնվել"
 
 #: src/sync-account.cpp:764
 msgid "Server sent bad content"
-msgstr "Le serveur a envoyé un contenu erroné"
+msgstr ""
 
 #: authenticator/main.qml:126
 msgid "Sign in to sync"
-msgstr "Connectez-vous pour synchroniser"
+msgstr ""
 
 #: src/sync-account.cpp:766
 msgid "Sync canceled"
-msgstr "Synchronisation annulée"
+msgstr ""
 
 #: src/sync-daemon.cpp:627 src/sync-daemon.cpp:649 src/sync-daemon.cpp:759
 #: src/sync-daemon.cpp:778
 msgid "Synchronization"
-msgstr "Synchronization"
+msgstr ""
 
 #. TRANSLATORS: %1 is an account username, such as an email address
 #: src/sync-daemon.cpp:651
 #, qt-format
 msgid "Syncing %1 (Calendar)"
-msgstr "Synchronisation de %1 (Agenda) terminée"
+msgstr ""
 
 #: src/sync-account.cpp:781
 msgid "Unknown status"
-msgstr "État inconnu"
+msgstr ""
 
 #: src/notify-message.cpp:83
 msgid "Yes"
-msgstr "Oui"
+msgstr "Այո"
