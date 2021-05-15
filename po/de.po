@@ -8,8 +8,8 @@ msgstr ""
 "Project-Id-Version: sync-monitor\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2020-02-20 15:14-0600\n"
-"PO-Revision-Date: 2020-12-13 10:26+0000\n"
-"Last-Translator: Rüdiger Kupper <ruediger.kupper+launchpad@gmail.com>\n"
+"PO-Revision-Date: 2021-05-15 18:00+0000\n"
+"Last-Translator: anonymous <noreply@weblate.org>\n"
 "Language-Team: German <https://translate.ubports.com/projects/ubports/"
 "sync-monitor/de/>\n"
 "Language: de\n"
@@ -62,7 +62,7 @@ msgstr "Kontodaten konnten nicht geladen werden."
 
 #: src/sync-account.cpp:757
 msgid "Could not run \"two-way\" sync"
-msgstr "Die wechselseitige Synchronisation ist fehlgeschlagen."
+msgstr "Die wechselseitige Synchronisation ist fehlgeschlagen"
 
 #: src/sync-daemon.cpp:760
 #, qt-format
