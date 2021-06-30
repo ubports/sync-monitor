@@ -8,8 +8,8 @@ msgstr ""
 "Project-Id-Version: sync-monitor\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2020-02-20 15:14-0600\n"
-"PO-Revision-Date: 2020-07-26 11:01+0000\n"
-"Last-Translator: Heimen Stoffels <vistausss@outlook.com>\n"
+"PO-Revision-Date: 2021-06-30 19:36+0000\n"
+"Last-Translator: Heimen Stoffels <vistausss@fastmail.com>\n"
 "Language-Team: Dutch <https://translate.ubports.com/projects/ubports/"
 "sync-monitor/nl/>\n"
 "Language: nl\n"
@@ -22,7 +22,8 @@ msgstr ""
 
 #: authenticator/main.qml:153
 msgid "Account sign-in failed. Please select your account to sign back in."
-msgstr "Inloggen mislukt. Kies je account en probeer opnieuw in te loggen."
+msgstr ""
+"Het inloggen is mislukt. Kies je account en probeer opnieuw in te loggen."
 
 #: authenticator/main.qml:60 authenticator/main.qml:78
 msgid "Accounts"
@@ -46,11 +47,11 @@ msgstr "Het verbindingscertificaat is ongeldig"
 
 #: src/sync-account.cpp:768
 msgid "Connection timeout"
-msgstr "Verbinding verlopen"
+msgstr "De verbinding is verlopen"
 
 #: src/sync-account.cpp:776
 msgid "Could not connect to the server"
-msgstr "Kan geen verbinding maken met de server"
+msgstr "Er kan geen verbinding worden gemaakt met de server"
 
 #: authenticator/main.qml:88
 msgid "Could not load account info."
@@ -66,12 +67,12 @@ msgid ""
 "Could not sync calendar %1 from account %2.\n"
 "%3"
 msgstr ""
-"De agenda '%1' van '%2' kan niet worden gesynchroniseerd.\n"
+"De agenda ‘%1’ van ‘%2’ kan niet worden gesynchroniseerd.\n"
 "%3"
 
 #: src/sync-account.cpp:755
 msgid "Could not sync due to a remote problem"
-msgstr "Synchroniseren mislukt door een extern probleem"
+msgstr "Het synchroniseren is mislukt wegens een extern probleem"
 
 #: src/sync-account.cpp:759
 msgid "Could not sync some items"
@@ -89,7 +90,7 @@ msgstr "Het account kan niet worden ingesteld"
 #: src/sync-daemon.cpp:780
 #, qt-format
 msgid "Finished syncing %1 (Calendar)"
-msgstr "Synchronisatie afgerond: %1 (agenda)"
+msgstr "De synchronisatie is afgerond: %1 (agenda)"
 
 #: src/sync-account.cpp:744
 msgid "Forbidden / access denied"
@@ -121,7 +122,7 @@ msgstr "Afsluiten"
 
 #: src/sync-account.cpp:779
 msgid "Server not found"
-msgstr "Server niet gevonden"
+msgstr "De server is niet gevonden"
 
 #: src/sync-account.cpp:764
 msgid "Server sent bad content"
@@ -133,7 +134,7 @@ msgstr "Log in om te synchroniseren"
 
 #: src/sync-account.cpp:766
 msgid "Sync canceled"
-msgstr "Synchronisatie afgebroken"
+msgstr "De synchronisatie is afgebroken"
 
 #: src/sync-daemon.cpp:627 src/sync-daemon.cpp:649 src/sync-daemon.cpp:759
 #: src/sync-daemon.cpp:778
