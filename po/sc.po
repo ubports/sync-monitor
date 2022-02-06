@@ -8,7 +8,7 @@ msgstr ""
 "Project-Id-Version: sync-monitor\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2020-02-20 15:14-0600\n"
-"PO-Revision-Date: 2020-08-08 07:58+0000\n"
+"PO-Revision-Date: 2021-11-21 15:09+0000\n"
 "Last-Translator: Adria <adriamartinmor@gmail.com>\n"
 "Language-Team: Sardinian <https://translate.ubports.com/projects/ubports/"
 "sync-monitor/sc/>\n"
@@ -52,7 +52,7 @@ msgstr "Connessione iscàdida"
 
 #: src/sync-account.cpp:776
 msgid "Could not connect to the server"
-msgstr "Impossìbile connètere a su server"
+msgstr "Impossìbile connètere a su serbidore"
 
 #: authenticator/main.qml:88
 msgid "Could not load account info."
@@ -115,7 +115,7 @@ msgstr "Su protzessu s'est firmadu in manera repentina"
 
 #: src/sync-account.cpp:751
 msgid "Proxy authentication required"
-msgstr "Autenticatzione rechèdida pro su server intermediàriu"
+msgstr "Autenticatzione rechèdida pro su serbidore intermediàriu"
 
 #: authenticator/main.qml:82 authenticator/main.qml:130
 msgid "Quit"
@@ -123,11 +123,11 @@ msgstr "Essi"
 
 #: src/sync-account.cpp:779
 msgid "Server not found"
-msgstr "Server no agatadu"
+msgstr "Serbidore no agatadu"
 
 #: src/sync-account.cpp:764
 msgid "Server sent bad content"
-msgstr "Su server at imbiadu cuntenutos non curretos"
+msgstr "Su serbidore at imbiadu cuntenutos non curretos"
 
 #: authenticator/main.qml:126
 msgid "Sign in to sync"
