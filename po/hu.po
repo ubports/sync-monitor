@@ -8,19 +8,21 @@ msgstr ""
 "Project-Id-Version: sync-monitor\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2020-02-20 15:14-0600\n"
-"PO-Revision-Date: 2016-09-05 07:09+0000\n"
-"Last-Translator: Richard Somlói <ricsipontaz@gmail.com>\n"
-"Language-Team: Hungarian <hu@li.org>\n"
+"PO-Revision-Date: 2022-02-06 14:19+0000\n"
+"Last-Translator: Lundrin <berenyi.vilmos@tutanota.com>\n"
+"Language-Team: Hungarian <https://translate.ubports.com/projects/ubports/"
+"sync-monitor/hu/>\n"
 "Language: hu\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=n != 1;\n"
+"X-Generator: Weblate 3.11.3\n"
 "X-Launchpad-Export-Date: 2016-09-06 06:25+0000\n"
-"X-Generator: Launchpad (build 18179)\n"
 
 #: authenticator/main.qml:153
 msgid "Account sign-in failed. Please select your account to sign back in."
-msgstr ""
+msgstr "Sikertelen belépés a fiókba. Kérem válassza ki a fiókját a belépéshez."
 
 #: authenticator/main.qml:60 authenticator/main.qml:78
 msgid "Accounts"
@@ -28,7 +30,7 @@ msgstr "Fiókok"
 
 #: src/sync-daemon.cpp:628
 msgid "An account failed to sync. Would you like to sign in again?"
-msgstr ""
+msgstr "Egy fiók szinkronizációja sikertelen. Szeretne újra belépni?"
 
 #: src/sync-account.cpp:748
 msgid "Command not allowed"
@@ -47,28 +49,19 @@ msgid "Connection timeout"
 msgstr "Időtúllépés"
 
 #: src/sync-account.cpp:776
-#, fuzzy
-#| msgid "Fail to connect with the server"
 msgid "Could not connect to the server"
-msgstr "Nem sikerült kapcsolódni a kiszolgálóhoz"
+msgstr "Sikertelen csatlakozás a szerverhez"
 
 #: authenticator/main.qml:88
-#, fuzzy
-#| msgid "Fail to load account information."
 msgid "Could not load account info."
-msgstr "Nem sikerült a fiókinformációk betöltése."
+msgstr "Fiókinformációk betöltése sikertelen."
 
 #: src/sync-account.cpp:757
-#, fuzzy
-#| msgid "Fail to run \"two-way\" sync"
 msgid "Could not run \"two-way\" sync"
-msgstr "Nem sikerült a „két-irányú” szinkronizálás futtatása"
+msgstr "Sikertelen „két-irányú” szinkronizálás futtatása"
 
 #: src/sync-daemon.cpp:760
-#, fuzzy, qt-format
-#| msgid ""
-#| "Fail to sync calendar %1 from account %2.\n"
-#| "%3"
+#, qt-format
 msgid ""
 "Could not sync calendar %1 from account %2.\n"
 "%3"
@@ -77,14 +70,10 @@ msgstr ""
 "%3"
 
 #: src/sync-account.cpp:755
-#, fuzzy
-#| msgid "Fail to sync due some remote problem"
 msgid "Could not sync due to a remote problem"
 msgstr "Távoli problémák miatt a szinkronizálás sikertelen"
 
 #: src/sync-account.cpp:759
-#, fuzzy
-#| msgid "Fail to sync some items"
 msgid "Could not sync some items"
 msgstr "Néhány elem szinkronizálása sikertelen"
 
@@ -93,17 +82,14 @@ msgid "Disk full"
 msgstr "Betelt a lemez"
 
 #: src/sync-account.cpp:735
-#, fuzzy
-#| msgid "Fail to configure account"
 msgid "Failed to configure account"
 msgstr "Nem sikerült a fiók beállítása"
 
 #. TRANSLATORS: %1 is an account username, such as an email address
 #: src/sync-daemon.cpp:780
-#, fuzzy, qt-format
-#| msgid "Start sync: %1 (Calendar)"
+#, qt-format
 msgid "Finished syncing %1 (Calendar)"
-msgstr "Szinkronizálás elkezdve: %1 (Naptár)"
+msgstr "Szinkronizálás befejezve: %1 (Naptár)"
 
 #: src/sync-account.cpp:744
 msgid "Forbidden / access denied"
@@ -111,7 +97,7 @@ msgstr "Hozzáférés megtagadva"
 
 #: authenticator/main.qml:126
 msgid "Logging in…"
-msgstr ""
+msgstr "Belépés…"
 
 #: src/notify-message.cpp:88
 msgid "No"
@@ -122,10 +108,8 @@ msgid "Object not found / unassigned field"
 msgstr "Az objektum nem található / nem hozzárendelt mező"
 
 #: src/sync-account.cpp:761
-#, fuzzy
-#| msgid "Process unexpected die."
 msgid "Process died unexpectedly"
-msgstr "A folyamat váratlanul leállt."
+msgstr "A folyamat váratlanul leállt"
 
 #: src/sync-account.cpp:751
 msgid "Proxy authentication required"
@@ -144,10 +128,8 @@ msgid "Server sent bad content"
 msgstr "A kiszolgáló rossz tartalmat küldött"
 
 #: authenticator/main.qml:126
-#, fuzzy
-#| msgid "Fail to sync"
 msgid "Sign in to sync"
-msgstr "Sikertelen szinkronizálás"
+msgstr "Lépj be a szinkronizáláshoz"
 
 #: src/sync-account.cpp:766
 msgid "Sync canceled"
@@ -160,10 +142,9 @@ msgstr "Szinkronizálás"
 
 #. TRANSLATORS: %1 is an account username, such as an email address
 #: src/sync-daemon.cpp:651
-#, fuzzy, qt-format
-#| msgid "Sync done: %1 (Calendar)"
+#, qt-format
 msgid "Syncing %1 (Calendar)"
-msgstr "Szinkronizálás befejezve: %1 (Naptár)"
+msgstr "Szinkronizálás: %1 (Naptár)"
 
 #: src/sync-account.cpp:781
 msgid "Unknown status"

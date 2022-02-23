@@ -8,55 +8,59 @@ msgstr ""
 "Project-Id-Version: sync-monitor\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2020-02-20 15:14-0600\n"
-"PO-Revision-Date: 2016-08-30 19:20+0000\n"
-"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
-"Language-Team: Swedish <sv@li.org>\n"
+"PO-Revision-Date: 2021-10-19 23:22+0000\n"
+"Last-Translator: Jakob Fridesjö <jakob.fridesjo@tuta.io>\n"
+"Language-Team: Swedish <https://translate.ubports.com/projects/ubports/"
+"sync-monitor/sv/>\n"
 "Language: sv\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=n != 1;\n"
+"X-Generator: Weblate 3.11.3\n"
 "X-Launchpad-Export-Date: 2016-08-31 06:38+0000\n"
-"X-Generator: Launchpad (build 18179)\n"
 
 #: authenticator/main.qml:153
 msgid "Account sign-in failed. Please select your account to sign back in."
 msgstr ""
+"Inloggning till användarkonto misslyckades. Var vänlig välj ditt "
+"användarkonto för att logga in igen."
 
 #: authenticator/main.qml:60 authenticator/main.qml:78
 msgid "Accounts"
-msgstr ""
+msgstr "Användarkonton"
 
 #: src/sync-daemon.cpp:628
 msgid "An account failed to sync. Would you like to sign in again?"
-msgstr ""
+msgstr "Ett användarkonto misslyckades att synkronisera. Vill du logga in igen?"
 
 #: src/sync-account.cpp:748
 msgid "Command not allowed"
-msgstr ""
+msgstr "Kommando inte tillåtet"
 
 #: src/sync-account.cpp:770
 msgid "Connection certificate has expired"
-msgstr ""
+msgstr "Anslutningscertifikat har utgått"
 
 #: src/sync-account.cpp:772
 msgid "Connection certificate is invalid"
-msgstr ""
+msgstr "Anslutningscertifikat är ogiltigt"
 
 #: src/sync-account.cpp:768
 msgid "Connection timeout"
-msgstr ""
+msgstr "Timeout för anslutning"
 
 #: src/sync-account.cpp:776
 msgid "Could not connect to the server"
-msgstr ""
+msgstr "Misslyckades att ansluta till servern"
 
 #: authenticator/main.qml:88
 msgid "Could not load account info."
-msgstr ""
+msgstr "Misslyckades att ladda information för användarkonto."
 
 #: src/sync-account.cpp:757
 msgid "Could not run \"two-way\" sync"
-msgstr ""
+msgstr "Misslyckades att köra \"två-vägs\" synkronisering"
 
 #: src/sync-daemon.cpp:760
 #, qt-format
@@ -64,6 +68,8 @@ msgid ""
 "Could not sync calendar %1 from account %2.\n"
 "%3"
 msgstr ""
+"Kunde inte synkronisera kalender %1 från användarkonto %2.\n"
+"%3"
 
 #: src/sync-account.cpp:755
 msgid "Could not sync due to a remote problem"
@@ -71,15 +77,15 @@ msgstr ""
 
 #: src/sync-account.cpp:759
 msgid "Could not sync some items"
-msgstr ""
+msgstr "Kunde inte synkronisera vissa saker"
 
 #: src/sync-account.cpp:753
 msgid "Disk full"
-msgstr ""
+msgstr "Disk full"
 
 #: src/sync-account.cpp:735
 msgid "Failed to configure account"
-msgstr ""
+msgstr "Misslyckades att konfigurera konto"
 
 #. TRANSLATORS: %1 is an account username, such as an email address
 #: src/sync-daemon.cpp:780
@@ -89,23 +95,23 @@ msgstr ""
 
 #: src/sync-account.cpp:744
 msgid "Forbidden / access denied"
-msgstr ""
+msgstr "Förbjuden / åtkomst nekad"
 
 #: authenticator/main.qml:126
 msgid "Logging in…"
-msgstr ""
+msgstr "Loggar in…"
 
 #: src/notify-message.cpp:88
 msgid "No"
-msgstr ""
+msgstr "Nej"
 
 #: src/sync-account.cpp:746
 msgid "Object not found / unassigned field"
-msgstr ""
+msgstr "Objekt inte funnet / ej tilldelat fält"
 
 #: src/sync-account.cpp:761
 msgid "Process died unexpectedly"
-msgstr ""
+msgstr "Process dog oväntat"
 
 #: src/sync-account.cpp:751
 msgid "Proxy authentication required"
@@ -113,15 +119,15 @@ msgstr ""
 
 #: authenticator/main.qml:82 authenticator/main.qml:130
 msgid "Quit"
-msgstr ""
+msgstr "Avsluta"
 
 #: src/sync-account.cpp:779
 msgid "Server not found"
-msgstr ""
+msgstr "Server ej funnen"
 
 #: src/sync-account.cpp:764
 msgid "Server sent bad content"
-msgstr ""
+msgstr "Server skickade dåligt innehåll"
 
 #: authenticator/main.qml:126
 msgid "Sign in to sync"
@@ -129,12 +135,12 @@ msgstr ""
 
 #: src/sync-account.cpp:766
 msgid "Sync canceled"
-msgstr ""
+msgstr "Synkronisering avfärdad"
 
 #: src/sync-daemon.cpp:627 src/sync-daemon.cpp:649 src/sync-daemon.cpp:759
 #: src/sync-daemon.cpp:778
 msgid "Synchronization"
-msgstr ""
+msgstr "Synkronisering"
 
 #. TRANSLATORS: %1 is an account username, such as an email address
 #: src/sync-daemon.cpp:651
@@ -144,8 +150,8 @@ msgstr ""
 
 #: src/sync-account.cpp:781
 msgid "Unknown status"
-msgstr ""
+msgstr "Okänd status"
 
 #: src/notify-message.cpp:83
 msgid "Yes"
-msgstr ""
+msgstr "Ja"
